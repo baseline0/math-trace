@@ -1,0 +1,121 @@
+name: Test Templates
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'templates/**'
+      - '.github/workflows/test-templates.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'templates/**'
+      - '.github/workflows/test-templates.yml'
+
+jobs:
+  test-templates:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        template:
+          - simple-physics
+          - biochemistry
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Test ${{ matrix.template }} - model.py
+        run: |
+          cd templates/${{ matrix.template }}
+          uv run python model.py
+          # Check that JSON file was generated
+          [ -f *_equations.json ] || exit 1
+
+      - name: Test ${{ matrix.template }} - simulate.py
+        run: |
+          cd templates/${{ matrix.template }}
+          uv run python simulate.py
+
+      - name: Test ${{ matrix.template }} - build_paper.py
+        run: |
+          cd templates/${{ matrix.template }}
+          uv run python build_paper.py
+          # Check that formulas.typ was generated
+          [ -f generated/formulas.typ ] || exit 1
+          # Check that figures were generated
+          [ -f generated/figures/*.png ] || exit 1
+
+      - name: Verify formula generation
+        run: |
+          cd templates/${{ matrix.template }}
+          # Ensure formulas.typ contains at least one #let statement
+          grep -q "#let" generated/formulas.typ || exit 1
+          echo "✅ Formulas generated correctly"
+
+      - name: Verify figure generation
+        run: |
+          cd templates/${{ matrix.template }}
+          # Check PNG file size (sanity check)
+          FILE_SIZE=$(wc -c < generated/figures/*.png)
+          if [ $FILE_SIZE -lt 1000 ]; then
+            echo "❌ Figure file too small ($FILE_SIZE bytes)"
+            exit 1
+          fi
+          echo "✅ Figures generated correctly ($FILE_SIZE bytes)"
+
+  check-template-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required files in each template
+        run: |
+          TEMPLATES=$(find templates -maxdepth 1 -type d ! -name templates ! -name ".*")
+          for template in $TEMPLATES; do
+            echo "Checking $template..."
+            [ -f "$template/model.py" ] || { echo "Missing: model.py"; exit 1; }
+            [ -f "$template/simulate.py" ] || { echo "Missing: simulate.py"; exit 1; }
+            [ -f "$template/build_paper.py" ] || { echo "Missing: build_paper.py"; exit 1; }
+            [ -f "$template/main.typ" ] || { echo "Missing: main.typ"; exit 1; }
+            [ -f "$template/README.md" ] || { echo "Missing: README.md"; exit 1; }
+          done
+          echo "✅ All templates have required files"
+
+      - name: Check template documentation
+        run: |
+          [ -f templates/TEMPLATE-USAGE.md ] || { echo "Missing: TEMPLATE-USAGE.md"; exit 1; }
+          echo "✅ Template documentation found"
+
+  syntax-check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        template:
+          - simple-physics
+          - biochemistry
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Check Python syntax for ${{ matrix.template }}
+        run: |
+          python -m py_compile templates/${{ matrix.template }}/model.py
+          python -m py_compile templates/${{ matrix.template }}/simulate.py
+          python -m py_compile templates/${{ matrix.template }}/build_paper.py
+          echo "✅ Python syntax valid"
