@@ -27,6 +27,55 @@ class SymPyToTypst:
             r'\gamma': 'gamma',
         }
 
+    def _extract_brace_content(self, s: str, start: int) -> Tuple[str, int]:
+        """Extract balanced brace content starting from position start.
+
+        Returns tuple of (content, end_position) where end_position is after closing brace.
+        """
+        if start >= len(s) or s[start] != '{':
+            return '', start
+
+        depth = 0
+        i = start
+        while i < len(s):
+            if s[i] == '{':
+                depth += 1
+            elif s[i] == '}':
+                depth -= 1
+                if depth == 0:
+                    return s[start + 1:i], i + 1
+            i += 1
+        return '', len(s)
+
+    def _replace_binom(self, latex: str) -> str:
+        """Replace \\binom{n}{k} with binom(n, k), handling nested braces."""
+        result = []
+        i = 0
+        while i < len(latex):
+            if latex[i:i+6] == r'\binom':
+                i += 6
+                # Skip optional whitespace
+                while i < len(latex) and latex[i] in ' \t':
+                    i += 1
+                # Extract first arg
+                if i < len(latex) and latex[i] == '{':
+                    arg1, i = self._extract_brace_content(latex, i)
+                    # Skip optional whitespace
+                    while i < len(latex) and latex[i] in ' \t':
+                        i += 1
+                    # Extract second arg
+                    if i < len(latex) and latex[i] == '{':
+                        arg2, i = self._extract_brace_content(latex, i)
+                        result.append(f'binom({arg1}, {arg2})')
+                    else:
+                        result.append(r'\binom')
+                else:
+                    result.append(r'\binom')
+            else:
+                result.append(latex[i])
+                i += 1
+        return ''.join(result)
+
     def convert(self, expr: sp.Expr) -> str:
         """
         Convert SymPy expression to Typst notation.
@@ -60,7 +109,10 @@ class SymPyToTypst:
         """
         typst = latex
 
-        # Common substitutions
+        # Common substitutions (order matters for nested patterns)
+        # \binom{n}{k} → binom(n, k); handles nested braces like n_{a}
+        typst = self._replace_binom(typst)
+
         # \frac{a}{b} → (a)/(b) or a/b
         typst = re.sub(r'\\frac\{([^}]+)\}\{([^}]+)\}', r'(\1)/(\2)', typst)
 

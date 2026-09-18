@@ -13,7 +13,8 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-import re
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from src.math_trace.generators import SymPyToTypst
 
 
 def generate_formulas() -> bool:
@@ -34,17 +35,11 @@ def generate_formulas() -> bool:
     with open('membrane_equations.json') as f:
         data = json.load(f)
 
+    converter = SymPyToTypst()
     typst_lines = []
     for name, info in data.items():
         latex_str = info['latex']
-        # Simple LaTeX to Typst conversion
-        # Replace common LaTeX patterns with Typst equivalents
-        typst_str = latex_str
-        typst_str = re.sub(r'\\frac\{([^}]+)\}\{([^}]+)\}', r'(\\1)/(\\2)', typst_str)
-        typst_str = re.sub(r'\\left\(', '(', typst_str)
-        typst_str = re.sub(r'\\right\)', ')', typst_str)
-        typst_str = re.sub(r'\^', '^', typst_str)
-        typst_str = re.sub(r'_', '_', typst_str)
+        typst_str = converter._latex_to_typst(latex_str)
 
         comment = f"// {info['description']} (from model.py:{info['source_line']})"
         definition = f"#let {name} = $ {typst_str} $"

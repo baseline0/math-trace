@@ -27,8 +27,7 @@ reaction $2a → b$ is given by:
 #figure(
   align(center, text(size: 12pt, formulas)),
   caption: [Rate law for rule $2a → b$ derived from mass-action kinetics (see model.py:25)],
-  label: <eq-rate>,
-)
+) <eq-rate>
 
 This formula is computed symbolically from the Python model using SymPy and
 verified in formal logic via Lean.
@@ -61,11 +60,10 @@ trajectory for $k = 0.01$, $n_a(0) = 50$.
   caption: [
     Stochastic trajectory of $n_a(t)$ for rule $2a → b$ with
     rate constant $k = 0.01$, initial count $n_a(0) = 50$, over 200 time steps
-    of $Δt = 0.1$. The monotonicity property is evident in the decreasing trend
+    of $Δ t = 0.1$. The monotonicity property is evident in the decreasing trend
     of the reaction rate as the population of `a` objects shrinks. Source: simulate.py.
   ],
-  label: <fig-sim>,
-)
+) <fig-sim>
 
 == Code traceability
 

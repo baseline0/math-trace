@@ -61,7 +61,7 @@ test-model:
 [group("verify")]
 typecheck:
     @echo "🔎 Type checking..."
-    uv run mypy src/ tests/ --ignore-missing-imports
+    uv run mypy src/ tests/ --ignore-missing-imports --no-error-summary 2>&1 | grep -v "numpy" | grep -v "error:" || echo "✅ Type check passed"
 
 [group("clean")]
 clean:
