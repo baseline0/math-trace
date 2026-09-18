@@ -35,7 +35,7 @@ env/
 .DS_Store
 
 # uv
-uv.lock
+# uv.lock should be committed for reproducibility
 
 # Generated files
 examples/*/generated/
