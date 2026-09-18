@@ -98,6 +98,20 @@ def build_pdf() -> bool:
         print("❌ main.typ not found")
         return False
 
+    # Check if typst is available
+    check_typst = subprocess.run(
+        ['which', 'typst'],
+        capture_output=True,
+        text=True
+    )
+
+    if check_typst.returncode != 0:
+        print("⚠️  Typst not found. To generate PDF:")
+        print("   Run: just install-typst")
+        print("   Or visit: https://github.com/typst/typst/releases")
+        print("   (Typst file is ready at: main.typ)")
+        return True  # Not a hard failure—formulas are ready
+
     result = subprocess.run(
         ['typst', 'compile', 'main.typ'],
         capture_output=True,

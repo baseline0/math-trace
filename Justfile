@@ -96,6 +96,24 @@ view-paper:
         echo "⚠️  main.pdf not found. Run: just paper"; \
     fi
 
+[group("setup")]
+install-typst:
+    @echo "📦 Installing Typst..."
+    @if command -v cargo &> /dev/null; then \
+        echo "Using Cargo to install typst-cli..."; \
+        cargo install typst-cli; \
+    elif command -v brew &> /dev/null; then \
+        echo "Using Homebrew to install typst..."; \
+        brew install typst; \
+    elif command -v apt-get &> /dev/null; then \
+        echo "Using apt-get to install typst..."; \
+        sudo apt-get update && sudo apt-get install -y typst; \
+    else \
+        echo "⚠️  Could not detect package manager."; \
+        echo "   Install Typst manually: https://github.com/typst/typst/releases"; \
+    fi
+    @typst --version || echo "⚠️  Installation may have failed. Check https://typst.app for manual install."
+
 [group("help")]
 help:
     @echo "🎓 math-trace: Formula-to-code traceability"
@@ -113,6 +131,9 @@ help:
     @echo "  just test-formulas — Test formula generation"
     @echo "  just test-model    — Test model definitions"
     @echo "  just typecheck     — Type check code"
+    @echo ""
+    @echo "SETUP:"
+    @echo "  just install-typst — Install Typst (required for PDF generation)"
     @echo ""
     @echo "UTILITIES:"
     @echo "  just clean      — Remove generated files"
