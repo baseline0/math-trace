@@ -1,0 +1,96 @@
+# Palomar Registry Metadata
+# This file describes the formal development for registration in the
+# Palomar formalization registry.
+
+registry:
+  name: "Palomar Formalization Registry"
+  endpoint: "https://palomar-registry.org"
+  # Entry ID will be assigned upon registration
+  entry_id: "PALOMAR-XXX-MEMBRANE-MONOTONE"
+
+theorem:
+  title: "Monotonicity of the Rate Law in Stochastic P-systems"
+  description: |
+    Formal proof that the transition rate for the rewriting rule 2a → b,
+    given by r(n_a) = k*n_a*(n_a-1)/2 under mass-action kinetics,
+    is strictly increasing in the population count n_a for all k > 0 and n_a ≥ 2.
+
+  keywords:
+    - "membrane computing"
+    - "P-systems"
+    - "stochastic kinetics"
+    - "mass-action kinetics"
+    - "monotonicity"
+    - "formal verification"
+
+paper:
+  title: "A Minimal Stochastic P-system"
+  authors: ["Mark Alexiuk"]
+  url: "https://github.com/baseline0/math-trace/tree/main/examples/membrane-dynamics"
+  date: "2024-09-18"
+  abstract: |
+    This paper presents a minimal model of stochastic membrane computing
+    and formalizes a key property of its rate law in Lean 4. The theorem
+    proves strict monotonicity of the transition rate, bridging informal
+    mathematical reasoning with formal verification.
+
+formalization:
+  system: "Lean 4"
+  dependencies:
+    - name: "Mathlib"
+      version: "latest"
+  main_theorems:
+    - name: "rate_strictly_increasing"
+      file: "Challenge.lean"
+      statement: |
+        (k : ℝ) (hk : 0 < k) → ∀ n m : ℕ, 2 ≤ n → n < m → rate k n < rate k m
+      proof_status: "available"
+      lines_of_code: 120
+
+  supporting_lemmas:
+    - "rate_step_difference"
+    - "rate_positive_step"
+    - "rate_strictly_monotone"
+
+code_of_truth:
+  system: "Python + SymPy"
+  file: "examples/membrane-dynamics/model.py"
+  line: 25
+  formula: "rate = k * n_a * (n_a - 1) / 2"
+  representation: "SymPy: k * sp.binomial(n_a, 2)"
+
+traceability:
+  links:
+    - from: "model.py (Python SymPy)"
+      to: "main.typ (Typst paper)"
+      type: "formula derivation"
+    - from: "main.typ (theorem statement)"
+      to: "Challenge.lean (formal theorem)"
+      type: "formalization"
+    - from: "Challenge.lean"
+      to: "Solution.lean"
+      type: "proof"
+
+  verification:
+    - step: "Formula in Python matches equation in paper"
+      status: "verified"
+    - step: "Paper theorem matches Lean theorem statement"
+      status: "verified"
+    - step: "Lean proof is complete"
+      status: "verified"
+
+publication:
+  date_submitted: "2024-09-18"
+  review_status: "pending"
+  license: "MIT"
+  access: "open"
+
+impact:
+  relevance: "Demonstrates code-linked traceability in formal verification"
+  target_audience: ["mathematical logicians", "formal methods researchers", "membrane computing community"]
+  significance: |
+    This formalization exemplifies the integration of informal mathematical
+    reasoning (represented in Python and published in Typst) with formal
+    verification (Lean 4). It shows how to maintain traceability from source
+    code through publication to formalization, enabling readers to verify
+    and adapt the mathematics.

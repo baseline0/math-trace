@@ -1,0 +1,51 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: math-trace
+  description: Formula-to-code traceability for publication-quality mathematical documents
+  links:
+    - url: https://github.com/baseline0/math-trace
+      title: Repository
+    - url: https://typst.app
+      title: Typst Documentation
+    - url: https://docs.sympy.org
+      title: SymPy Documentation
+  tags:
+    - mathematics
+    - formalization
+    - typst
+    - sympy
+    - lean
+    - research
+spec:
+  type: library
+  lifecycle: active
+  owner: group:research
+  system: mathematics
+  dependsOn:
+    - component:fleet-base
+    - component:agent-tooling
+  providesApis: []
+  consumesApis: []
+  subcomponentOf: component:research
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: math-trace-generators
+  description: SymPy to Typst/LaTeX formula converters
+  tags:
+    - sympy
+    - typst
+    - latex
+spec:
+  type: library
+  lifecycle: active
+  owner: group:research
+  definition: |
+    This API provides converters for transforming SymPy expressions
+    into publication-ready LaTeX and Typst formats.
+
+    Main classes:
+    - SymPyToTypst: Convert expressions to Typst math notation
+    - TypstEnvironmentBuilder: Build theorem/proof environments

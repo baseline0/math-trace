@@ -1,0 +1,36 @@
+{
+  "paper_theorem": {
+    "title": "Theorem 1 (Monotonicity)",
+    "source": "main.typ (line ~45)",
+    "statement": "Let k > 0. For integers n_a >= 2, the function r(n_a) = (k*n_a*(n_a-1))/2 is strictly increasing in n_a.",
+    "informal_proof": [
+      "For n_a >= 2, write r(n) = k*n*(n-1)/2.",
+      "Then r(n+1) - r(n) = k*n*(n+1)/2 - k*n*(n-1)/2 = k*n > 0.",
+      "So r is strictly increasing."
+    ]
+  },
+  "lean_theorem": {
+    "name": "rate_strictly_increasing",
+    "file": "Challenge.lean",
+    "type_signature": "(k : ℝ) (hk : 0 < k) → ∀ n m : ℕ, 2 ≤ n → n < m → rate k n < rate k m",
+    "definition_of_rate": "def rate (k : ℝ) (n : ℕ) : ℝ := k * (n : ℝ) * ((n : ℝ) - 1) / 2"
+  },
+  "correspondence": {
+    "paper_variable_k": "Lean: k : ℝ with hypothesis hk : 0 < k",
+    "paper_variable_n_a": "Lean: n : ℕ with hypothesis hn : 2 ≤ n",
+    "paper_rate_formula": "Lean: rate k n = k * (n : ℝ) * ((n : ℝ) - 1) / 2",
+    "paper_increasing_property": "Lean: ∀ n m : ℕ, 2 ≤ n → n < m → rate k n < rate k m"
+  },
+  "verification_steps": [
+    "✓ Formula definition matches model.py:25",
+    "✓ Theorem statement aligns with paper Theorem 1",
+    "✓ Lean proof proves strict monotonicity",
+    "✓ Type signature is consistent and correct",
+    "✓ Hypotheses (k > 0, n ≥ 2) match paper assumptions"
+  ],
+  "traceability": {
+    "source_of_truth": "examples/membrane-dynamics/model.py:25",
+    "paper_reference": "examples/membrane-dynamics/main.typ (Theorem 1, Section 2)",
+    "lean_formalization": "examples/membrane-dynamics/lean/Challenge.lean and Solution.lean"
+  }
+}

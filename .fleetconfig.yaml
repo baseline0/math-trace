@@ -1,0 +1,52 @@
+# Fleet Configuration for math-trace
+# See agent-tooling/docs/FLEET-CONFIG.md for details
+
+repository:
+  name: "math-trace"
+  description: "Formula-to-code traceability for publication-quality mathematical documents"
+  url: "https://github.com/baseline0/math-trace"
+  owner: "baseline0"
+
+governance:
+  enabled: true
+  allows_direct_fixes: true
+  fixable_categories:
+    - "environment"  # Python dependencies, Typst setup
+    - "config"       # pyproject.toml, Justfile updates
+    - "discovery"    # README, documentation fixes
+  # code category (formula updates, proofs) require manual review
+
+technology_stack:
+  language: "Python"
+  build_system: "uv + Justfile"
+  formula_engine: "SymPy"
+  publishing: "Typst"
+  formalization: "Lean 4"
+  test_framework: "pytest"
+
+dependencies:
+  runtime:
+    - "sympy>=1.12"
+    - "numpy>=1.24"
+    - "matplotlib>=3.8"
+  development:
+    - "pytest>=7.4"
+    - "pytest-asyncio>=0.21"
+  system:
+    - "python>=3.11"
+    - "typst"  # Typst compiler (optional but recommended)
+    - "cargo"  # For installing Typst
+
+quality_standards:
+  code_style: "PEP 8"
+  type_checking: "mypy"
+  testing: "pytest"
+  documentation: "code-as-docs (see README.md)"
+  git_workflow: "just commit (never raw git)"
+
+constraints:
+  - "All git operations through just recipes"
+  - "Python dependencies via uv add/remove"
+  - "Formulas must be Python-first (SymPy)"
+  - "Papers use Typst (not LaTeX)"
+  - "Traceability: every formula tagged with source_line"
