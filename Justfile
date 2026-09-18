@@ -27,31 +27,21 @@ simulate: model
 figures: simulate
     @echo "🎨 Generating figures..."
     cd examples/membrane-dynamics && uv run python -c \
-        "from simulate import simulate; import matplotlib; matplotlib.use('Agg'); \
+        'from simulate import simulate; import matplotlib; matplotlib.use("Agg"); \
          import matplotlib.pyplot as plt; \
          ts, na = simulate(k_val=0.01, na0=50, steps=200, dt=0.1, seed=42); \
-         plt.figure(figsize=(8, 5)); plt.plot(ts, na, linewidth=2, color='#1f77b4'); \
-         plt.xlabel('Time', fontsize=12); plt.ylabel('\\$n_a\\$', fontsize=12); \
-         plt.title('Stochastic trajectory of \\$2a \\to b\\$', fontsize=14); \
-         plt.grid(alpha=0.3, linestyle='--'); plt.tight_layout(); \
-         import os; os.makedirs('generated/figures', exist_ok=True); \
-         plt.savefig('generated/figures/simulation.png', dpi=300, bbox_inches='tight'); \
-         print('✅ Generated simulation.png')"
+         plt.figure(figsize=(8, 5)); plt.plot(ts, na, linewidth=2, color="#1f77b4"); \
+         plt.xlabel("Time", fontsize=12); plt.ylabel("n_a", fontsize=12); \
+         plt.title("Stochastic trajectory: 2a → b", fontsize=14); \
+         plt.grid(alpha=0.3, linestyle="--"); plt.tight_layout(); \
+         import os; os.makedirs("generated/figures", exist_ok=True); \
+         plt.savefig("generated/figures/simulation.png", dpi=300, bbox_inches="tight"); \
+         print("✅ Generated simulation.png")'
 
 [group("build")]
-pdf: formulas figures
-    @echo "📝 Compiling Typst document..."
-    @if command -v typst &> /dev/null; then \
-        cd examples/membrane-dynamics && typst compile main.typ && echo "✅ Generated main.pdf"; \
-    else \
-        echo "⚠️  typst not found. Install: cargo install typst-cli"; \
-        echo "   Or visit: https://github.com/typst/typst/releases"; \
-    fi
-
-[group("build")]
-paper: pdf
-    @echo "🎉 Paper complete: examples/membrane-dynamics/main.pdf"
-    @ls -lh examples/membrane-dynamics/main.pdf 2>/dev/null || echo "⚠️  PDF not found (typst may not be installed)"
+paper:
+    @echo "📚 Building paper (formulas → figures → PDF)..."
+    cd examples/membrane-dynamics && uv run python build_paper.py
 
 [group("verify")]
 test:

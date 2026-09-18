@@ -140,12 +140,22 @@ def main() -> bool:
         ('PDF', build_pdf),
     ]
 
+    pdf_generated = True
     for name, step in steps:
         if not step():
-            print(f"\n❌ Failed at step: {name}")
-            return False
+            if name == 'PDF':
+                pdf_generated = False
+                # Don't fail on missing Typst—formulas are still useful
+            else:
+                print(f"\n❌ Failed at step: {name}")
+                return False
 
-    print("\n✅ Paper built successfully: main.pdf")
+    if pdf_generated and Path('main.pdf').exists():
+        print("\n✅ Paper built successfully: main.pdf")
+    else:
+        print("\n✅ Formulas and figures ready!")
+        if not pdf_generated:
+            print("   (PDF generation requires Typst: run 'just install-typst')")
     return True
 
 
