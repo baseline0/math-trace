@@ -97,7 +97,7 @@ class RegexCheck:
 REGEX_CHECKS: list[RegexCheck] = [
     RegexCheck(
         name="risky_bold_comment",
-        pattern=re.compile(r'\*[^*\n]*?/\*'),  # * ... /* on same line, no nested *
+        pattern=re.compile(r'\*[^*\n]*?(?<!\\)/\*'),  # * ... /* (not escaped) on same line
         level="warning",
         message="Possible '/*' inside bold text (Typst interprets as block comment start)",
         suggestion="Use backslash: \\/* or use strong(\"...\") instead",
@@ -133,7 +133,7 @@ def check_typst_compile(paths: list[Path]) -> list[Issue]:
     for path in paths:
         # For each .typ file, try to compile it
         # We compile to a temp location without actually generating PDF
-        cmd = ["typst", "compile", str(path), "/tmp/check_output.pdf", "--diagnostic"]
+        cmd = ["typst", "compile", str(path), "/tmp/check_output.pdf"]
 
         result = subprocess.run(cmd, capture_output=True, text=True)
 
