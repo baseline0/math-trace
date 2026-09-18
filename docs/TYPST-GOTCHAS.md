@@ -2,9 +2,33 @@
 
 When writing `.typ` files for math-trace, watch out for these common Typst syntax issues.
 
+**Target Typst version:** 0.15+ (math-trace templates)  
+**Last updated:** 2026-09-18  
+**See also:** [TYPST-LINTING.md](TYPST-LINTING.md) for how we check your code
+
+---
+
+## Quick index: CI error → section
+
+| CI error / symptom | Section | Solution |
+|--------------------|---------|----------|
+| `unclosed delimiter` near `/*` | §1 | Use backslash: `\/*` |
+| `file not found` for `#include` | §4 | Create file first (run `python model.py`) |
+| Weird emphasis in `*...*` with slashes | §2 | Use `strong([...])` instead of `*...*` |
+| Path not working (Windows vs Linux) | §3 | Use forward slashes always |
+| `/*` inside bold text like `*lean/*` | §1 | Use `*lean\/*` or `strong("lean/")` |
+| Unclosed `{` or `[` or `(` | §9 | Match all delimiters |
+| Math mode won't close (`$...$`) | §6 | Close math with `$` |
+| Unexpected text after code block | §7 | Check spacing and brackets |
+
+---
+
 ## 1. Block Comments: `/* */` Syntax Collision
 
 **Problem:** In Typst (like C, C++, JavaScript), `/*` starts a block comment. If you write `*lean/*` in bold text, Typst interprets `/*` as the start of a comment, treating everything after it as a comment until it finds `*/`.
+
+**Real example in this repo:**
+- ✅ Fixed: `examples/membrane-dynamics/main.typ` line 78 — uses `*lean\/*`
 
 **Error Message:**
 ```
