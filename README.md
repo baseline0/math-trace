@@ -1,161 +1,168 @@
 # math-trace
 
-**Formula-to-code traceability for publication-quality mathematical documents.**
+**Write publication-quality papers where every equation links back to code.**
 
-Typst + Python for rigorous research papers where every equation links back to its implementation and formal proofs.
+Formula-to-code traceability for researchers who want reproducible mathematics. SymPy → Typst → PDF, with optional Lean formalization and Palomar registry integration.
 
-## Quick Start
+## Quick Install & Try
 
 ```bash
-cd examples/membrane-dynamics
+# Install from PyPI
+pip install math-trace
+
+# Or clone to use examples
+git clone https://github.com/baseline0/math-trace.git
+cd math-trace/examples/membrane-dynamics
+
+# Build the paper (30 seconds)
 just paper
+open main.pdf
 ```
 
-This generates `main.pdf` with equations, theorems, and simulation figures—all derived from `model.py`.
+**What you get**: A publication-ready PDF with equations, theorems, and simulation figures—all traced back to `model.py`.
 
-Requirements:
+## What Is math-trace?
+
+Every formula in your paper should link to the code that uses it. Every theorem should have a proof. Every proof should be verified.
+
+math-trace connects:
+- **SymPy formulas** (Python) → source of truth
+- **Typst paper** (typesetting) → equations in your PDF
+- **Simulations** (matplotlib/numpy) → figures validated against formulas
+- **Lean proofs** (optional) → formal verification
+- **Palomar registry** (optional) → publication registration
+
+One edit to `model.py` updates your paper automatically.
+
+### Requirements
+
 - Python 3.11+
-- uv package manager
-- Typst compiler (`cargo install typst-cli`)
+- `pip install math-trace`
+- Optional: Typst compiler (`cargo install typst-cli` for PDF generation)
+- Optional: Lean 4 (for formal proofs)
 
-## The Demo: Stochastic P Systems
+## Example: Stochastic P Systems
 
-We demonstrate complete end-to-end traceability using a minimal membrane computing example:
+The included example demonstrates end-to-end formula traceability:
 
-### The Model
+### Step 1: Define Formulas in Python
 
-Rule `2a → b` with stochastic mass-action kinetics.
-
-**Source of truth**: `examples/membrane-dynamics/model.py:25`
+`examples/membrane-dynamics/model.py` (source of truth):
 
 ```python
 import sympy as sp
+
 k = sp.Symbol('k', positive=True, real=True)
 n_a = sp.Symbol('n_a', positive=True, integer=True)
 rate_expr = k * sp.binomial(n_a, 2)  # Rate law: r = k * n_a * (n_a - 1) / 2
 ```
 
-### The Paper
+### Step 2: Use Formulas in Paper
 
-Typst document that imports formulas from the model:
+`main.typ` imports and displays:
 
 ```typst
 #figure(
-  align(center, rate_formula),
+  align(center, $k binomial(n_a, 2)$),
   caption: [Rate law (from model.py:25)]
 )
 ```
 
-### The Simulation
+### Step 3: Validate with Simulation
 
-Stochastic realization evaluates the rate law:
+`simulate.py` uses the same formula:
 
 ```python
-# simulate.py
-rate = k_val * na * (na - 1) / 2  # Matches model.py:25
+# This MUST match model.py:25 exactly
+rate = k_val * na * (na - 1) / 2
 ```
 
-### The Formalization
+Tests verify code ↔ formula equivalence.
 
-Lean proof of monotonicity:
+### Step 4: Formalize (Optional)
+
+`lean/Challenge.lean` states the theorem:
 
 ```lean
--- Challenge.lean: Derived from model.py:25
 def rate (k : ℝ) (n : ℕ) : ℝ := k * (n : ℝ) * ((n : ℝ) - 1) / 2
-
-theorem rate_strictly_increasing (k : ℝ) (hk : 0 < k) :
-    ∀ n m : ℕ, 2 ≤ n → n < m → rate k n < rate k m := by ...
 ```
 
-### Traceability Chain
+### The Traceability Chain
 
 ```
-model.py (SymPy formulas - SOURCE OF TRUTH)
+model.py (SymPy: source of truth)
     ↓
-formulas.typ (LaTeX → Typst conversion)
+generated/formulas.typ (automatic LaTeX → Typst)
     ↓
-main.typ (Typst paper with equations, theorem, figure)
+main.typ (your paper)
     ↓
-main.pdf (compiled document)
+main.pdf (compiled PDF)
     ↓
-lean/Challenge.lean (formal theorem statement)
+simulate.py (validation: formulas match code)
     ↓
-lean/Solution.lean (formal proof)
+tests/ (proof: simulations match equations)
     ↓
-lean/comparator.json (verification of correspondence)
+lean/ (optional: formal proof)
     ↓
-Palomar Registry (formalization registration)
+Palomar Registry (optional: publish formalization)
 ```
 
-## Workflow
+**Key principle**: Edit formulas once in `model.py`. Everything updates automatically.
 
-### 1. Build the Paper
+## Getting Started (5 Minutes)
+
+### For Users: Just Use It
+
+See [Getting Started Guide](docs/getting-started-external.md) for:
+- Installation (1 minute)
+- Running the example (2 minutes)
+- Adapting to your domain (2 minutes)
+
+### For Contributors: Add Your Domain
+
+See [Contributing Guide](CONTRIBUTING.md) to:
+- Fork and clone
+- Create your domain example
+- Submit a PR
+
+### Full Workflow
+
+**1. Clone template** (or use `pip install math-trace` + example from GitHub)
 
 ```bash
-just paper
+git clone https://github.com/baseline0/math-trace.git
+cd math-trace/examples/membrane-dynamics
 ```
 
-This runs:
-1. `model.py` → exports formulas to JSON
-2. JSON → `generated/formulas.typ` (LaTeX → Typst conversion)
-3. `simulate.py` → stochastic trajectories
-4. Matplotlib → `generated/figures/simulation.png`
-5. Typst compiler → `main.pdf`
-
-### 2. Adapt to Your Domain
-
-Replace `examples/membrane-dynamics/model.py` with your formulas:
+**2. Edit `model.py`** with your formulas
 
 ```python
-# model.py
 import sympy as sp
 
-# Define your symbols and equations
-x = sp.Symbol('x', real=True)
-y = sp.Symbol('y', positive=True)
+# Your symbols
+k, n = sp.symbols('k n', positive=True)
 
-# Your formula
-my_formula = sp.exp(-x**2) * sp.sqrt(y)
-
-# Wrap in Formula class
-FORMULAS = {
-    'my_formula': Formula(
-        name='my_formula',
-        expr=my_formula,
-        description='My important equation',
-        source_line=15
-    )
-}
+# Your formula (source of truth)
+your_formula = k * sp.binomial(n, 2)
 ```
 
-Then:
-1. Run `just model` to export formulas
-2. Edit `main.typ` to import and use your formulas
-3. Run `just paper` to build
+**3. Update `main.typ`** to use your formulas
 
-### 3. Add Your Simulation
+**4. Adapt `simulate.py`** to compute your results
 
-Replace `simulate.py` with your own numerical computations:
+**5. Build and view**
 
-```python
-# simulate.py
-def compute(param1, param2):
-    # Your simulation logic
-    return results
+```bash
+just paper     # Generates main.pdf
 ```
 
-Update `build_paper.py` to generate your figures.
+**Optional: Formalize with Lean**
 
-### 4. Formalize Your Theorem
-
-Add Lean proof in `lean/Challenge.lean`:
-
-```lean
-theorem my_theorem : ... := by
-  sorry  -- Your proof here
+```bash
+# Edit lean/Challenge.lean with your theorem
+# (See examples/membrane-dynamics/lean/ for structure)
+just lean      # Compile Lean proofs
 ```
-
-Register in Palomar with `lean/formalization.yaml`.
 
 ## Project Structure
 
@@ -264,27 +271,56 @@ just typecheck         # Type check Python code
 just clean             # Remove generated files
 ```
 
-## For New Users
+## How to Use
 
-1. **Understand the demo**: Read `examples/membrane-dynamics/` end-to-end
-   - Start with `model.py` (formulas in SymPy)
-   - Read `simulate.py` (how formulas are used)
-   - Read `main.typ` (how equations appear in paper)
-   - Read `lean/Challenge.lean` (how theorems are formalized)
+### I just want to write a paper
 
-2. **Run the build**: `just paper` → generates `main.pdf`
+1. Follow [Getting Started Guide](docs/getting-started-external.md)
+2. Clone the example, edit `model.py`, run `just paper`
+3. Cite math-trace in your paper (see citation below)
 
-3. **Adapt the example**: Replace formulas in `model.py` with your own
+### I want to contribute a domain example
 
-4. **Add your simulation**: Modify `simulate.py` to compute your results
+1. Follow [Contributing Guide](CONTRIBUTING.md)
+2. Add your example to `examples/`
+3. Include tests and Lean formalization (optional but encouraged)
+4. Open a PR
 
-5. **Formalize your theorem**: Extend `lean/Challenge.lean` with your proof
+### I want to use math-trace as a library
 
-6. **Register in Palomar**: Fill out `lean/formalization.yaml` and submit
+```python
+from math_trace import SymPyToTypst
+import sympy as sp
 
-## Integration with Fleet
+converter = SymPyToTypst()
+expr = sp.Symbol('x')**2 + 1
+typst_code = converter.convert(expr)
+print(typst_code)
+```
 
-This repository is part of the mathematical research fleet. For fleet-specific setup and commands, see [CLAUDE.md](CLAUDE.md).
+See API docs in docstrings and examples in `tests/`.
+
+### I want to formalize my theorem
+
+See `examples/membrane-dynamics/lean/` for the pattern. Optional: register with [Palomar](https://palomar-registry.org).
+
+## Citation
+
+If you use math-trace in your research, please cite:
+
+```bibtex
+@software{mathTrace2026,
+  author = {Alexiuk, Mark},
+  title = {math-trace: Formula-to-code traceability for research papers},
+  year = {2026},
+  url = {https://github.com/baseline0/math-trace},
+  howpublished = {\url{https://pypi.org/project/math-trace/}}
+}
+```
+
+## For Fleet Members
+
+This repository is part of the mathematical research fleet. For fleet-specific commands and infrastructure integration, see [CLAUDE.md](CLAUDE.md).
 
 ## References
 
@@ -305,24 +341,26 @@ This repository is part of the mathematical research fleet. For fleet-specific s
 - [Palomar Formalization Registry](https://palomar-registry.org)
 - [Traceability Design](docs/adr/ADR-003-code-linked-traceability.md)
 
-## License
-
-MIT
-
-## Authors
-
-- Mark Alexiuk (@baseline0)
-
 ## Contributing
 
-Contributions welcome! Please:
-1. Fork the repository
-2. Add your mathematical example to `examples/`
-3. Include tests in `tests/examples/`
-4. Document design decisions in `docs/adr/`
-5. Run `just test` and `just typecheck` before submitting
-6. Open a PR with reference to Palomar entry (if formalizing)
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+- How to add your domain example
+- Code standards
+- PR process
+- Where to get help
+
+## License
+
+MIT — See [LICENSE](LICENSE) for details.
+
+## Support
+
+- **Questions?** Open a [GitHub Discussion](https://github.com/baseline0/math-trace/discussions)
+- **Bug reports?** File an [issue](https://github.com/baseline0/math-trace/issues)
+- **Want to contribute?** See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 
-**Why math-trace?** Because rigorous mathematics deserves rigorous traceability. Every equation should link to its proof, every theorem to its formalization, every formula to the code that uses it.
+**Why math-trace?**
+
+Rigorous mathematics deserves rigorous traceability. Every equation should link to its proof, every theorem to its formalization, every formula to the code that uses it. With math-trace, one edit to `model.py` updates your entire paper—formulas, figures, proofs, and all.
