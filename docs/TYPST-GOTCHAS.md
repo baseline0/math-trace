@@ -30,6 +30,13 @@ When writing `.typ` files for math-trace, watch out for these common Typst synta
 **Real example in this repo:**
 - ✅ Fixed: `examples/membrane-dynamics/main.typ` line 78 — uses `*lean\/*`
 
+**Note:** Our linter has an experimental check to flag this pattern (`risky_bold_comment`). It runs locally with:
+```bash
+MATH_TRACE_TYPST_STRICT=1 python scripts/check_typst.py
+```
+
+Or in CI (if enabled). See [TYPST-LINTING.md](TYPST-LINTING.md) for details.
+
 **Error Message:**
 ```
 error: unclosed delimiter
@@ -377,13 +384,65 @@ The function above is defined in `model.py`.
 
 ---
 
+## Adding a New Regex Check
+
+The linting system is designed to be easy to extend. If you discover a new pattern that's worth catching, here's how to add it.
+
+**To add a new regex check:**
+
+1. **Edit `scripts/check_typst.py`:**
+   - Find the `REGEX_CHECKS` list (near the top of the file).
+   - Append a new `RegexCheck` entry with:
+     - `name`: short identifier
+     - `pattern`: compiled regex (e.g., `re.compile(r'...')`)
+     - `level`: `"warning"` or `"error"`
+     - `message`: what the linter will report
+     - `suggestion`: how to fix it
+     - `doc_section`: reference to this file (e.g., `"§3 (Your new section)"`)
+
+2. **Add a section to this file** (e.g., §11):
+   - Explain the pattern you're catching.
+   - Show ✅ correct and ❌ incorrect examples.
+   - Reference where the check runs.
+
+3. **Update the index table** at the top of this file if it's a new symptom.
+
+4. **Test locally:**
+   ```bash
+   MATH_TRACE_TYPST_STRICT=1 python scripts/check_typst.py
+   ```
+
+**Example: Catching Windows-style paths in `#include`**
+
+In `scripts/check_typst.py`, add to `REGEX_CHECKS`:
+
+```python
+RegexCheck(
+    name="windows_include_path",
+    pattern=re.compile(r'#\s*include\s+"[^"]*\\[^"]*"'),
+    level="warning",
+    message="Windows-style backslash in #include path",
+    suggestion='Use forward slashes: #include "generated/formulas.typ"',
+    doc_section="§3 (Backslashes in file paths)",
+),
+```
+
+Then add/update §3 in this file, update the index, and test.
+
+That's it! The check now runs for all contributors.
+
+---
+
 ## See Also
 
 - [Typst Documentation](https://typst.app/docs/)
 - [GitHub: typst/typst](https://github.com/typst/typst)
 - [math-trace README](../README.md)
 - [build_paper.py](../examples/membrane-dynamics/build_paper.py) — How formulas are generated
+- [TYPST-LINTING.md](TYPST-LINTING.md) — How we check your code
 
 ---
 
-**Last Updated:** 2026-09-18
+**Last Updated:** 2026-09-18  
+**Typst Version:** 0.15+  
+**Script:** `scripts/check_typst.py`

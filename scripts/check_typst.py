@@ -72,6 +72,50 @@ class Issue:
 
 
 # ============================================================================
+# Regex-based checks: data-driven registry
+# ============================================================================
+
+@dataclass
+class RegexCheck:
+    """Define a regex-based linting check."""
+    name: str
+    pattern: re.Pattern
+    level: str  # "error" or "warning"
+    message: str
+    suggestion: str
+    doc_section: str
+
+
+# Define regex checks here. Each check is automatically run by run_regex_checks().
+# To add a new check:
+#   1. Append a RegexCheck entry below.
+#   2. Document it in docs/TYPST-GOTCHAS.md (new section or existing).
+#   3. Update the index table in TYPST-GOTCHAS.md if it's a new symptom.
+#   4. Test locally: python scripts/check_typst.py
+#   5. Optional: add a fixture in tests/ to ensure the check works as expected.
+
+REGEX_CHECKS: list[RegexCheck] = [
+    RegexCheck(
+        name="risky_bold_comment",
+        pattern=re.compile(r'\*[^*\n]*?/\*'),  # * ... /* on same line, no nested *
+        level="warning",
+        message="Possible '/*' inside bold text (Typst interprets as block comment start)",
+        suggestion="Use backslash: \\/* or use strong(\"...\") instead",
+        doc_section="§1 (Block comment collision)",
+    ),
+    # Example: to add a new check for Windows paths in includes:
+    # RegexCheck(
+    #     name="windows_include_path",
+    #     pattern=re.compile(r'#\s*include\s+"[^"]*\\\\[^"]*"'),
+    #     level="warning",
+    #     message="Windows-style backslash in #include path",
+    #     suggestion='Use forward slashes: #include "generated/formulas.typ"',
+    #     doc_section="§3 (Backslashes in file paths)",
+    # ),
+]
+
+
+# ============================================================================
 # Core checks (always run)
 # ============================================================================
 
@@ -94,26 +138,51 @@ def check_typst_compile(paths: list[Path]) -> list[Issue]:
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         if result.returncode != 0:
-            # Parse error output to extract line numbers if possible
             stderr = result.stderr + result.stdout
-
-            # Try to extract line number from Typst error
-            line_match = re.search(r':(\d+):', stderr)
-            line_num = int(line_match.group(1)) if line_match else None
-
-            # Extract first line of error message
-            error_lines = [l for l in stderr.split('\n') if l.strip()]
-            error_msg = error_lines[0] if error_lines else "Compilation failed"
-
-            issues.append(Issue(
-                path=str(path),
-                line=line_num,
-                level="error",
-                message=error_msg,
-                doc_section="Typst compilation"
-            ))
+            issues.append(_enrich_compile_issue(path, stderr))
 
     return issues
+
+
+def _enrich_compile_issue(path: Path, stderr: str) -> Issue:
+    """
+    Parse typst compile stderr and produce an Issue with helpful context.
+    Maps common error patterns to TYPST-GOTCHAS.md sections.
+    """
+    # Extract line number if present
+    line_match = re.search(r':(\d+):', stderr)
+    line_num = int(line_match.group(1)) if line_match else None
+
+    # Default message: first non-empty line of error
+    error_lines = [l for l in stderr.split('\n') if l.strip()]
+    error_msg = error_lines[0] if error_lines else "Compilation failed"
+
+    doc_section = "Typst compilation"
+    suggestion = None
+
+    # Heuristic: unclosed delimiter near /*
+    if "unclosed delimiter" in stderr.lower() and "/*" in stderr:
+        doc_section = "§1 (Block comment collision)"
+        suggestion = "Check for '/*' inside bold text like *lean/*. Use \\/* or strong(\"...\")."
+
+    # Heuristic: file not found for #include
+    elif "file not found" in stderr.lower():
+        doc_section = "§4 (Missing #include files)"
+        suggestion = "Ensure the file exists and the path uses forward slashes (not backslashes)."
+
+    # Heuristic: unclosed math mode
+    elif "unclosed" in stderr.lower() and "$" in stderr:
+        doc_section = "§6 (Math mode vs text mode)"
+        suggestion = "Make sure every $ that opens math mode has a closing $."
+
+    return Issue(
+        path=str(path),
+        line=line_num,
+        level="error",
+        message=error_msg,
+        suggestion=suggestion,
+        doc_section=doc_section,
+    )
 
 
 def check_includes_exist(paths: list[Path]) -> list[Issue]:
@@ -148,7 +217,7 @@ def check_includes_exist(paths: list[Path]) -> list[Issue]:
                     line=line_num,
                     level="error",
                     message=f"#include file not found: {include_path}",
-                    suggestion=f"Create {include_path} or fix the path",
+                    suggestion=f"Create {include_path} or fix the path (use forward slashes)",
                     doc_section="§4 (Missing #include files)"
                 ))
 
@@ -159,42 +228,40 @@ def check_includes_exist(paths: list[Path]) -> list[Issue]:
 # Experimental checks (opt-in via MATH_TRACE_TYPST_STRICT)
 # ============================================================================
 
-def check_risky_bold_comment(paths: list[Path]) -> list[Issue]:
+def run_regex_checks(paths: list[Path]) -> list[Issue]:
     """
-    Detect likely '/*' inside bold text like *lean/*.
+    Run all regex-based checks defined in REGEX_CHECKS.
 
-    Why: Typst parses '/*' as start of block comment, causing unclosed
-    comment errors with confusing diagnostics.
-
-    See: docs/TYPST-GOTCHAS.md §1 (Block comment collision)
+    This is a generic runner that applies each check to all files.
     """
     issues = []
-
     for path in paths:
         content = path.read_text(encoding='utf-8', errors='ignore')
+        lines = content.splitlines()
 
-        # Pattern: *.../*... (bold text containing /*)
-        # This is a heuristic; may have false positives in code blocks
-        pattern = r'\*[^*]*\/\*'
+        for check in REGEX_CHECKS:
+            for match in check.pattern.finditer(content):
+                line_no = content[:match.start()].count('\n') + 1
 
-        for match in re.finditer(pattern, content):
-            line_num = content[:match.start()].count('\n') + 1
+                # Get the line content for context (optional)
+                line_content = lines[line_no - 1] if line_no <= len(lines) else ""
 
-            issues.append(Issue(
-                path=str(path),
-                line=line_num,
-                level="warning",
-                message="Possible '/*' inside bold text (Typst interprets as block comment start)",
-                suggestion="Use backslash: \\/* or use strong(\"...\") instead",
-                doc_section="§1 (Block comment collision)"
-            ))
-
+                issues.append(Issue(
+                    path=str(path),
+                    line=line_no,
+                    level=check.level,
+                    message=check.message,
+                    suggestion=check.suggestion,
+                    doc_section=check.doc_section,
+                ))
     return issues
 
 
 def check_comment_balance(paths: list[Path]) -> list[Issue]:
     """
     Ensure block comments are balanced (/* has matching */).
+
+    Ignores /* and */ inside triple-backtick code blocks to avoid false positives.
 
     Why: Unclosed comments often cause cryptic "unexpected end of file" errors.
     This heuristic catches the most obvious cases.
@@ -206,19 +273,39 @@ def check_comment_balance(paths: list[Path]) -> list[Issue]:
     for path in paths:
         content = path.read_text(encoding='utf-8', errors='ignore')
 
-        open_count = content.count('/*')
-        close_count = content.count('*/')
+        # Count /* and */ outside code blocks
+        open_count = _count_outside_code_blocks(content, '/*')
+        close_count = _count_outside_code_blocks(content, '*/')
 
         if open_count != close_count:
             issues.append(Issue(
                 path=str(path),
                 level="warning",
                 message=f"Unbalanced block comments: {open_count} opening /*, {close_count} closing */",
-                suggestion="Check for unclosed /* ... */ blocks",
+                suggestion="Check for unclosed /* ... */ blocks (outside of ``` code blocks)",
                 doc_section="§1 (Block comment collision)"
             ))
 
     return issues
+
+
+def _count_outside_code_blocks(text: str, marker: str) -> int:
+    """
+    Count occurrences of marker, ignoring those inside triple-backtick code blocks.
+
+    Simple heuristic: toggles a flag when encountering ``` lines.
+    This prevents false warnings when showing broken examples in docs.
+    """
+    count = 0
+    in_code_block = False
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith('```'):
+            in_code_block = not in_code_block
+            continue
+        if not in_code_block:
+            count += line.count(marker)
+    return count
 
 
 # ============================================================================
@@ -262,13 +349,13 @@ def main():
     # Run all checks
     all_issues = []
 
-    # Core checks (always run)
+    # Core checks (always run, blocking)
     all_issues.extend(check_typst_compile(typ_files))
     all_issues.extend(check_includes_exist(typ_files))
 
-    # Experimental checks (opt-in)
+    # Experimental checks (opt-in via MATH_TRACE_TYPST_STRICT)
     if os.environ.get('MATH_TRACE_TYPST_STRICT'):
-        all_issues.extend(check_risky_bold_comment(typ_files))
+        all_issues.extend(run_regex_checks(typ_files))
         all_issues.extend(check_comment_balance(typ_files))
 
     # Report results

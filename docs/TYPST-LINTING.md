@@ -64,8 +64,13 @@ Look up the error in [TYPST-GOTCHAS.md](TYPST-GOTCHAS.md), fix it locally, commi
 - ✅ Diagnostics: Typst's built-in error reporting
 
 **Experimental checks (opt-in via `MATH_TRACE_TYPST_STRICT=1`):**
-- ⚠️ Bold text with `/*`: Detects risky patterns
-- ⚠️ Comment balance: Flags mismatched `/*` and `*/`
+- ⚠️ Bold text with `/*`: Detects risky patterns (`*lean/*` → error)
+- ⚠️ Comment balance: Flags mismatched `/*` and `*/` (ignores code blocks)
+
+**Note:** Experimental checks are disabled by default. To enable locally or in CI:
+```bash
+MATH_TRACE_TYPST_STRICT=1 python scripts/check_typst.py
+```
 
 **When they run:**
 - **Pre-commit hook** (if installed): Before you commit
