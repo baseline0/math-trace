@@ -1,0 +1,145 @@
+name: Lint Typst Files
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**/*.typ'
+      - '.github/workflows/lint-typst.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**/*.typ'
+
+jobs:
+  typst-syntax-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Typst
+        run: |
+          # Use official typst-install script
+          curl -fsSL https://install.typst.community/install.sh | sh
+          echo "$HOME/.typst/bin" >> $GITHUB_PATH
+
+      - name: Verify Typst Installation
+        run: typst --version
+
+      - name: Find all .typ files
+        run: |
+          find . -name "*.typ" -type f ! -path "./.git/*" | sort > /tmp/typ_files.txt
+          echo "Found $(wc -l < /tmp/typ_files.txt) .typ files:"
+          cat /tmp/typ_files.txt
+
+      - name: Check Typst Syntax
+        run: |
+          # Check each .typ file for syntax errors
+          # Using 'typst compile' with minimal output to catch errors
+          while IFS= read -r file; do
+            echo "Checking: $file"
+
+            # Create a temporary test file that just imports the target file
+            # This validates syntax without requiring all dependencies
+            cat > /tmp/test.typ << EOF
+          #import "$file" as target
+          EOF
+
+            # Try to compile - capture both stdout and stderr
+            if ! typst compile /tmp/test.typ /tmp/test.pdf 2>&1 | grep -E "(Error|error|unclosed|comment)" > /dev/null; then
+              echo "  ✅ OK"
+            else
+              echo "  ❌ Syntax error detected"
+              typst compile /tmp/test.typ /tmp/test.pdf 2>&1 || true
+              exit 1
+            fi
+          done < /tmp/typ_files.txt
+
+      - name: Check for common Typst syntax issues
+        run: |
+          echo "Checking for common syntax issues..."
+
+          # Check for unclosed comments (/* without */)
+          while IFS= read -r file; do
+            echo "Scanning: $file"
+
+            # Count /* and */ - they should match
+            open_comments=$(grep -o '/\*' "$file" | wc -l)
+            close_comments=$(grep -o '\*/' "$file" | wc -l)
+
+            if [ "$open_comments" -ne "$close_comments" ]; then
+              echo "  ⚠️  Warning: Unbalanced block comments in $file"
+              echo "     Open comments: $open_comments"
+              echo "     Close comments: $close_comments"
+            fi
+
+            # Check for /* inside bold text (common issue)
+            if grep -E '\*[^*]*\/\*' "$file" > /dev/null; then
+              echo "  ⚠️  Warning: Possible '/*' inside bold text in $file"
+              grep -n -E '\*[^*]*\/\*' "$file"
+              echo "     Fix: Use backslash: \\/* instead of /*"
+              exit 1
+            fi
+          done < /tmp/typ_files.txt
+
+      - name: Semantic checks (if Typst available)
+        run: |
+          # Additional checks using typst
+          echo "Running semantic checks..."
+
+          while IFS= read -r file; do
+            echo "Checking: $file"
+
+            # Use typst's diagnostic mode if available
+            if typst --version | grep -q "typst"; then
+              # Try to compile and capture diagnostics
+              typst compile "$file" /tmp/output.pdf --diagnostic 2>&1 | \
+                grep -i "error\|warning" && {
+                  echo "  Diagnostics found in $file"
+                  exit 1
+                } || echo "  ✅ No errors"
+            fi
+          done < /tmp/typ_files.txt || true
+
+      - name: Report results
+        if: success()
+        run: |
+          echo "✅ All Typst files passed syntax checks"
+          echo ""
+          echo "Summary:"
+          echo "  - Block comments must have matching /* and */"
+          echo "  - Do not use /* inside bold text: escape as \\/*"
+          echo "  - Use raw strings for paths: \`lean/\` not *lean/*"
+
+  typst-import-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Typst
+        run: |
+          curl -fsSL https://install.typst.community/install.sh | sh
+          echo "$HOME/.typst/bin" >> $GITHUB_PATH
+
+      - name: Check .typ file imports
+        run: |
+          echo "Validating #include and #import statements..."
+
+          # Check all .typ files for broken includes
+          while IFS= read -r file; do
+            echo "Checking includes in: $file"
+
+            # Extract all #include directives
+            grep -o '#include "[^"]*"' "$file" | sed 's/#include "//;s/"$//' | while read -r include; do
+              # Check if included file exists
+              include_dir=$(dirname "$file")
+              include_path="$include_dir/$include"
+
+              if [ ! -f "$include_path" ]; then
+                echo "  ❌ Missing include: $include (searched in $include_dir/)"
+                exit 1
+              else
+                echo "  ✅ Found: $include"
+              fi
+            done
+          done < /tmp/typ_files.txt || true

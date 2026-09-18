@@ -75,7 +75,7 @@ source in the codebase:
 - *model.py:25* — SymPy definition of the rate law (source of truth)
 - *simulate.py* — Stochastic realization using numpy
 - *build_paper.py* — Automated pipeline (formulas → figures → PDF)
-- *lean/* — Formal development and Palomar registration
+- *lean\/* — Formal development and Palomar registration
 
 Users can inspect `model.py` to verify the rate formula, modify simulation
 parameters in `simulate.py`, or extend the Lean proof in `lean/Solution.lean`.
