@@ -89,20 +89,34 @@ view-paper:
 [group("setup")]
 install-typst:
     @echo "📦 Installing Typst..."
-    @if command -v cargo &> /dev/null; then \
-        echo "Using Cargo to install typst-cli..."; \
-        cargo install typst-cli; \
-    elif command -v brew &> /dev/null; then \
-        echo "Using Homebrew to install typst..."; \
-        brew install typst; \
-    elif command -v apt-get &> /dev/null; then \
-        echo "Using apt-get to install typst..."; \
-        sudo apt-get update && sudo apt-get install -y typst; \
+    @if command -v typst &> /dev/null; then \
+        echo "✅ Typst already installed:"; \
+        typst --version; \
     else \
-        echo "⚠️  Could not detect package manager."; \
-        echo "   Install Typst manually: https://github.com/typst/typst/releases"; \
+        echo "Trying official installer (typst-install)..."; \
+        if command -v sh &> /dev/null; then \
+            curl -fsSL https://install.typst.community/install.sh | sh && \
+            echo "" && \
+            echo "⚠️  Typst installed! Add to PATH in ~/.bashrc or ~/.zshrc:" && \
+            echo "  export PATH=\"\$$HOME/.typst/bin:\$$PATH\"" && \
+            echo "" && \
+            echo "Then run: source ~/.bashrc (or ~/.zshrc)"; \
+        elif command -v cargo &> /dev/null; then \
+            echo "Falling back to Cargo..."; \
+            cargo install typst-cli; \
+        elif command -v brew &> /dev/null; then \
+            echo "Using Homebrew..."; \
+            brew install typst; \
+        elif command -v apt-get &> /dev/null; then \
+            echo "Using apt-get..."; \
+            sudo apt-get update && sudo apt-get install -y typst; \
+        else \
+            echo "❌ Could not install Typst automatically."; \
+            echo "   Manual install: https://github.com/typst/typst/releases"; \
+            echo "   Or: https://install.typst.community/"; \
+            exit 1; \
+        fi; \
     fi
-    @typst --version || echo "⚠️  Installation may have failed. Check https://typst.app for manual install."
 
 [group("help")]
 help:

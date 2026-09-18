@@ -38,7 +38,7 @@ One edit to `model.py` updates your paper automatically.
 
 - Python 3.11+
 - `pip install math-trace`
-- Optional: Typst compiler (`cargo install typst-cli` for PDF generation)
+- Optional: Typst compiler (`just install-typst` for PDF generation)
 - Optional: Lean 4 (for formal proofs)
 
 ## Example: Stochastic P Systems
@@ -118,6 +118,28 @@ See [Getting Started Guide](docs/getting-started-external.md) for:
 - Running the example (2 minutes)
 - Adapting to your domain (2 minutes)
 
+### For Contributors: Fork a Template
+
+Want to start your own paper? Pick a template and customize it:
+
+- **[simple-physics](templates/simple-physics/)** — Harmonic oscillator (classical mechanics)
+- **[biochemistry](templates/biochemistry/)** — Enzyme kinetics (Michaelis-Menten)
+- See [TEMPLATE-USAGE.md](templates/TEMPLATE-USAGE.md) for full guide
+
+Each template includes a complete working example you can fork:
+
+```bash
+cp -r templates/simple-physics ../my-physics-paper
+cd ../my-physics-paper
+# Edit model.py, simulate.py, main.typ with your research
+python build_paper.py
+```
+
+See [templates/TEMPLATE-USAGE.md](templates/TEMPLATE-USAGE.md) for:
+- Step-by-step adaptation guide
+- Multi-domain examples (optics, pharmacokinetics, gene regulation)
+- Publishing workflows (GitHub, arXiv, journals)
+
 ### For Contributors: Add Your Domain
 
 See [Contributing Guide](CONTRIBUTING.md) to:
@@ -192,6 +214,13 @@ math-trace/
 │           ├── Solution.lean
 │           ├── comparator.json
 │           └── formalization.yaml
+│
+├── templates/                  # Fork-friendly templates by domain
+│   ├── TEMPLATE-USAGE.md       # Master guide for customizing templates
+│   ├── simple-physics/         # Template: Classical mechanics
+│   │   ├── model.py, simulate.py, build_paper.py, main.typ, README.md
+│   └── biochemistry/           # Template: Enzyme kinetics
+│       ├── model.py, simulate.py, build_paper.py, main.typ, README.md
 │
 ├── tests/                      # Test suite
 │   ├── test_model_export.py    # Formula generation tests
