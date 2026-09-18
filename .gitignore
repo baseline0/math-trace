@@ -42,6 +42,16 @@ examples/*/generated/
 examples/*/*.pdf
 examples/*/membrane_equations.json
 examples/**/*.png
+templates/*/generated/
+templates/*_equations.json
+templates/**/*.pdf
+templates/**/figures/
+
+# Fleet integration (governance configs committed, runtime files excluded)
+# Exclude: audit logs, template tracking, runtime data
+.fleet/audit.log
+.fleet/templates.json
+.fleet/*.log
 
 # Lean
 lake-packages/
