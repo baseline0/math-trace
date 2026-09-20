@@ -378,11 +378,248 @@ Not ideal if:
 
 | Aspect | Before | After |
 |--------|--------|-------|
-| **Traceability** | Comments only | Formula index + visible linkage |
-| **Parameters** | Basic `\|param=value` | Symbol mapping + assumptions + form variants |
-| **Workflow** | Manual CLI | `just present` + CI checks + error messages |
-| **Scope** | Open-ended | Locked API + sunset clause |
-| **Pilot** | "Use it internally" | **Use it for membrane paper's conference presentation** |
+| **Traceability** | Comments only | **Deterministic rendering + formula index (first-class output) + CI gates** |
+| **Parameters** | Basic `\|param=value` | **Symbol aliasing + assumption snapshots + actionable errors** |
+| **Rendering** | "Generate LaTeX once" | **Locked SymPy settings + reproducible across versions** |
+| **Workflow** | Manual CLI | **One command: `just present` (build + Marp + index)** |
+| **Validation** | Wishful thinking | **CI check fails on missing formulas or mismatched index** |
+| **Scope** | Open-ended | **Locked API + explicit deferrals + sunset clause** |
+| **Pilot** | "Use it internally" | **Conference presentation + friction log + community validation** |
+
+---
+
+## Feedback Round 2: Design Specifics (2026-09-19)
+
+**Key Insight from Validator:**
+> "Without deterministic rendering, auditable artifacts, and CI gates, 'traceability' is marketing. With them, it's a verifiable property of your repo."
+
+This shifts us from "nice tool" to **"research infrastructure."**
+
+### 1. Deterministic Rendering Lock (Critical)
+
+**Problem:** SymPy's `latex()` output can change with versions, assumptions, or settings.
+
+**Solution:** Wrap SymPy printing with explicit, locked options:
+
+```python
+# In Formula class
+@dataclass
+class Formula:
+    id: str
+    expr: sp.Expr
+    # NEW: Lock rendering parameters
+    rendering_opts: dict = field(default_factory=lambda: {
+        "mode": "plain",  # or "equation"
+        "fold_short_frac": False,
+        "mul_symbol": "cdot",  # explicit multiplication symbol
+    })
+    assumptions: dict = field(default_factory=dict)  # e.g., {"n": {"positive": True}}
+    
+    def to_latex(self) -> str:
+        """Render with locked settings for reproducibility."""
+        # Apply assumptions to symbols
+        expr_with_assumptions = self.expr
+        for sym_name, sym_assumptions in self.assumptions.items():
+            # Replace symbol with one that has assumptions
+            pass
+        # Render with locked options
+        return sp.latex(expr_with_assumptions, **self.rendering_opts)
+```
+
+**Validation:**
+- Same `id` must always render to the same LaTeX (across SymPy versions)
+- Rendering options stored in formula index (so reviewers can reproduce)
+- CI pins SymPy minor version; documents upgrade path
+
+**Status:** Must implement before real usage
+
+### 2. Formula Index as First-Class Output
+
+**Current:** Comments in generated Markdown  
+**New:** Dedicated slide + appendix listing every formula with full traceability
+
+**Generated `formula_index.md` (auto-created):**
+
+```markdown
+# Formula Index
+*Auto-generated from model.py via build_slides.py*
+
+## Used Formulas
+
+| ID | Source | LaTeX | Parameters | SymPy Version | Assumptions |
+|----|--------|-------|------------|----------------|------------|
+| `mult_input` | model.py:106 | $3$ | none | 1.14.0 | none |
+| `mult_rule1` | model.py:113 | $\lambda n. 2n$ | n | 1.14.0 | n: positive=True |
+| ... | ... | ... | ... | ... | ... |
+
+## Usage Map
+
+- **presentation.md:110** — `{{formula:mult_rule1}}`
+- **presentation.md:111** — `{{formula:mult_input}}`
+```
+
+**Why This Matters:**
+- Reviewers can verify every equation in the slides
+- If SymPy rendering changes, the index diff will flag it
+- Auditable proof that formulas match source code
+
+**Implementation:**
+```python
+def generate_formula_index(formulas: dict, markdown_path: str) -> str:
+    """Create formula index with usage map and traceability."""
+    # Scan markdown for all {{formula:...}} references
+    # Cross-check against FORMULAS dict
+    # Generate table with rendering, source, assumptions
+    # Flag missing or unused formulas
+```
+
+**Status:** ✅ Must be Phase 1
+
+### 3. Symbol Aliasing & Assumptions
+
+**Problem:** Code uses `n`, slides want to display as $\theta$. SymPy assumptions (positive, real, integer) affect printing.
+
+**Solution:** Store symbol mappings and assumptions per formula:
+
+```python
+Formula(
+    id="f_rule",
+    expr=sp.Lambda((n,), 2*n),
+    # NEW: Symbol display mapping
+    symbols={"n": r"\theta"},  # code uses n, display as θ
+    # NEW: Lock assumptions
+    assumptions={"n": {"positive": True, "real": True}},
+    rendering_opts={"mul_symbol": "cdot"}
+)
+```
+
+**Validation in Error Messages:**
+```
+Error: Parameter 'n' in {{formula:f_rule|n=2}} is invalid.
+Expected parameters: {} (formula has no parameters, n is a symbol)
+Hint: If you meant to parameterize, use a form variant like {{formula:f_rule|form=evaluate_n=2}} (not yet supported)
+```
+
+**Status:** Must implement before real usage
+
+### 4. CI Gate (Non-Negotiable)
+
+**Goal:** Make formula drift *impossible* by failing the build if formulas mismatch.
+
+**`just present` target:**
+```bash
+present:
+    # Export formulas
+    python paper/build_slides.py
+    
+    # Invoke Marp (fail if rendering errors)
+    marp presentation_generated.md -o presentation.pdf
+    
+    # Generate formula index and check for missing formulas
+    python paper/validate_formulas.py
+    
+    # If index changed, fail with diff (catches silent changes)
+    git diff --exit-code formula_index.md || \
+        (echo "Formula index changed—review and commit"; exit 1)
+```
+
+**CI Job (GitHub Actions):**
+```yaml
+- name: Build presentation
+  run: |
+    pip install sympy==1.14.0 marp-cli
+    just present
+    
+- name: Check formula consistency
+  run: |
+    python paper/validate_formulas.py --strict
+```
+
+**Validation:**
+- Missing formula ID → build fails with clear message
+- Formula rendering changed → index diff flags it
+- SymPy version mismatch → CI requires explicit upgrade
+
+**Status:** ✅ Must be Phase 1
+
+### 5. Actionable Error Messages
+
+**Current:** Cryptic "formula not found"  
+**New:** Help the user fix it
+
+```
+Error in presentation.md:110
+  {{formula:missing_id}} — formula not found
+
+Available formulas:
+  - mult_input (line 106)
+  - mult_rule1 (line 113)
+  - mult_step1_output (line 120)
+  - mult_final (line 127)
+
+Hint: Did you mean {{formula:mult_rule1}}?
+```
+
+**Status:** ✅ Phase 1
+
+### 6. One-Command Workflow
+
+```bash
+# Everything: export formulas → render slides → generate index
+just present
+
+# Optional: view PDF
+open presentation.pdf formula_index.pdf
+```
+
+**Status:** ✅ Phase 1
+
+---
+
+## Updated Phase 1 Specification (MVP with Teeth)
+
+**Phase 1 is no longer "basic substitution." It's "auditable formula rendering."**
+
+```
+Phase 1 Deliverables:
+  ✓ Formula ID + metadata (name, description, source_line)
+  ✓ Symbol aliasing (code `n` → display `θ`)
+  ✓ Locked SymPy assumptions (reproducible rendering)
+  ✓ Locked rendering options (mode, mul_symbol, fold_short_frac)
+  ✓ {{formula:id}} substitution with error handling
+  ✓ Formula index generation (table + usage map)
+  ✓ `just present` one-command build
+  ✓ CI gate (missing formulas, index changes)
+  ✓ Actionable error messages
+  
+Deferred (Post-Pilot):
+  - Form variants (|form=expanded)
+  - VS Code snippets
+  - Advanced parameter handling
+  - Symbol renaming in rendered output (?)
+```
+
+---
+
+## Validation Criteria (Measurable)
+
+**Before considering PyPI, we must prove:**
+
+1. ✅ **Reproducibility:** Same formula renders identically across SymPy versions (minor bumps)
+2. ✅ **Auditability:** Formula index diffs catch all changes; no silent drift
+3. ✅ **Usability:** `just present` succeeds in CI without manual steps
+4. ✅ **Real Usage:** Used for 2+ conference presentations without critical friction
+5. ✅ **Community Pull:** 3+ unsolicited requests from other researchers (not sales pitches)
+
+---
+
+## Bottom Line
+
+The validator is right: this is no longer "nice-to-have traceability." It's **"formula drift detection by default."** With deterministic rendering, auditable artifacts, and CI gates, researchers can trust that:
+
+> "Every formula in this presentation matches the code—we can verify it."
+
+That's a tool worth maintaining.
 
 **Validator's Bottom Line:**
 > "Build it for yourselves first, use it in anger, and revisit PyPI once you've proven it across multiple talks."
