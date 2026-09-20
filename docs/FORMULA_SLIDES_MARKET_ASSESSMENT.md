@@ -684,4 +684,51 @@ We will use this for the membrane paper's next conference presentation and colle
 
 ---
 
-**Next Step:** Implement Phase 1 (formula index, assumptions locking) in membrane repo. Use for conference presentation. Collect real feedback.
+## Feedback Round 3: Hardening & Edge Cases (2026-09-19)
+
+**Key Insight:** "Formula drift cannot happen" is only true if the metadata and checks cover ALL failure modes.
+
+**Critical Hardening Needed:**
+
+1. **Assumption Completeness**
+   - Current: Assumptions optional
+   - Fix: Validate all symbols have assumptions recorded (even if "no assumptions")
+   - Prevents: Silent drift across SymPy versions
+
+2. **Rendering Config Verification**
+   - Current: Config stored, but no hash/snapshot
+   - Fix: Add SHA256 hash of rendering config to formula index
+   - Benefit: Reviewers can verify LaTeX hasn't changed without re-rendering
+
+3. **SymPy Version Pinning**
+   - Current: JSON shows version, but not pinned in dependencies
+   - Fix: Add `sympy>=1.14.0,<1.15.0` to pyproject.toml
+   - Fix: Document upgrade path (re-export all formulas, diff LaTeX)
+
+4. **Error Message UX**
+   - Current: "Formula 'foo' not found"
+   - Fix: Add suggestions ("Did you mean 'bar'?") via Levenshtein distance
+   - Fix: Show offending line + context in Markdown
+   - Fix: Proper exit codes (fail on errors, warn on unused)
+
+5. **Formula Index Audit Trail**
+   - Current: Table with formulas and usage
+   - Fix: Add LaTeX hash (SHA256 first 8 chars)
+   - Fix: Include commit hash in header
+   - Optional: Append index as PDF slides
+
+6. **Workflow Integration**
+   - Current: `just present` as manual command
+   - Fix: Pre-commit hook that validates on `presentation.md` changes
+   - Fix: CI template (GitHub Actions) with pinned SymPy + artifact upload
+   - Fix: Documentation with troubleshooting
+
+**Phase 2 Friction Collection (When Using for Conference):**
+- Symbol aliasing ergonomics: easy to maintain?
+- Assumption surprises: any unexpected rendering?
+- CI flakiness: build fails for non-formula reasons?
+- Index readability: useful to reviewers or just boilerplate?
+
+---
+
+**Next Step:** Implement hardening (assumptions validation, config hashing, SymPy pinning, improved errors). Then use for membrane conference presentation and collect real friction data.
