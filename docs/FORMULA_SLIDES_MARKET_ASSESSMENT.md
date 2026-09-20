@@ -333,13 +333,106 @@ Not ideal if:
 
 ---
 
+## Feedback & Iteration Log
+
+### Feedback Round 1: Early Viability Check (2026-09-19)
+
+**Griller's Assessment:**
+> "Your assessment is correct: this is a **valuable niche tool** with a clear audience and a real problem to solve. The key to success is **rigorous traceability** (not just generation), **workflow integration** (CI + one-command builds), and **scope discipline**."
+
+**Key Stresses Identified:**
+
+1. **Traceability Must Be Auditable, Not Just Generated**
+   - Current approach: "Traceability comments (source lines)" in rendered output
+   - Problem: Only comments—not verified linkage
+   - Fix: Add **formula index** (auto-generated slide/page) listing every formula ID, source file/line, and rendered form
+   - Fix: Make formula linkage visible in PDF metadata or slide notes, not just comments
+   - Status: ⚠️ *To implement before MVP*
+
+2. **Parameter Handling & Assumptions Edge Cases**
+   - Problem: Symbol renaming (paper uses $\theta$, code uses `theta_hat`)
+   - Problem: SymPy assumptions affect printing (positive, real, integer)
+   - Problem: Same formula, different forms (expanded vs factored)
+   - Fix: Add **symbol mapping layer** for aliasing
+   - Fix: **Lock SymPy assumptions** explicitly in `Formula` definition
+   - Fix: Support **form variants** via `{{formula:id|form=expanded}}`
+   - Status: 🔴 *Critical gap—must address before real usage*
+
+3. **Workflow Integration (CLI + CI + Editor)**
+   - Current: `python build_slides.py` is manual, optional
+   - Problem: If it's an extra step, it gets skipped → drift returns
+   - Fix: Integrate into single `just` target (e.g., `just present`)
+   - Fix: Add **CI check** that fails if formula IDs are missing or rendering fails
+   - Fix: **Actionable error messages** ("Formula `foo` not found; used in presentation.md:42")
+   - Bonus: VS Code snippet for `{{formula:...}}` autocomplete
+   - Status: ⚠️ *MVP scope; refine based on pilot*
+
+4. **Avoiding "Abandoned PyPI Project" Fate**
+   - Risk: Feature creep (themes, live server, Jupyter, plugins)
+   - Mitigation: **Scope lock** at publication—publish small stable API only
+   - Mitigation: **Version pinning policy** for SymPy and dependencies
+   - Mitigation: **Sunset clause** (if we stop using it, archive as read-only)
+   - Status: ✅ *Accepted; will codify in docs*
+
+**How This Feedback Changes Our Plan:**
+
+| Aspect | Before | After |
+|--------|--------|-------|
+| **Traceability** | Comments only | Formula index + visible linkage |
+| **Parameters** | Basic `\|param=value` | Symbol mapping + assumptions + form variants |
+| **Workflow** | Manual CLI | `just present` + CI checks + error messages |
+| **Scope** | Open-ended | Locked API + sunset clause |
+| **Pilot** | "Use it internally" | **Use it for membrane paper's conference presentation** |
+
+**Validator's Bottom Line:**
+> "Build it for yourselves first, use it in anger, and revisit PyPI once you've proven it across multiple talks."
+
+**Our Commitment:**
+We will use this for the membrane paper's next conference presentation and collect friction points before considering PyPI publication.
+
+---
+
+## Updated Implementation Roadmap
+
+### Phase 1 (MVP - Now)
+- [x] Basic formula substitution (`{{formula:id}}`)
+- [x] Source line comments in output
+- [ ] **Formula index generator** (auto-create appendix listing all formulas)
+- [ ] **Locked SymPy assumptions** (explicit `mode`, `fold_frac`, etc.)
+- [ ] **Actionable error messages** ("Formula `X` at presentation.md:42 not found")
+
+### Phase 2 (Real Usage - Membrane Conference Talk)
+- [ ] Integrate into `just present` target
+- [ ] Add CI check for missing formula IDs
+- [ ] Test symbol mapping / form variants
+- [ ] Collect friction points from live usage
+- [ ] Document lessons learned
+
+### Phase 3 (Generalization - 6+ Months)
+- [ ] Revisit PyPI based on usage data
+- [ ] If publishing: Lock API, pin dependencies, add sunset clause
+- [ ] If not: Mark as internal tool, document for team reuse
+
+---
+
 ## Conclusion
 
-**This is a good tool to build.** It solves a real problem for academic researchers (including us). Publishing to PyPI is reasonable, but only if we're honest about the niche and committed to maintenance.
+**This is a good tool to build,** and the feedback validates both the problem and the approach. The key differentiator—**code-coupled formula rendering with auditable traceability**—is what will earn trust from researchers.
 
-**Recommendation:** Build it now. Use it for the membrane paper. See if others find it valuable. Revisit the PyPI decision in 6 months with real usage data.
+**Immediate Actions:**
+1. Implement formula index generator
+2. Lock SymPy printing assumptions
+3. Add parameter mapping layer
+4. Integrate into CI and build workflow
+5. **Use it for membrane paper's conference presentation**
 
-**If we decide to publish:** Position it as a niche utility, not a general-purpose tool. Better to be honest about scope than to overpromise and disappoint.
+**Decision Point:** In 6 months, after real usage, revisit PyPI publication with concrete data on:
+- How many presentations have we used it for?
+- What friction points emerged in CI/workflow?
+- Did unsolicited interest from others materialize?
+- Are we committed to maintaining it long-term?
+
+**If we publish:** Position as a niche utility with scope locked, version policy clear, and sunset clause documented.
 
 ---
 
@@ -350,7 +443,8 @@ Not ideal if:
 - **Jupyter & nbconvert:** Formula support in notebooks (inspiration)
 - **Quarto:** https://quarto.org (Code + narrative, heavier than we need)
 - **Beamer:** https://ctan.org/pkg/beamer (Gold standard for math, but painful)
+- **TexSlide:** https://texslide.com (LaTeX-focused, different audience)
 
 ---
 
-**Next Step:** Implement the MVP in the membrane repo. Iterate based on real usage.
+**Next Step:** Implement Phase 1 (formula index, assumptions locking) in membrane repo. Use for conference presentation. Collect real feedback.
