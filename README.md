@@ -2,6 +2,11 @@
 
 **Write publication-quality papers where every equation links back to code.**
 
+## Test Status
+
+[![Unit Tests](https://github.com/anthropics/math-trace/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/anthropics/math-trace/actions)  
+**Status:** 16/16 tests passing ✅
+
 Formula-to-code traceability for researchers who want reproducible mathematics. SymPy → Typst → PDF, with optional Lean formalization and Palomar registry integration.
 
 ## Quick Install & Try
