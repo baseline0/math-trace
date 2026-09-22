@@ -45,7 +45,7 @@ Always use `just` recipes.
 
 ### System
 - `typst` — Typst compiler for PDFs (install: `cargo install typst-cli`)
-- `python>=3.11` — Python runtime
+- `python>=3.13` — Python runtime
 
 ## Building the Paper
 

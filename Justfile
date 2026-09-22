@@ -87,6 +87,23 @@ view-paper:
     fi
 
 [group("setup")]
+setup:
+    @echo "🚀 Setting up math-trace..."
+    @echo ""
+    @echo "Step 1: Checking environment..."
+    bash scripts/check-env.sh || true
+    @echo ""
+    @echo "Step 2: Installing/updating Typst..."
+    @just install-typst
+    @echo ""
+    @echo "Step 3: Syncing Python dependencies..."
+    uv sync
+    @echo ""
+    @echo "✅ Setup complete! Ready to build your first paper:"
+    @echo "   cd examples/membrane-dynamics"
+    @echo "   just paper"
+
+[group("setup")]
 install-typst:
     @echo "📦 Installing Typst..."
     @if command -v typst &> /dev/null; then \
@@ -121,6 +138,9 @@ install-typst:
 [group("help")]
 help:
     @echo "🎓 math-trace: Formula-to-code traceability"
+    @echo ""
+    @echo "FIRST TIME?"
+    @echo "  just setup — One-command installation (Python, uv, Typst)"
     @echo ""
     @echo "BUILD:"
     @echo "  just model     — Export formulas from SymPy (source of truth)"

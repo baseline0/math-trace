@@ -36,8 +36,8 @@ One edit to `model.py` updates your paper automatically.
 
 ### Requirements
 
-- Python 3.11+
-- `pip install math-trace`
+- Python 3.13
+- `pip install math-trace` (or `just setup` for one-command installation)
 - Optional: Typst compiler (`just install-typst` for PDF generation)
 - Optional: Lean 4 (for formal proofs)
 
