@@ -6,6 +6,11 @@ repository:
   description: "Formula-to-code traceability for publication-quality mathematical documents"
   url: "https://github.com/baseline0/math-trace"
   owner: "baseline0"
+  intended_audiences:
+    - "Academic researchers (mathematics, physics, ML)"
+    - "AI companies (responsible presentation of mathematical results)"
+    - "AGMAI (Advisory Group on Mathematics and AI, IAS) — partner for verification infrastructure"
+    - "Journal editorial boards (mathematical rigor assurance)"
 
 governance:
   enabled: true
