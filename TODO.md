@@ -703,6 +703,49 @@ supplementary_materials:
 
 ---
 
+## ✅ Approved Backlog (Phase 4-5)
+
+**Status**: APPROVED FOR EXECUTION  
+**Decision Date**: 2026-09-22  
+**Rationale**: Strategic feedback integrated, 20-week timeline planned, resource allocation defined, critical path identified.
+
+### Phase 4: Hardening (Weeks 1-9) — READY TO START
+
+**Total Effort**: 37-52 hrs (4-6 weeks at 10-12 hrs/week)  
+**Start Date**: ASAP (Week 1 = This week)  
+**Target Release**: Week 9 (v1.0.0)
+
+**Approved Tasks**:
+- [x] Phase 4c: Write papers (IEEE format, batch workflow)
+- [x] Phase 4d: Test suite to 90%+ coverage
+- [x] Phase 4e: GitHub Release v1.0.0 (CHANGELOG, CITATION.cff, Zenodo DOI)
+- [x] Phase 4f: Documentation index (TEMPLATE-INDEX, TEMPLATE-SELECTION)
+
+**Approval Notes**:
+- Clear: Exactly which template goes first (Epidemiology reference paper)
+- Unblocked: All 5 core templates complete; no dependencies
+- Measurable: 90%+ coverage, v1.0.0 release, GitHub release notes
+- Resourced: ~10-12 hrs/week capacity assumed
+
+### Phase 5: Expansion (Weeks 10-20) — APPROVED CONTINGENT
+
+**Total Effort**: 50-70 hrs (dependent on Phase 4 completion)  
+**Start Date**: After v1.0.0 release (Week 10)  
+**Strategic Decision**: **Academic adoption first** (papers, Zenodo, citations), then industry features (Streamlit, Overleaf) in v1.2+
+
+**Approved Tasks**:
+- [x] Phase 5a: Complete papers + extended scenarios for 5 core templates
+- [x] Phase 5b: Add 3-5 specialized templates (Optimization, Quantum Computing, Protein Folding as priority)
+- [x] Phase 5c: Interactive visualizations (Jupyter + Streamlit, post-5a)
+- [x] Phase 5d: Zenodo + arXiv integrations (post-5a, Overleaf deferred to v1.2)
+
+**Approval Notes**:
+- Conditional: Start after Phase 4 complete and v1.0.0 released
+- Prioritized: High-relevance templates first (Optimization, QC, Protein Folding)
+- Tiered: Core features (5c, 5d) optional/post-v1.1 (marked "Low priority")
+
+---
+
 ## Execution Timeline & Sequencing 📅
 
 **20-Week Plan (Phase 4 + Phase 5 roadmap):**
