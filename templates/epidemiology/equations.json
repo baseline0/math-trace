@@ -1,0 +1,58 @@
+{
+  "basic_reproduction_number": {
+    "latex": "R_0 = \\frac{\\beta}{\\gamma}",
+    "code_ref": "model.py:basic_reproduction_number()",
+    "line": 48,
+    "test_ref": "tests/test_sir_model.py",
+    "validation": "R\u2080 > 1 predicts epidemic spread; R\u2080 < 1 predicts extinction",
+    "interpretation": "Average number of secondary infections per infected individual"
+  },
+  "sir_susceptible": {
+    "latex": "\\frac{dS}{dt} = -\\frac{\\beta \\cdot S \\cdot I}{N}",
+    "code_ref": "model.py:sir_dynamics()",
+    "line": 92,
+    "test_ref": "tests/test_sir_model.py",
+    "validation": "Population conserved: S + I + R = N"
+  },
+  "sir_infected": {
+    "latex": "\\frac{dI}{dt} = \\frac{\\beta \\cdot S \\cdot I}{N} - \\gamma \\cdot I",
+    "code_ref": "model.py:sir_dynamics()",
+    "line": 93,
+    "test_ref": "tests/test_sir_model.py",
+    "validation": "Peak infection timing matches data for COVID-19, 1918 flu"
+  },
+  "sir_recovered": {
+    "latex": "\\frac{dR}{dt} = \\gamma \\cdot I",
+    "code_ref": "model.py:sir_dynamics()",
+    "line": 94,
+    "test_ref": "tests/test_sir_model.py"
+  },
+  "population_conservation": {
+    "latex": "S(t) + I(t) + R(t) = N",
+    "code_ref": "model.py:check_population_conservation()",
+    "line": 144,
+    "test_ref": "tests/test_sir_model.py",
+    "validation": "Error < 1e-6 (numerical precision)"
+  },
+  "endemic_equilibrium": {
+    "latex": "S^* = \\frac{N}{R_0}, \\quad R^* = N\\left(1 - \\frac{1}{R_0}\\right)",
+    "code_ref": "model.py:sir_equilibrium()",
+    "line": 176,
+    "test_ref": "tests/test_sir_model.py",
+    "validation": "Long-time limit matches numerical solution"
+  },
+  "seir_exposed": {
+    "latex": "\\frac{dE}{dt} = \\frac{\\beta \\cdot S \\cdot I}{N} - \\sigma \\cdot E",
+    "code_ref": "model.py:seir_dynamics()",
+    "line": 232,
+    "test_ref": "tests/test_seir_model.py",
+    "interpretation": "\u03c3 = 1/incubation period (e.g., 5.1 days for COVID-19)"
+  },
+  "attack_rate": {
+    "latex": "\\text{Attack Rate} = \\frac{R_{\\text{final}}}{N}",
+    "code_ref": "model.py:attack_rate()",
+    "line": 282,
+    "test_ref": "tests/test_observables.py",
+    "validation": "Predicted attack rate vs observed seroprevalence studies"
+  }
+}

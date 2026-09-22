@@ -1,0 +1,22 @@
+[template]
+name = "Epidemiology"
+domain = "biology"
+subdomain = "disease-dynamics"
+difficulty = "beginner"
+description = "SIR/SEIR compartmental models for infectious disease spread"
+equations_count = 6
+code_lines = 320
+test_coverage = 0.90
+
+[dependencies]
+python = ">=3.13"
+packages = ["numpy", "scipy>=1.18", "matplotlib>=3.8"]
+
+[validation]
+analytical_solution = true
+peer_reviewed_ref = "Kermack & McKendrick (1927), Anderson & May (1991)"
+
+[scenarios]
+["COVID-19 SIR"] = "Realistic parameters; R0=2.5, intervention effects"
+["Measles SEIR"] = "High R0≈12-18; vaccination threshold"
+["Ebola SEIR"] = "High case fatality; quarantine interventions"
