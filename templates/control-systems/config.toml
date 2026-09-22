@@ -1,0 +1,17 @@
+[template]
+name = "Control Systems"
+domain = "engineering"
+subdomain = "control-theory"
+difficulty = "intermediate"
+description = "State-space representation, PID controllers, stability analysis"
+equations_count = 5
+code_lines = 280
+test_coverage = 0.85
+
+[dependencies]
+python = ">=3.13"
+packages = ["numpy", "scipy>=1.18", "matplotlib>=3.8"]
+
+[scenarios]
+["Mass-Spring-Damper"] = "Beginner: analytical solution, ζ effect"
+["DC Motor Control"] = "Intermediate: realistic motor parameters, PID tuning"

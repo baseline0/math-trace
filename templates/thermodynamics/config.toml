@@ -1,0 +1,17 @@
+[template]
+name = "Thermodynamics"
+domain = "physics"
+subdomain = "thermodynamics"
+difficulty = "beginner"
+description = "Ideal gas law, internal energy, entropy, Carnot efficiency"
+equations_count = 5
+code_lines = 300
+test_coverage = 0.82
+
+[dependencies]
+python = ">=3.13"
+packages = ["numpy", "scipy>=1.18", "matplotlib>=3.8"]
+
+[scenarios]
+["Ideal Gas"] = "Beginner: PVT relations, thermodynamic properties"
+["Carnot Cycle"] = "Intermediate: Efficiency, heat flow, work extraction"

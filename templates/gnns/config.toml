@@ -1,0 +1,9 @@
+[template]
+name = "Graph Neural Networks"
+domain = "machine-learning"
+subdomain = "graph-deep-learning"
+difficulty = "advanced"
+description = "Message passing, graph attention, node classification"
+equations_count = 5
+code_lines = 350
+test_coverage = 0.80

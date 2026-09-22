@@ -1,0 +1,32 @@
+{
+  "message_aggregation": {
+    "latex": "m_i = \\sum_{j \\in N(i)} A_{ij} \\mathbf{h}_j",
+    "code_ref": "model.py:message_aggregate()",
+    "line": 31,
+    "description": "Neighbor aggregation via matrix multiplication"
+  },
+  "node_update": {
+    "latex": "\\mathbf{h}'_i = \\sigma(W_{\\text{self}} \\mathbf{h}_i + W_{\\text{neigh}} \\mathbf{m}_i + \\mathbf{b})",
+    "code_ref": "model.py:node_update()",
+    "line": 77,
+    "description": "Update node with self + aggregated neighbor info"
+  },
+  "attention_softmax": {
+    "latex": "\\alpha_{ij} = \\frac{\\exp(a_{ij})}{\\sum_k \\exp(a_{ik})}",
+    "code_ref": "model.py:attention_weights()",
+    "line": 119,
+    "description": "Softmax normalization for attention"
+  },
+  "graph_attention": {
+    "latex": "\\mathbf{h}'_i = \\sigma\\left(\\sum_j \\alpha_{ij} W \\mathbf{h}_j\\right)",
+    "code_ref": "model.py:graph_attention_layer()",
+    "line": 158,
+    "description": "Attention-weighted neighbor aggregation"
+  },
+  "cross_entropy_loss": {
+    "latex": "L = -\\sum_i \\sum_c y_{ic} \\log(\\hat{y}_{ic})",
+    "code_ref": "model.py:classification_loss()",
+    "line": 206,
+    "description": "Node classification cross-entropy loss"
+  }
+}

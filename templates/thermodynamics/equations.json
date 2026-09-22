@@ -1,0 +1,32 @@
+{
+  "ideal_gas_law": {
+    "latex": "PV = nRT",
+    "code_ref": "model.py:ideal_gas_pressure()",
+    "line": 32,
+    "description": "State equation for ideal gas; relates P, V, T, n"
+  },
+  "internal_energy": {
+    "latex": "U = n C_v T",
+    "code_ref": "model.py:internal_energy()",
+    "line": 71,
+    "description": "Internal energy (kinetic energy of molecules)"
+  },
+  "first_law": {
+    "latex": "dU = \\delta Q - \\delta W",
+    "code_ref": "model.py:first_law()",
+    "line": 108,
+    "description": "Energy conservation: heat in - work out = energy change"
+  },
+  "entropy": {
+    "latex": "S = n C_v \\ln(T) + n R \\ln(V) + S_0",
+    "code_ref": "model.py:entropy()",
+    "line": 154,
+    "description": "Entropy: measure of disorder; \u221d ln(T) and ln(V)"
+  },
+  "carnot_efficiency": {
+    "latex": "\\eta_{\\text{Carnot}} = 1 - \\frac{T_c}{T_h}",
+    "code_ref": "model.py:carnot_efficiency()",
+    "line": 189,
+    "validation": "\u03b7 = 0 at T_c = T_h; \u03b7 < 1 always (2nd Law)"
+  }
+}
