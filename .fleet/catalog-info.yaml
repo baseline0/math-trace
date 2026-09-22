@@ -3,9 +3,10 @@ kind: Component
 metadata:
   name: math-trace
   title: Math-Trace
-  description: Formula-to-code traceability framework for research papers with automated template generation
+  description: Formula-to-code traceability framework for research papers with automated
+    template generation
   labels:
-    layer: "2"
+    layer: '2'
     type: application
     language: python
 spec:
@@ -13,16 +14,17 @@ spec:
   lifecycle: production
   owner: mark-alexiuk
   dependsOn:
-    - fleet-base
-    - agent-tooling
+  - fleet-base
+  - agent-tooling
   provides:
-    - TemplateLibrary
-    - FormulaParser
-    - CodeGenerator
-    - ValidationFramework
+  - TemplateLibrary
+  - FormulaParser
+  - CodeGenerator
+  - ValidationFramework
   tags:
-    - research
-    - automation
-    - code-generation
-    - templates
-    - scientific-computing
+  - research
+  - automation
+  - code-generation
+  - templates
+  - scientific-computing
+schema_version: '1.0'

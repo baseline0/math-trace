@@ -1,0 +1,5 @@
+schema_version: '1.0'
+name: math-trace
+title: math-trace Boundaries
+description: Boundary specification
+status: approved

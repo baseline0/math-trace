@@ -1,141 +1,96 @@
----
-# Fleet integration for math-trace (internal only, not public)
-# This configuration enables fleet-ops agents to maintain and expand math-trace
-# Excluded from public repo via .gitignore
-
 name: math-trace
 enabled: true
-description: "Formula-to-code traceability framework for research papers"
-
-# Governance: Enable fleet-wide maintenance and expansion
+description: Formula-to-code traceability framework for research papers
 governance:
-  # Enable automated infrastructure fixes
   auto_fix: true
-
-  # Categories of changes fleet agents can make directly
   fixable_categories:
-    - environment        # Python dependencies, uv.lock updates
-    - config             # pyproject.toml, Justfile, GitHub Actions
-    - discovery          # New templates, examples, test coverage
-
-  # Require human review for
+  - environment
+  - config
+  - discovery
   requires_review:
-    - code               # Formula conversions, simulation logic
-    - breaking_changes   # API changes, template structure changes
-
-# Template Management
+  - code
+  - breaking_changes
 templates:
-  # Automated template validation
   auto_validate: true
-  validation_schedule: "on-commit"  # Run CI/CD for all template changes
-
-  # Track new domain templates
+  validation_schedule: on-commit
   tracking:
     enabled: true
-    index_file: ".fleet/templates.json"  # Auto-updated by fleet agents
-
-# MCP Coordination
+    index_file: .fleet/templates.json
 mcp:
-  # Enable rope-mcp for refactoring template code
   rope_mcp:
     enabled: true
     tasks:
-      - extract_formula_helpers      # DRY up model.py across templates
-      - unify_build_scripts          # Keep build_paper.py consistent
-
-  # Enable vscode-workspace-mcp for multi-template operations
+    - extract_formula_helpers
+    - unify_build_scripts
   vscode_mcp:
     enabled: true
     workspaces:
-      - name: "all-templates"
-        pattern: "templates/*/model.py"
-        task: "batch-update-sympy-exports"
-
-# Cost & Usage Tracking
+    - name: all-templates
+      pattern: templates/*/model.py
+      task: batch-update-sympy-exports
 cost_tracking:
   enabled: true
-
-  # Track MCP usage for template maintenance
   mcp_operations:
-    - extract_formula_helpers
-    - unify_build_scripts
-    - batch_refactor_templates
-
-  # Track fleet-ops maintenance time
+  - extract_formula_helpers
+  - unify_build_scripts
+  - batch_refactor_templates
   maintenance_categories:
-    - "template-validation"
-    - "dependency-updates"
-    - "ci-cd-maintenance"
-    - "documentation-sync"
-
-# Audit & Compliance
+  - template-validation
+  - dependency-updates
+  - ci-cd-maintenance
+  - documentation-sync
 audit:
   enabled: true
-  log_location: ".fleet/audit.log"
-
-  # Log all fleet agent operations
+  log_location: .fleet/audit.log
   log_events:
-    - agent_action
-    - mcp_invocation
-    - policy_decision
-    - template_addition
-    - dependency_update
-
-# Maintenance Schedule
+  - agent_action
+  - mcp_invocation
+  - policy_decision
+  - template_addition
+  - dependency_update
 maintenance:
-  # Weekly template validation
   weekly:
-    - task: "validate-all-templates"
-      day: "monday"
-      time: "09:00"
-
-  # Monthly documentation sync
+  - task: validate-all-templates
+    day: monday
+    time: 09:00
   monthly:
-    - task: "sync-template-docs"
-      day: "1"
-      time: "10:00"
-    - task: "audit-dependencies"
-      day: "1"
-      time: "11:00"
-
-  # Quarterly review of template catalog
+  - task: sync-template-docs
+    day: '1'
+    time: '10:00'
+  - task: audit-dependencies
+    day: '1'
+    time: '11:00'
   quarterly:
-    - task: "review-template-coverage"
-      season: "Q1,Q2,Q3,Q4"
-      time: "14:00"
-
-# Integration Points
+  - task: review-template-coverage
+    season: Q1,Q2,Q3,Q4
+    time: '14:00'
 integration:
-  # Publish new templates to public repo (after validation)
   github_releases:
     enabled: true
-    branch: "main"
+    branch: main
     auto_push: true
-
-  # Report metrics to fleet dashboard
   fleet_dashboard:
     enabled: true
     metrics:
-      - template_count
-      - template_pass_rate
-      - dependency_versions
-
-  # Link to Palomar registry for formal proofs
+    - template_count
+    - template_pass_rate
+    - dependency_versions
   palomar:
     enabled: true
-    auto_register: false  # Manual review before registration
-    registry_base: "https://palomar.ridge.ai"
-
-# External vs Internal
+    auto_register: false
+    registry_base: https://palomar.ridge.ai
 external:
-  # What's visible to the public
-  visibility: ["README.md", "templates/", "examples/", "docs/"]
-
-  # What's hidden from public
-  internal_only: [".fleet/", ".fleet/audit.log", ".fleet/templates.json"]
-
-# Version & Metadata
-version: "1.0"
-created: "2026-09-18"
-maintained_by: "mark-alexiuk"
-fleet_role: "public-template-repo"
+  visibility:
+  - README.md
+  - templates/
+  - examples/
+  - docs/
+  internal_only:
+  - .fleet/
+  - .fleet/audit.log
+  - .fleet/templates.json
+version: '1.0'
+created: '2026-09-18'
+maintained_by: mark-alexiuk
+fleet_role: public-template-repo
+schema_version: '1.0'
