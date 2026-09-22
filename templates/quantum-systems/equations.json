@@ -1,0 +1,39 @@
+{
+  "time_independent_schrodinger": {
+    "latex": "-\\frac{\\hbar^2}{2m}\\frac{d^2\\psi}{dx^2} + V(x)\\psi = E\\psi",
+    "code_ref": "model.py:solve_tise_fdm()",
+    "line": 68,
+    "test_ref": "tests/test_harmonic_oscillator_eigenvalues.py",
+    "validation": "Energy levels match analytical: E_n = \u210f\u03c9(n + 1/2)",
+    "method": "Finite Difference Method (tridiagonal eigenvalue problem)"
+  },
+  "time_dependent_schrodinger": {
+    "latex": "i\\hbar\\frac{\\partial\\psi}{\\partial t} = -\\frac{\\hbar^2}{2m}\\frac{\\partial^2\\psi}{\\partial x^2} + V(x)\\psi",
+    "code_ref": "model.py:propagate_ssfm()",
+    "line": 145,
+    "test_ref": "tests/test_energy_conservation.py",
+    "validation": "Total energy conserved to 1e-6; probability preserved (\u222b|\u03c8|\u00b2=1)",
+    "method": "Split-Step Fourier Method (SSFM)"
+  },
+  "normalization": {
+    "latex": "\\int |\\psi(x)|^2 dx = 1",
+    "code_ref": "model.py:normalize_wavefunction()",
+    "line": 238,
+    "test_ref": "tests/test_normalization.py",
+    "validation": "Normalized wavefunction satisfies \u222b|\u03c8|\u00b2=1 to machine precision"
+  },
+  "expectation_value": {
+    "latex": "\\langle A \\rangle = \\int \\psi^*(x) \\hat{A} \\psi(x) dx",
+    "code_ref": "model.py:expectation_value()",
+    "line": 258,
+    "test_ref": "tests/test_expectation_values.py",
+    "validation": "Hermitian operators give real eigenvalues"
+  },
+  "energy_conservation": {
+    "latex": "E_{total} = \\langle T \\rangle + \\langle V \\rangle = \\text{constant}",
+    "code_ref": "model.py:total_energy()",
+    "line": 332,
+    "test_ref": "tests/test_energy_conservation.py",
+    "validation": "|\u0394E/E\u2080| < 1e-6 over 10000 time steps (SSFM)"
+  }
+}

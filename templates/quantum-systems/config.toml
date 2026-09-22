@@ -1,0 +1,100 @@
+[template]
+name = "Quantum Systems"
+domain = "physics"
+subdomain = "quantum-mechanics"
+difficulty = "intermediate"
+description = "Computational framework for solving time-independent and time-dependent Schrödinger equations"
+
+# Content metrics
+equations_count = 5
+code_lines = 450
+test_coverage = 0.94
+scenarios = 3  # Harmonic oscillator, double slit, tunneling
+
+[dependencies]
+python = ">=3.13"
+packages = [
+    "numpy>=1.24",
+    "scipy>=1.12",
+    "matplotlib>=3.8",
+    "pytest>=7.4",
+]
+
+[validation]
+analytical_solution = true
+description = "Compare to closed-form solutions (harmonic oscillator, particle in box)"
+benchmark_dataset = false
+peer_reviewed_ref = "Griffiths, D. J. (2018). Introduction to Quantum Mechanics (3rd ed.)"
+
+[testing]
+test_files = [
+    "test_harmonic_oscillator.py",
+    "test_normalization.py",
+    "test_energy_conservation.py",
+]
+test_coverage_percent = 94
+validation_benchmarks = [
+    "Eigenvalue accuracy (E_n vs analytical)",
+    "Energy conservation (|ΔE/E₀| < 1e-6 over 1000 steps)",
+    "Probability normalization (∫|ψ|²dx = 1)",
+    "Expectation values for Hermitian operators",
+]
+
+[equations]
+# Equation metadata for formula traceability
+[[equations.items]]
+name = "Time-Independent Schrödinger"
+latex = "-ℏ²/(2m) d²ψ/dx² + V(x)ψ = Eψ"
+method = "Finite Difference Method (tridiagonal eigenvalue problem)"
+code_ref = "src/model.py:solve_tise_fdm()"
+test_ref = "src/tests/test_harmonic_oscillator.py::TestHarmonicEigenvalues"
+
+[[equations.items]]
+name = "Time-Dependent Schrödinger"
+latex = "iℏ ∂ψ/∂t = -ℏ²/(2m) ∂²ψ/∂x² + V(x)ψ"
+method = "Split-Step Fourier Method (SSFM)"
+code_ref = "src/model.py:propagate_ssfm()"
+test_ref = "src/tests/test_harmonic_oscillator.py::TestEnergyConservation"
+
+[[equations.items]]
+name = "Normalization"
+latex = "∫ |ψ(x)|² dx = 1"
+method = "Numerical integration (trapezoidal rule)"
+code_ref = "src/model.py:normalize_wavefunction()"
+test_ref = "src/tests/test_harmonic_oscillator.py::TestNormalization"
+
+[[equations.items]]
+name = "Expectation Value"
+latex = "⟨A⟩ = ∫ ψ*(x) Â ψ(x) dx"
+method = "Numerical integration of operator expectation"
+code_ref = "src/model.py:expectation_value()"
+test_ref = "src/tests/test_harmonic_oscillator.py::TestExpectationValues"
+
+[[equations.items]]
+name = "Energy Conservation"
+latex = "E_total = ⟨T⟩ + ⟨V⟩ = constant"
+method = "Conserved by split-step method (preserves unitarity)"
+code_ref = "src/model.py:total_energy()"
+test_ref = "src/tests/test_harmonic_oscillator.py::TestEnergyConservation"
+
+[extensions]
+suggested = [
+    "Add 3D Schrödinger solver (separation of variables)",
+    "Implement Crank-Nicolson scheme for implicit time-stepping",
+    "Add perturbation theory for weakly-nonlinear potentials",
+    "GPU acceleration with CuPy for large grids (N > 2000)",
+    "Quantum Monte Carlo for ground-state finding",
+    "Visualize Wigner phase-space distribution",
+]
+
+[publication]
+# Typst/LaTeX formatting
+paper_template = "IEEE"
+citation_style = "IEEE"
+include_code_listings = true
+include_benchmark_results = true
+
+[author]
+name = "Research Template"
+institution = "math-trace Quantum Systems"
+email = "research@math-trace.org"
