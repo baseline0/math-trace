@@ -15,21 +15,20 @@ head_sha: null
 
 scope:
   allowed:
-    - Extend tests/test_harmonic_oscillator.py with formal contract validation
+    - Extend tests/test_harmonic_oscillator.py with formal contract validation tests
     - Add numerical invariant tests (eigenvalue accuracy, normalization, energy conservation, expectation values, uncertainty principle)
     - Update PARAMETERS.md with "Numerical Methods" section documenting FDM, SSFM, quadrature, momentum operator, boundary conditions, tolerance justification
     - Update README.md with "Contract Status" section summarizing validated invariants and test references
-    - Validate equations.json traceability against model.py
-    - Compile paper.typ to PDF; verify equation definitions
   prohibited:
     - New solver implementations or algorithm changes
     - New scenarios (harmonic oscillator only)
     - Modifications to physics/equations or numerical methods
-    - Changes to paper.typ narrative (validation only)
+    - Changes to paper infrastructure or paper.typ
     - New test files (extend existing harmonic_oscillator module only)
     - Performance optimizations or refactoring
     - Release, publish, deploy, or tag operations
     - Modifications to other templates
+    - Equation export or artifact generation infrastructure
 
 expected_paths:
   - templates/quantum-systems/src/model.py
@@ -37,8 +36,6 @@ expected_paths:
   - templates/quantum-systems/src/scenarios/harmonic_oscillator.py
   - templates/quantum-systems/PARAMETERS.md
   - templates/quantum-systems/README.md
-  - templates/quantum-systems/paper.typ
-  - templates/quantum-systems/equations.json
 
 acceptance:
   - Eigenvalue contract: E_n = (n+1/2)ℏω validated to ≤0.1% relative error for n=0–4 at grid 512 points
@@ -46,10 +43,10 @@ acceptance:
   - Energy conservation: TDSE drift |E(t)−E(0)|/E(0) < 1e-6 (ω ≥ 1.0), < 1e-4 (ω < 1.0)
   - Uncertainty principle: Ground state Δx·Δp ≥ ℏ/2 − 1e-5
   - Expectation values: ⟨x⟩=0, ⟨p⟩=0 for eigenstates to ±1e-6
-  - Equations traceability validated; paper.typ compiles to PDF
-  - PARAMETERS.md expanded with numerical methods documentation (≥500 words)
-  - README updated with contract status section
-  - Test coverage ≥90% of src/model.py; all tests pass
+  - Numerical assumptions documented in PARAMETERS.md (FDM, SSFM, quadrature, finite-difference momentum, boundary conditions, tolerance justification)
+  - Assumption documentation is explicit and consistent with current implementation
+  - README updated with contract status section (links to test file, lists validated invariants)
+  - Test coverage does not regress below current baseline (94% on src/model.py)
   - Repeated scenario execution produces identical outputs (floating-point precision)
 
 validation:
