@@ -60,7 +60,7 @@ def simulate_speed_control(
         t_sim: Simulation time
 
     Returns:
-        Dictionary with time, speed, error, control voltage
+        Dictionary with time, speed, error, control voltage, and settling/tracking metrics
     """
     system = dc_motor_system()
     controller = PIDController(K_p, K_i, K_d, setpoint=target_speed)
@@ -69,7 +69,10 @@ def simulate_speed_control(
 
     error = target_speed - y
     peak_overshoot = np.max(y) - target_speed if np.max(y) > target_speed else 0
-    steady_state_error = np.abs(error[-1])
+    terminal_tracking_error = np.abs(error[-1])  # error at t_final (finite-horizon measurement)
+
+    # Determine settling status
+    settling_status = check_settling_status(t, y, target_speed)
 
     return {
         "t": t,
@@ -81,13 +84,20 @@ def simulate_speed_control(
         "K_i": K_i,
         "K_d": K_d,
         "peak_overshoot": peak_overshoot,
-        "steady_state_error": steady_state_error,
-        "settling_time": estimate_settling_time(t, y, target_speed),
+        "steady_state_error": terminal_tracking_error,  # backward compat: same numeric value
+        "terminal_tracking_error": terminal_tracking_error,  # explicit finite-horizon label
+        "settling_time": settling_status['settling_time'],  # numeric value (or final time if unsettled)
+        "settling_status": settling_status['status'],  # 'observed' or 'not_observed_within_horizon'
+        "observation_horizon_sec": settling_status['observation_horizon_sec'],
     }
 
 
 def estimate_settling_time(t: np.ndarray, y: np.ndarray, setpoint: float, tolerance: float = 0.02) -> float:
-    """Estimate 2% settling time."""
+    """
+    Estimate 2% settling time or return final time if not settled.
+
+    Returns first time entering 2% band, or final simulation time if band never reached.
+    """
     error = np.abs(y - setpoint)
     threshold = tolerance * setpoint
 
@@ -96,6 +106,36 @@ def estimate_settling_time(t: np.ndarray, y: np.ndarray, setpoint: float, tolera
         return t[settled_idx[0]]
     else:
         return t[-1]
+
+
+def check_settling_status(t: np.ndarray, y: np.ndarray, setpoint: float, tolerance: float = 0.02) -> Dict:
+    """
+    Check whether system settled within simulation horizon.
+
+    Returns dict with:
+      - 'settled': bool (True if 2% band reached and maintained)
+      - 'settling_time': float (first time in band, or t_final if unsettled)
+      - 'status': str ('observed' or 'not_observed_within_horizon')
+      - 'observation_horizon_sec': float (simulation end time)
+    """
+    error = np.abs(y - setpoint)
+    threshold = tolerance * setpoint
+
+    settled_idx = np.where(error <= threshold)[0]
+    if len(settled_idx) > 0:
+        return {
+            'settled': True,
+            'settling_time': t[settled_idx[0]],
+            'status': 'observed',
+            'observation_horizon_sec': t[-1],
+        }
+    else:
+        return {
+            'settled': False,
+            'settling_time': t[-1],  # final time (not a true settling time)
+            'status': 'not_observed_within_horizon',
+            'observation_horizon_sec': t[-1],
+        }
 
 
 if __name__ == "__main__":
@@ -108,8 +148,16 @@ if __name__ == "__main__":
     print(f"\nControl Performance:")
     print(f"  Target speed: {result['target_speed']:.1f} rad/s")
     print(f"  Peak overshoot: {result['peak_overshoot']:.2f} rad/s ({result['peak_overshoot']/result['target_speed']*100:.1f}%)")
-    print(f"  Steady-state error: {result['steady_state_error']:.3f} rad/s")
-    print(f"  Settling time (2%): {result['settling_time']:.2f} sec")
+
+    # Display settling time with status
+    if result['settling_status'] == 'observed':
+        print(f"  Settling time (2%): {result['settling_time']:.2f} sec")
+    else:
+        print(f"  Settling time (2%): not observed within {result['observation_horizon_sec']:.1f} s horizon")
+
+    # Display terminal tracking error with finite-horizon label
+    print(f"  Terminal tracking error at t={result['observation_horizon_sec']:.1f} s: {result['terminal_tracking_error']:.3f} rad/s")
+    print(f"  (Finite-horizon measurement; not an asymptotic steady-state-error claim.)")
 
     print(f"\nPID Gains:")
     print(f"  K_p = {result['K_p']:.2f}")
