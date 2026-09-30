@@ -30,6 +30,7 @@ def step_1_export_formulas():
     """Export SymPy formulas as JSON."""
     print("\n=== Step 1: Export Symbolic Formulas ===")
     output_path = Path(__file__).parent / 'generated' / 'sir_equations.json'
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     export_formulas(output_path)
 
     with open(output_path) as f:
