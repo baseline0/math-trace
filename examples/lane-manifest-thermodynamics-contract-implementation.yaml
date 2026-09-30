@@ -1,0 +1,219 @@
+schema_version: 1
+id: MATH-TRACE-THERMODYNAMICS-REFERENCE-CONTRACT-001
+title: Thermodynamics reference contract implementation
+type: reference_contract_implementation
+status: draft_pending_human_review
+
+created_at: "2026-09-30T16:30:00-05:00"
+created_by: agent
+
+# ===== TARGET REPOSITORY & BASELINE =====
+
+target:
+  repository: math-trace
+  repository_path: /home/mark/projects/math-trace
+  target_branch: main
+  base_sha: "319e79b9170c2aa62597c538b2a63297ec40f862"
+  worktree_prefix: "thermo-contract-"
+
+# ===== AUTHORIZATION & DERIVATION =====
+
+authorization:
+  work_item: MATH-TRACE-THERMODYNAMICS-REFERENCE-CONTRACT-001
+  preflight_result: MATH-TRACE-THERMODYNAMICS-REFERENCE-CONTRACT-001-R001
+  preflight_decision: MATH-TRACE-THERMODYNAMICS-REFERENCE-CONTRACT-001-D001
+  decision_timestamp: "2026-09-30T16:07:47.889291"
+  decision_by: human
+  statement: "Implementation manifest derived from accepted preflight evidence"
+
+# ===== TEMPLATE & SCENARIO FOCUS =====
+
+template:
+  path: templates/thermodynamics/
+  reference_scenario: src/scenarios/ideal_gas.py
+  reference_model: src/model.py
+  scenario_description: "Ideal gas (1 mole, diatomic, V=0.024 m³) + Carnot cycle (T_h=300K, T_c=100K, Q_h=1000J)"
+
+# ===== MUTATION AUTHORIZATION =====
+
+scope:
+  policy: default_deny
+  unexpected_path_action: fail
+
+  authorized_mutations:
+    - path: templates/thermodynamics/src/tests/test_ideal_gas.py
+      kind: test_addition
+      description: "New test file (not currently committed); add ~12 contract-validation functions"
+      max_lines: 500
+      requires_review: true
+
+    - path: templates/thermodynamics/PARAMETERS.md
+      kind: documentation_update
+      description: "Record exact parameter values and tolerance justification"
+      max_lines: 100
+      requires_review: true
+
+    - path: templates/thermodynamics/README.md
+      kind: documentation_update
+      description: "Update test coverage and reference baseline results"
+      max_lines: 50
+      requires_review: true
+
+  prohibited:
+    physics_expansion:
+      - "Add scenarios, polytropic processes, phase diagrams, real-gas models, new cycles"
+      - "Thermochemistry, statistical mechanics, non-equilibrium dynamics"
+
+    data_infrastructure:
+      - "External thermodynamic tables, new material-property data, cross-domain tooling"
+      - "Interactive visualizations, web UI, plotting libraries in scenario"
+
+    framework_publishing:
+      - "Paper, release, publishing, test framework changes, documentation generation"
+      - "Refactoring model.py, renaming functions, reorganizing code"
+
+    model_changes:
+      - "Equation modifications, solver additions, time-dependent dynamics"
+      - "Performance optimization, uncertainty quantification, sensitivity analysis"
+
+# ===== CONTRACTS TO VALIDATE =====
+
+contracts:
+  - id: ideal-gas-state-equation
+    status: valid_now
+    claim: "PV = nRT under SI and absolute-temperature conventions"
+    tolerance_absolute: "±1e-12 K (round-trip error)"
+    test_function: "test_eos_round_trip()"
+    validation_method: "Forward P→T→V→P; verify identity to machine precision"
+
+  - id: first-law-energy-balance
+    status: valid_now
+    claim: "ΔU = Q - W for closed system (verified via Carnot: Q_h = W + Q_c)"
+    tolerance_absolute: "±1e-15 J (3 operations on 1000 J input)"
+    test_function: "test_first_law_energy_balance()"
+    validation_method: "Assert |1000 - (667 + 333)| < 1e-15"
+
+  - id: carnot-efficiency-bound
+    status: valid_now
+    claim: "η ≤ 1 - T_c/T_h (absolute temps); verified at T_h=300K, T_c=100K"
+    tolerance_absolute: "±1e-14 (for η ≈ 2/3)"
+    test_function: "test_carnot_efficiency_bound()"
+    validation_method: "Verify η = 2/3 exactly; test boundary η(T_c=T_h) raises error"
+
+  - id: entropy-behavior
+    status: valid_now
+    claim: "S = n·C_v·ln(T) + n·R·ln(V) + S_0; dS/dT > 0 for T > 0"
+    tolerance_absolute: "±1e-13 J/K (logarithm precision)"
+    test_function: "test_entropy_monotonicity()"
+    validation_method: "Assert S(200K) < S(300K) < S(500K); verify dS/dT > 0"
+
+  - id: state-variable-path-independence
+    status: valid_with_baseline_calibration
+    claim: "U and S depend only on state, not path (for closed system)"
+    tolerance_absolute: "U: ±1e-11 J; S: ±1e-13 J/K"
+    test_function: "test_state_variable_path_independence()"
+    validation_method: "Isothermal + isobaric paths to common final state; verify equality"
+
+  - id: deterministic-reproducibility
+    status: valid_now
+    claim: "Repeated scenario runs produce bit-identical outputs"
+    tolerance_absolute: "Bit-identical (binary match required)"
+    test_function: "test_deterministic_output()"
+    validation_method: "Run scenario 3 times; diff outputs (must be identical)"
+
+# ===== NUMERICAL CONVENTIONS =====
+
+conventions:
+  units: "SI (Kelvin, Pascal, m³, Joules, mol)"
+  temperature_scale: "Absolute Kelvin (required for Carnot efficiency and entropy)"
+  sign_convention: "Q > 0 into system, W > 0 by system (First Law: dU = δQ - δW)"
+  arithmetic: "IEEE 754 64-bit floating-point (machine epsilon ≈ 2.2×10⁻¹⁶)"
+  process_assumptions: "Ideal gas, equilibrium thermodynamics, closed systems, reversible processes (Carnot), no phase changes, no chemical reactions"
+
+# ===== VALIDATION COMMANDS =====
+
+validation:
+  smoke_test:
+    - command: "cd templates/thermodynamics && python -m src.scenarios.ideal_gas"
+      expected_output: "Q_h=1000J, W=667J, Q_c=333J, η=66.7%"
+      description: "Verify scenario runs deterministically"
+
+  contract_tests:
+    - command: "cd templates/thermodynamics && pytest src/tests/test_ideal_gas.py -v"
+      expected_result: "ALL PASS (6 contracts validated)"
+      description: "All six contract tests pass"
+
+  reproducibility_test:
+    - command: "for i in 1 2 3; do python -m src.scenarios.ideal_gas >> run_$i.txt; done; diff run_1.txt run_2.txt && diff run_2.txt run_3.txt"
+      expected_result: "No diff output (byte-identical)"
+      description: "Verify deterministic reproducibility"
+
+# ===== EXPECTED ARTIFACTS =====
+
+deliverables:
+  - artifact: templates/thermodynamics/src/tests/test_ideal_gas.py
+    description: "~12 contract-validation test functions"
+    lines: "~350-500 (depending on test helper functions)"
+    required: true
+
+  - artifact: templates/thermodynamics/PARAMETERS.md
+    description: "Parameter documentation with tolerance justification per contract"
+    lines: "~50-100"
+    required: true
+
+  - artifact: templates/thermodynamics/README.md
+    description: "Updated README with test coverage and baseline results"
+    lines: "~10-30 lines modified"
+    required: true
+
+# ===== RESULT ARTIFACT EXPECTATIONS =====
+
+result_expectations:
+  kind: committed_candidate
+  state: ready_for_review
+  validation_status: pass
+  expected_changed_paths: 3
+  expected_changed_files:
+    - templates/thermodynamics/src/tests/test_ideal_gas.py
+    - templates/thermodynamics/PARAMETERS.md
+    - templates/thermodynamics/README.md
+
+# ===== CLOSURE & INTEGRATION =====
+
+integration:
+  method: manual_merge
+  phase_1_applies: true
+  phase_2_applies: false
+  statement: "No automatic Git integration; human review required for acceptance"
+
+# ===== APPROVAL GATE =====
+
+approval_required:
+  - status: pending
+    checkpoint: "Human review of refined WorkItem"
+    gate: "MATH-TRACE-THERMODYNAMICS-REFERENCE-CONTRACT-001 implementation_refinement status = authorized"
+
+  - status: pending
+    checkpoint: "Human review of implementation manifest"
+    gate: "This manifest approved by human review"
+
+  - status: pending
+    checkpoint: "Explicit authorization before mutation-capable dispatch"
+    gate: "Agent receives explicit dispatch command with manifest URL/path"
+
+# ===== NOTES =====
+
+notes: |
+  This manifest is derived from the accepted thermodynamics preflight
+  (R001, decision D001, timestamp 2026-09-30T16:07:47).
+
+  All contract tolerances are derived from IEEE 754 arithmetic precision;
+  no borrowed thresholds from Quantum or Control references.
+
+  The single reference scenario (ideal gas + Carnot) is sufficient to validate
+  all six contracts without scenario expansion.
+
+  Implementation scope is strictly bounded to test additions and documentation;
+  no model changes, no new scenarios, no external data.
+
+  Unexpected mutations will cause scope violation and fail the attempt.
