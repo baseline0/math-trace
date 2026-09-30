@@ -112,20 +112,30 @@ def check_settling_status(t: np.ndarray, y: np.ndarray, setpoint: float, toleran
     """
     Check whether system settled within simulation horizon.
 
+    Settling is defined as: response enters 2% band and REMAINS within it through
+    the end of the observation window (sustained band membership, not just entry).
+
     Returns dict with:
-      - 'settled': bool (True if 2% band reached and maintained)
-      - 'settling_time': float (first time in band, or t_final if unsettled)
+      - 'settled': bool (True if 2% band entered and maintained through horizon end)
+      - 'settling_time': float (first time entering band, or t_final if unsettled)
       - 'status': str ('observed' or 'not_observed_within_horizon')
       - 'observation_horizon_sec': float (simulation end time)
     """
     error = np.abs(y - setpoint)
     threshold = tolerance * setpoint
+    within_band = error <= threshold
 
-    settled_idx = np.where(error <= threshold)[0]
-    if len(settled_idx) > 0:
+    # Find first index where response enters band AND remains in band through horizon end
+    settling_index = None
+    for index in range(len(within_band)):
+        if np.all(within_band[index:]):  # all remaining samples must be in band
+            settling_index = index
+            break
+
+    if settling_index is not None:
         return {
             'settled': True,
-            'settling_time': t[settled_idx[0]],
+            'settling_time': t[settling_index],
             'status': 'observed',
             'observation_horizon_sec': t[-1],
         }
