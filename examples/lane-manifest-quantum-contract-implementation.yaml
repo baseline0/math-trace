@@ -38,16 +38,17 @@ expected_paths:
   - templates/quantum-systems/README.md
 
 acceptance:
-  - Eigenvalue contract: E_n = (n+1/2)ℏω validated to ≤0.1% relative error for n=0–4 at grid 512 points
-  - Normalization contract: ∫|ψ|²dx = 1 ± 1e-6 for eigenstates and time-evolved states
-  - Energy conservation: TDSE drift |E(t)−E(0)|/E(0) < 1e-6 (ω ≥ 1.0), < 1e-4 (ω < 1.0)
-  - Uncertainty principle: Ground state Δx·Δp ≥ ℏ/2 − 1e-5
-  - Expectation values: ⟨x⟩=0, ⟨p⟩=0 for eigenstates to ±1e-6
-  - Numerical assumptions documented in PARAMETERS.md (FDM, SSFM, quadrature, finite-difference momentum, boundary conditions, tolerance justification)
-  - Assumption documentation is explicit and consistent with current implementation
-  - README updated with contract status section (links to test file, lists validated invariants)
+  - Eigenvalue contract: E_n = (n+1/2)ℏω validated to ≤0.1% relative error for n=0–4 at grid 512 points; tests incorrect Hamiltonian scaling/discretization/eigenvalue ordering
+  - Stationary-state normalization: ∫|ψ|²dx = 1 ± 1e-6 for eigenstates; tests incorrect quadrature/wavefunction normalization
+  - Time-evolved normalization: Time-propagated states maintain ∫|ψ|²dx = 1 ± 1e-6 at three checkpoints; tests non-unitary propagation or normalization drift
+  - Energy conservation: TDSE drift |E(t)−E(0)|/E(0) < 1e-6 (ω ≥ 1.0), < 1e-4 (ω < 1.0); tests incorrect propagation under time-independent Hamiltonian
+  - Expectation values: ⟨x⟩=0, ⟨p⟩=0 for eigenstates to ±1e-6; tests incorrect operator/observable implementation
+  - Uncertainty principle: Ground state Δx·Δp ≥ ℏ/2 − 1e-5; tests incorrect momentum operator, variance calculation, or normalization
+  - PARAMETERS.md documents atomic-unit convention (ℏ, m, ω values/meanings), spatial grid/domain/spacing, quadrature rule, FDM eigenvalue method, SSFM propagation convention, finite-difference momentum operator, effective boundary treatment, numerical limitations, and tolerance provenance
+  - README identifies harmonic oscillator as supported reference scenario; states double-slit/tunneling out of scope for this lane
+  - Assumption documentation is complete, internally consistent with implementation, and explicitly distinguishes physical identities from discretization-dependent numerical tolerances
   - Test coverage does not regress below current baseline (94% on src/model.py)
-  - Repeated scenario execution produces identical outputs (floating-point precision)
+  - Repeated runs of declared deterministic contract tests produce identical pass/fail outcomes and numerically equivalent asserted values within stated tolerances (no byte-identical artifact claim)
 
 validation:
   commands:
