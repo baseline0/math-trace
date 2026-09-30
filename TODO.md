@@ -60,391 +60,123 @@
 
 **Completed Templates**:
 - [x] **Quantum Systems** (450 LOC, 5 equations, Schrödinger solver with analytical benchmarks)
-- [x] **Epidemiology** (320 LOC, 6 equations, SIR/SEIR disease modeling)
+- [x] **Epidemiology** (320 LOC, 6 equations, SIR/SEIR disease modeling) — **Recent merge:** b9a8fa8 added contract tests + reproducibility hardening
 - [x] **Control Systems** (280 LOC, 5 equations, PID + state-space LTI)
 - [x] **Graph Neural Networks** (350 LOC, 5 equations, message passing + attention)
 - [x] **Thermodynamics** (300 LOC, 5 equations, ideal gas + Carnot cycle)
 
 **Batch-creation pattern proven**: All 5 templates follow identical structure (src/model.py → scenarios → tests → config.toml → equations.json).
 
-### 4c: Write Papers & Extend Scenarios ⏳ Ready to Start
+**Important:** Epidemiology SIR/R0 reference hardening lane (MATH-TRACE-REFERENCE-HARDENING-001) was merged as of 2026-09-30, adding 17 contract tests + reproducibility validation. Phase 4c must reconcile against this baseline before writing papers.
 
-**Why**: Templates have core code but need publication-quality papers (paper.typ) and enriched scenarios to demonstrate full value.
+### 4c: Reference Contract & Reconciliation ⏳ CRITICAL — START HERE
 
-**Strategy**: Start with **one reference paper** (Epidemiology recommended—highest impact), then batch remaining 4 papers using proven template.
+**Status**: Phase 4 backlog must be reconciled against recently merged epidemiology hardening lane (commit b9a8fa8, merged 2026-09-30).
 
-#### Write paper.typ for each template (3-4 hrs per template, 2 hrs for remaining 4)
+**Context**: The epidemiology SIR/R0 reference hardening lane added 17 contract tests + reproducibility validation. This changed the baseline for Phase 4c work. A stashed template/scenario enhancement (stash 278e97a) also exists and must be classified before proceeding.
 
-**Recommended Structure (IEEE format):**
-```typst
-= Abstract
-  - Background (1-2 sentences)
-  - Problem (specific computational gap)
-  - Approach (methods + implementation)
-  - Results (quantitative outcomes)
-  - Implications (broader impact)
+**Critical First Step**: Execute reconciliation discovery **before any new implementation lanes**.
 
-= Introduction
-  - Why this domain matters
-  - Existing tools (and limitations)
-  - Your contributions (3 bullet points)
+#### **DISCOVERY LANE: MATH-TRACE-PHASE4-BASELINE-RECONCILIATION-001**
 
-= Mathematical Framework
-  - Core equations (numbered, with citations)
-  - Notation table (symbol, description, units)
+**Purpose**: Reconcile Phase 4 backlog with current main after merged hardening + stashed work.
 
-= Implementation
-  - Architecture diagram (auto-generated from code)
-  - Key algorithms (code listings with equation refs)
-  - Validation strategy (tests, benchmarks)
+**Mode**: Read-only inventory and planning (no source edits, no stash application, no release actions).
 
-= Results
-  - Benchmark 1: Analytical comparison
-  - Benchmark 2: Real-world scenario
-  - Figures (auto-generated from simulations)
+**Questions to Answer** (in order of priority):
 
-= Discussion
-  - Limitations (honest, specific)
-  - Extensions (3-5 concrete ideas)
-  - Reproducibility (how to replicate)
+1. **Epidemiology baseline**: What paper/reference artifacts already exist on main? Which Phase 4c-1 acceptance items (Abstract, Intro, Framework, Implementation, Results, Discussion, Conclusion, figures, reproducible build) are already satisfied by recent merges?
 
-= Conclusion
-  - Summary (1 paragraph)
-  - Impact (who benefits)
-  - Call to action (GitHub link)
+2. **Stash content**: What does stash 278e97a contain? Map its contents to backlog items 4c-6 through 4c-10 (scenario extensions). Is it one coherent cross-template enhancement or should it be decomposed by domain?
+
+3. **Scientific contracts by template**: For each of 5 templates, identify:
+   - Model governing equations, symbols, units/conventions, parameter meaning
+   - Mathematical invariants (conservation, bounds, normalization, stability, limiting behavior, known analytic cases)
+   - Existing tests that would catch scientifically meaningful mistakes (not just line coverage)
+   - Critical gaps in contract validation
+
+4. **Scenario expansion risks**: Assess each proposed scenario extension (Measles SEIR, Ebola stochastic, Cora GNN, Bode/mass-spring, etc.) for scientific and reproducibility complexity. Identify which are well-bounded vs. which introduce scope expansion.
+
+5. **Release readiness**: Distinguish local readiness (clean main, artifact completeness) from irreversible publishing readiness (GitHub release, Zenodo archival, DOI issuance). What are the prerequisites for each?
+
+**Deliverable**: Compact reconciliation packet + ranked recommendation of no more than 3 next bounded implementation lanes (in order of user value + strategic fit).
+
+**Hard Boundaries**:
+- ✅ Read-only (inventory, analysis, recommendations only)
+- ✅ Do NOT apply, pop, drop, or alter stash 278e97a
+- ✅ Do NOT edit TODO.md, source, tests, templates, docs, or metadata during this lane
+- ✅ Do NOT run release, push, tag, GitHub, Zenodo, or publishing actions
+- ✅ Do NOT create generic template frameworks or assumptions
+
+**Expected Output Format**:
+```
+# Phase 4 Reconciliation Report
+
+## Current Baseline (main SHA: xxx)
+
+### Epidemiology Reference Status
+- Paper artifacts: [list existing files]
+- Contract satisfaction: [checklist of 8 acceptance items]
+- Outstanding 4c-1 work: [specific gaps, if any]
+
+### Stash 278e97a Classification
+- File inventory: [list by template domain]
+- Mapping to backlog: [which 4c tasks it addresses]
+- Recommended structure: [single lane vs. split recommendation]
+
+### Template Contract Gaps by Template
+[For each of 5 templates: identified missing scientific invariants, test gaps]
+
+### Scenario Expansion Risk Assessment
+[For each proposed scenario: complexity level, prerequisite work, or "well-bounded ready to proceed"]
+
+### Recommended Next Lanes (ranked by value)
+1. [Lane 1 name + rationale]
+2. [Lane 2 name + rationale]
+3. [Lane 3 name + rationale]
 ```
 
-**Writing order** (sequential, then parallel):
-1. **Week 1-2**: Epidemiology paper (reference template) — **4-6 hrs**
-2. **Week 3-4**: Remaining 4 papers (Quantum, Control, GNNs, Thermodynamics) — **2-3 hrs each**
+**Timeline**: 2-3 hours (read-only analysis, no implementation)
 
-**Tasks**:
-- [ ] **Phase 4c-1: Epidemiology reference paper** (4-6 hrs)
-  - [ ] Write Abstract (1 hr)
-  - [ ] Write Introduction + Framework (1 hr)
-  - [ ] Write Implementation section with code refs (1.5 hrs)
-  - [ ] Generate figures + Results section (1.5 hrs)
-  - [ ] Write Discussion + Conclusion (1 hr)
-  - [ ] Peer review + refinements (0.5 hrs)
-- [ ] **Phase 4c-2: Quantum Systems paper** (2-3 hrs, use Epidemiology template)
-- [ ] **Phase 4c-3: Control Systems paper** (2-3 hrs)
-- [ ] **Phase 4c-4: GNN paper** (2-3 hrs)
-- [ ] **Phase 4c-5: Thermodynamics paper** (2-3 hrs)
+---
 
-**Status per template**:
-- Quantum: Core ✅, Paper ⏳, Scenarios ⏳
-- Epidemiology: Core ✅, Paper ⏳, Scenarios ⏳
-- Control: Core ✅, Paper ⏳, Scenarios ⏳
-- GNNs: Core ✅, Paper ⏳, Scenarios ⏳
-- Thermodynamics: Core ✅, Paper ⏳, Scenarios ⏳
+## Simple Backlog Format (Post-Consultant Feedback)
 
-#### Extend scenarios (2-3 hrs per template, priority-ordered)
+### Now
 
-**Scenario Expansion Table:**
+- [ ] **MATH-TRACE-PHASE4-BASELINE-RECONCILIATION-001** — discovery
+  Read-only inventory of current main, the merged epidemiology reference
+  hardening result, and preserved template/scenario candidate work.
+  Output: one recommended next bounded lane.
 
-| Template | Current | Extend To | Effort | Priority |
-|----------|---------|-----------|--------|----------|
-| **Epidemiology** | COVID (SIR) | Measles (SEIR, R₀≈15), Ebola (stochastic) | 2-3 hrs | 🔴 HIGH |
-| **GNNs** | Karate Club (34 nodes) | Cora (citation, 2.7k nodes), attention visualization | 2-3 hrs | 🔴 HIGH |
-| **Quantum** | Harmonic oscillator | Double-slit interference, tunneling barrier | 2-3 hrs | 🟡 MEDIUM |
-| **Control** | PID controller | Mass-spring-damper (analytical 2nd order), Bode plot | 2-3 hrs | 🟡 MEDIUM |
-| **Thermodynamics** | Ideal gas + Carnot | Polytropic processes, phase diagrams (P-V, T-S) | 2-3 hrs | 🟡 MEDIUM |
+### Next — selected after reconciliation
 
-**Recommendation:** Pick **one extension per template** (not all) for Phase 4. Additional extensions become Phase 5 work.
+- [ ] Next reference-contract lane — selected by reconciliation.
+- [ ] Template/scenario candidate-work triage — split only if reconciliation
+  finds distinct domain scopes.
+- [ ] Remaining template reference-contract lanes — one at a time.
 
-**Tasks**:
-- [ ] **Phase 4c-6: Epidemiology scenarios** (Measles + Ebola, 2-3 hrs)
-- [ ] **Phase 4c-7: GNN scenarios** (Cora + attention viz, 2-3 hrs)
-- [ ] **Phase 4c-8: Quantum scenarios** (Double-slit + tunneling, 2-3 hrs)
-- [ ] **Phase 4c-9: Control scenarios** (Mass-spring-damper, 2-3 hrs)
-- [ ] **Phase 4c-10: Thermodynamics scenarios** (Polytropic + phase diagrams, 2-3 hrs)
+### Deferred — evidence required
 
-### 4d: Test Suite Completion ⏳ Ready to Start
+Scenario expansions — only with explicit model, scope, provenance, and
+reproducibility contract.
 
-**Why**: Bring all 5 templates to 90%+ test coverage with validation against analytical solutions.
+Release readiness — only after the intended v1 reference scope is complete.
 
-**Test Strategy** (per template, 2-3 hrs):
+Release execution, tag/push, GitHub release, Zenodo/DOI — separate,
+explicit human-approved publishing lane.
 
-**Test Categories:**
-1. **Model accuracy tests** — Verify equations match analytical solutions
-   - Epidemiology: SIR equilibrium S* = N/R₀
-   - Quantum: Harmonic oscillator energies E_n = ℏω(n + 1/2)
-   - Control: Pole location, settling time formulas
-   - GNNs: Cross-entropy loss decreases with training
-   - Thermodynamics: Carnot efficiency bounds (0 ≤ η < 1)
+---
 
-2. **Conservation law tests** — Verify physical invariants
-   - Quantum: Wavefunction normalization ∫|ψ|²dx = 1
-   - Epidemiology: Population conservation S + I + R = N
-   - Thermodynamics: Energy conservation (First Law)
-   - Control: Lyapunov stability (poles in left half-plane)
+## Design Rationale (Temporary)
 
-3. **Scenario validation** — Numerical vs. analytical
-   - Run scenario, compare output to known analytical solution
-   - Target: error < 1e-3 relative to analytical baseline
+See `TODO-PHASE4-REVISION-NOTES.md` for detailed consultant feedback on:
 
-4. **Edge cases** — Robustness
-   - Zero/negative parameters (should raise ValueError)
-   - NaN propagation (should handle gracefully)
-   - Boundary conditions (e.g., T_hot = T_cold → undefined efficiency)
-
-**Tooling:**
-```bash
-# Generate coverage report
-just test-coverage  # Target: 90%+ line coverage
-
-# View gaps interactively
-coverage html  # Open htmlcov/index.html in browser
-```
-
-**Tasks per template** (2-3 hrs):
-- [ ] **Phase 4d-1: Quantum test suite** (90%+ coverage)
-  - [ ] Eigenvalue accuracy (TISE vs. analytical)
-  - [ ] Energy conservation (TDSE)
-  - [ ] Normalization constraint
-  - [ ] Scenario validation (harmonic oscillator)
-- [ ] **Phase 4d-2: Epidemiology test suite** (90%+ coverage)
-  - [ ] R₀ calculation accuracy
-  - [ ] SIR equilibrium validation
-  - [ ] Population conservation
-  - [ ] Scenario validation (COVID baseline)
-- [ ] **Phase 4d-3: Control test suite** (90%+ coverage)
-  - [ ] Pole stability checks
-  - [ ] Settling time accuracy
-  - [ ] PID controller gains
-  - [ ] Scenario validation (DC motor)
-- [ ] **Phase 4d-4: GNN test suite** (90%+ coverage)
-  - [ ] Message aggregation correctness
-  - [ ] Attention weight normalization
-  - [ ] Classification loss convergence
-  - [ ] Scenario validation (Karate Club accuracy)
-- [ ] **Phase 4d-5: Thermodynamics test suite** (90%+ coverage)
-  - [ ] Carnot efficiency bounds
-  - [ ] Energy conservation (First Law)
-  - [ ] Entropy monotonicity
-  - [ ] Scenario validation (Ideal Gas law)
-
-### 4e: GitHub Release v1.0 ⏳ Ready to Start
-
-**Why**: First official release with all 5 templates, complete documentation, and CI/CD validation.
-
-**Pre-release Checklist** (before tagging):
-- [ ] All 5 templates complete (papers + scenarios + tests)
-- [ ] README.md updated with quickstart (`just setup && just build`)
-- [ ] CITATION.cff created (for academic citation)
-- [ ] LICENSE.md verified (MIT or Apache 2.0)
-- [ ] CHANGELOG.md drafted
-- [ ] All tests passing (`just test`)
-- [ ] Coverage ≥90% across all templates (`just test-coverage`)
-- [ ] GitHub release branch ready for review
-
-**Release Workflow** (1-2 hrs):
-
-**Step 1: Update version + metadata**
-```bash
-# Edit pyproject.toml
-version = "1.0.0"
-
-# Create CHANGELOG.md
-cat > CHANGELOG.md << 'EOF'
-# Changelog
-
-## [1.0.0] - 2026-10-15
-
-### Added
-- **5 Production Templates** (26 equations, 1,700 LOC)
-  - Quantum Systems: Schrödinger solver (FDM eigenvalues, SSFM time evolution)
-  - Epidemiology: SIR/SEIR disease modeling (basic reproduction, intervention analysis)
-  - Control Systems: State-space LTI + PID controller (pole stability, settling time)
-  - Graph Neural Networks: Message passing + attention (node classification, loss computation)
-  - Thermodynamics: Ideal gas + Carnot cycle (PVT relations, efficiency bounds)
-- Installation automation: `just setup` (Python 3.13, Typst, uv)
-- Fleet governance: `.fleet/config.yaml`, audit logging, cost tracking
-- Test coverage: 90%+ on all templates
-- Publication-quality papers: IEEE format with benchmarks + code references
-
-### Changed
-- Migrated from `np.trapz` to `scipy.integrate.trapezoid` (deprecation fix)
-- Standardized Python version to 3.13 across all templates
-
-### Fixed
-- Justfile indentation (consistent 2-space base indentation)
-- Missing `Callable` import in control-systems/src/model.py
-
-### Deprecated
-- Numpy trapezoid integration (prefer scipy.integrate.trapezoid)
-
-### Security
-- No breaking changes
-- All dependencies pinned in uv.lock
-
-## [0.1.0] - 2026-08-01
-- Initial release: Quantum Systems + Epidemiology templates
-EOF
-
-# Create CITATION.cff
-cat > CITATION.cff << 'EOF'
-cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
-title: "Computational Science Templates: Formula-to-Code Traceability"
-version: 1.0.0
-authors:
-  - given-names: Mark
-    family-names: Alexiuk
-    orcid: "0000-0000-0000-0000"  # Update with your ORCID
-repository-code: "https://github.com/your-org/computational-templates"
-license: MIT
-doi: "10.5281/zenodo.xxxxxxx"  # Get from Zenodo after release
-keywords:
-  - computational-science
-  - reproducibility
-  - formula-traceability
-  - templates
-  - sympy
-  - typst
-subjects:
-  - "Science"
-  - "Physics"
-  - "Mathematics"
-date-released: 2026-10-15
-EOF
-```
-
-**Step 2: Commit + tag**
-```bash
-just commit  # Auto-generate message or use:
-# MESSAGE="release: v1.0.0 - Five production templates + formula traceability" just commit
-
-# Verify changes
-git status
-git log -1
-
-# Tag the release
-git tag -a v1.0.0 -m "Five production templates + formula traceability
-- Quantum Systems (Schrödinger solver, 5 equations)
-- Epidemiology (SIR/SEIR disease modeling, 6 equations)
-- Control Systems (LTI state-space + PID, 5 equations)
-- Graph Neural Networks (message passing + attention, 5 equations)
-- Thermodynamics (ideal gas + Carnot, 5 equations)
-
-Total: 26 equations, 1,700 LOC, 10 scenarios, 90%+ test coverage"
-
-# Push to GitHub
-git push origin main
-git push origin v1.0.0
-```
-
-**Step 3: Create GitHub release**
-- Go to GitHub → Releases → Draft New Release
-- Tag: v1.0.0
-- Title: "v1.0.0: Five Production Templates + Formula Traceability"
-- Release notes (copy from CHANGELOG.md, add installation instructions)
-- Attach: (optional) PDF of compiled papers
-- **Publish release**
-
-**Step 4: Register Zenodo DOI** (optional but recommended for academic visibility)
-```bash
-# Visit https://zenodo.org/account/settings/github/
-# Connect GitHub account, enable auto-archival for releases
-# After first release, Zenodo auto-generates DOI
-# Copy DOI to CITATION.cff + README.md
-```
-
-**Tasks**:
-- [ ] **Phase 4e-1: Version + metadata** (30 mins)
-  - [ ] Update pyproject.toml version to 1.0.0
-  - [ ] Create CHANGELOG.md
-  - [ ] Create CITATION.cff
-- [ ] **Phase 4e-2: Git tag + push** (15 mins)
-  - [ ] Commit with `just commit`
-  - [ ] Tag v1.0.0
-  - [ ] Push origin main + tag
-- [ ] **Phase 4e-3: GitHub release** (30 mins)
-  - [ ] Draft release on GitHub
-  - [ ] Write release notes
-  - [ ] (Optional) Attach compiled papers as PDFs
-  - [ ] Publish release
-- [ ] **Phase 4e-4: Zenodo integration** (15 mins)
-  - [ ] Register Zenodo account (if needed)
-  - [ ] Enable GitHub auto-archival
-  - [ ] Get DOI, update CITATION.cff + README
-
-### 4f: Documentation Index ⏳ Ready to Start
-
-**Why**: Help users navigate between templates and understand which to use for their domain.
-
-**Deliverables** (1-2 hrs):
-
-**1. TEMPLATE-INDEX.md** — Comparison table
-```markdown
-# Template Index
-
-| Domain | Equations | LOC | Scenarios | Difficulty | Use Case |
-|--------|-----------|-----|-----------|-----------|----------|
-| Quantum Systems | 5 | 450 | 2 (harmonic, plus extensions) | 🟡 Intermediate | Quantum mechanics, wave equations |
-| Epidemiology | 6 | 320 | 2 (COVID, plus extensions) | 🟢 Beginner | Disease modeling, compartmental analysis |
-| Control Systems | 5 | 280 | 2 (PID + state-space) | 🟡 Intermediate | Robot control, feedback systems |
-| Graph Neural Networks | 5 | 350 | 2 (Karate Club, plus extensions) | 🔴 Advanced | Node classification, graph learning |
-| Thermodynamics | 5 | 300 | 2 (Ideal gas, Carnot) | 🟡 Intermediate | Heat cycles, statistical mechanics |
-```
-
-**2. TEMPLATE-SELECTION.md** — Decision flowchart
-```markdown
-# Choosing Your Template
-
-**Are you modeling change over time?**
-→ Yes: Physics (Quantum, Thermodynamics), Control Systems
-→ No: Network phenomena (GNNs), Static systems
-
-**Is your system discrete (e.g., counts, networks) or continuous (e.g., PDEs)?**
-→ Discrete: Epidemiology (SIR compartments), GNNs (nodes/edges)
-→ Continuous: Quantum (wavefunctions), Control (differential equations)
-
-**Do you need formal proofs?**
-→ Yes: Quantum Systems, Thermodynamics (conservation laws)
-→ No: Epidemiology, Control, GNNs
-
-**Are you new to this domain?**
-→ Yes: Start with Epidemiology (intuitive) or Quantum (well-studied)
-→ No: Pick by field specialty
-```
-
-**3. Update README.md** — Template gallery section
-```markdown
-## 🎯 Quick Template Gallery
-
-### For Epidemiologists & Public Health
-→ **Epidemiology template**: SIR/SEIR disease modeling, intervention analysis
-Start here: `cd templates/epidemiology && just paper`
-
-### For Physicists & Quantum Researchers
-→ **Quantum Systems template**: Schrödinger solver (FDM eigenvalues, SSFM time evolution)
-Start here: `cd templates/quantum-systems && just paper`
-
-### For Control Engineers
-→ **Control Systems template**: LTI state-space, PID controller design
-Start here: `cd templates/control-systems && just paper`
-
-### For ML / Graph Specialists
-→ **Graph Neural Networks template**: Message passing, attention mechanisms
-Start here: `cd templates/gnns && just paper`
-
-### For Thermodynamicists
-→ **Thermodynamics template**: Ideal gas, Carnot cycles, entropy
-Start here: `cd templates/thermodynamics && just paper`
-```
-
-**Tasks**:
-- [ ] **Phase 4f-1: Create TEMPLATE-INDEX.md** (30 mins)
-  - [ ] Comparison table (equations, LOC, scenarios, difficulty)
-  - [ ] Key features per template
-- [ ] **Phase 4f-2: Create TEMPLATE-SELECTION.md** (30 mins)
-  - [ ] Decision flowchart (time-dependent, discrete/continuous, formal proofs, beginner-friendly)
-  - [ ] Example use cases
-- [ ] **Phase 4f-3: Update README.md** (30 mins)
-  - [ ] Add "Quick Template Gallery" section
-  - [ ] Each template gets 1-2 sentences + quick-start command
-  - [ ] Link to TEMPLATE-SELECTION.md for guidance
+- Correct sequencing: reference contract → tests → scenarios → narrative (not papers first)
+- Scientific contracts replacing 90% coverage targets
+- Scenario expansion risks (each has hidden complexity)
+- Two-stage release: readiness (read-only) + execution (after approval)
+- Six-question manifest template for any implementation lane
 
 ---
 
