@@ -1,0 +1,56 @@
+schema_version: 1
+
+work_item: MATH-TRACE-PHASE4-BASELINE-RECONCILIATION-001
+lane: discovery
+type: read_only_inventory
+
+repository: /home/mark/projects/math-trace
+worktree: /home/mark/projects/math-trace
+branch: main
+target_branch: main
+
+base_sha: 447f72c761a8e11c4c19141a70f16c76b0099f2c
+head_sha: 447f72c761a8e11c4c19141a70f16c76b0099f2c
+
+scope:
+  allowed:
+    - Inventory repository artifacts, tests, documentation, and build entry points
+    - Inspect the epidemiology hardening merge and associated reference artifact
+    - Inspect preserved candidate work using git stash show only
+    - Map observed state to current Phase 4 TODO claims
+    - Write evidence only to the WorkItem evidence directory in portfolio-ops
+  prohibited:
+    - Modify math-trace source, tests, templates, documentation, TODO.md, manifests,
+      Git state, branch state, or tracked artifacts
+    - Apply, pop, drop, rename, or otherwise mutate the preserved stash
+    - Commit, merge, push, tag, reset, checkout, clean, rebase, or stash
+    - Release, publish, deploy, access external services, or make network calls
+    - Create a framework, scenario implementation, paper, test suite, or WorkItem
+      hierarchy
+
+expected_paths:
+  - TODO.md
+  - TODO-PHASE4-REVISION-NOTES.md
+  - examples/epidemiology-sir/**
+  - templates/**
+  - tests/**
+  - README.md
+  - pyproject.toml
+
+evidence:
+  directory: /home/mark/projects/portfolio-ops/work-items/evidence/MATH-TRACE-PHASE4-BASELINE-RECONCILIATION-001
+  required:
+    - reconciliation-report.md
+    - candidate-work-inventory.md
+    - next-lane-recommendation.md
+
+acceptance:
+  - Report exact main SHA and clean/dirty state
+  - Map observed epidemiology reference state to Phase 4 claims
+  - Inventory preserved candidate work without applying it
+  - Identify no more than five material gaps or risks
+  - Recommend exactly one next bounded implementation lane with outcome, allowed paths,
+    prohibited scope, and validation evidence
+
+validation:
+  commands: []
