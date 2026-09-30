@@ -1,0 +1,74 @@
+schema_version: 1
+
+work_item: MATH-TRACE-QUANTUM-SYSTEMS-REFERENCE-CONTRACT-001
+attempt: implementation-001
+lane: reference-contract
+type: bounded_implementation
+
+repository: /home/mark/projects/math-trace
+worktree: /home/mark/projects/math-trace
+branch: quantum-contract-hardening
+target_branch: main
+
+base_sha: 447f72c761a8e11c4c19141a70f16c76b0099f2c
+head_sha: null
+
+scope:
+  allowed:
+    - Extend tests/test_harmonic_oscillator.py with formal contract validation
+    - Add numerical invariant tests (eigenvalue accuracy, normalization, energy conservation, expectation values, uncertainty principle)
+    - Update PARAMETERS.md with "Numerical Methods" section documenting FDM, SSFM, quadrature, momentum operator, boundary conditions, tolerance justification
+    - Update README.md with "Contract Status" section summarizing validated invariants and test references
+    - Validate equations.json traceability against model.py
+    - Compile paper.typ to PDF; verify equation definitions
+  prohibited:
+    - New solver implementations or algorithm changes
+    - New scenarios (harmonic oscillator only)
+    - Modifications to physics/equations or numerical methods
+    - Changes to paper.typ narrative (validation only)
+    - New test files (extend existing harmonic_oscillator module only)
+    - Performance optimizations or refactoring
+    - Release, publish, deploy, or tag operations
+    - Modifications to other templates
+
+expected_paths:
+  - templates/quantum-systems/src/model.py
+  - templates/quantum-systems/src/tests/test_harmonic_oscillator.py
+  - templates/quantum-systems/src/scenarios/harmonic_oscillator.py
+  - templates/quantum-systems/PARAMETERS.md
+  - templates/quantum-systems/README.md
+  - templates/quantum-systems/paper.typ
+  - templates/quantum-systems/equations.json
+
+acceptance:
+  - Eigenvalue contract: E_n = (n+1/2)ℏω validated to ≤0.1% relative error for n=0–4 at grid 512 points
+  - Normalization contract: ∫|ψ|²dx = 1 ± 1e-6 for eigenstates and time-evolved states
+  - Energy conservation: TDSE drift |E(t)−E(0)|/E(0) < 1e-6 (ω ≥ 1.0), < 1e-4 (ω < 1.0)
+  - Uncertainty principle: Ground state Δx·Δp ≥ ℏ/2 − 1e-5
+  - Expectation values: ⟨x⟩=0, ⟨p⟩=0 for eigenstates to ±1e-6
+  - Equations traceability validated; paper.typ compiles to PDF
+  - PARAMETERS.md expanded with numerical methods documentation (≥500 words)
+  - README updated with contract status section
+  - Test coverage ≥90% of src/model.py; all tests pass
+  - Repeated scenario execution produces identical outputs (floating-point precision)
+
+validation:
+  commands:
+    - pytest src/tests/test_harmonic_oscillator.py -v
+    - pytest src/tests/test_harmonic_oscillator.py::TestHarmonicEigenvalues::test_eigenvalue_accuracy_first_5_levels -v
+    - pytest src/tests/test_harmonic_oscillator.py::TestEnergyConservation::test_ground_state_energy_conservation -v
+    - pytest src/tests/test_harmonic_oscillator.py::TestNormalization -v
+    - pytest src/tests/test_harmonic_oscillator.py::TestExpectationValues -v
+    - python src/scenarios/harmonic_oscillator.py > /tmp/run1.txt && python src/scenarios/harmonic_oscillator.py > /tmp/run2.txt && diff /tmp/run1.txt /tmp/run2.txt
+    - pytest src/tests/test_harmonic_oscillator.py --cov=src.model --cov-report=term-missing --cov-fail-under=90
+
+evidence:
+  directory: /home/mark/projects/portfolio-ops/work-items/evidence/MATH-TRACE-QUANTUM-SYSTEMS-REFERENCE-CONTRACT-001
+  required:
+    - preflight-summary.md
+    - implementation-plan.md
+
+human_authority:
+  review: human_before_merge
+  dispatch: human_before_implementation
+  merge: human_only
