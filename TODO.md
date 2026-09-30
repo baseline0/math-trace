@@ -166,6 +166,33 @@ Release readiness — only after the intended v1 reference scope is complete.
 Release execution, tag/push, GitHub release, Zenodo/DOI — separate,
 explicit human-approved publishing lane.
 
+**Platform ideas (defer until two reference contracts exist)**:
+
+- [ ] **Equation-trace interoperability across domains**
+  Hypothesis: two completed, domain-specific references may reveal a small
+  shared semantic metadata contract for equations, assumptions, source
+  locations, validation links, and limitations.
+  Entry condition: Quantum reference-contract lane is complete and reviewed;
+  can be compared side-by-side with Epidemiology.
+  Non-goal: shared file layout, generic paper framework, forced exports, or
+  cross-domain schema implementation before evidence.
+
+- [ ] **Research-question → literature-review WorkItem template**
+  (Not an autonomous framework; manual template with human decision gates.)
+  Entry condition: a real research decision needs structured external evidence.
+  Non-goal: autonomous research conclusions or auto-generated WorkItems.
+
+- [ ] **Canonical reference source → one rendered output**
+  (Not mock-data paper generation or arbitrary format conversion.)
+  Entry condition: one real reference needs a reproducible human-facing artifact.
+  Non-goal: mock scientific results, arbitrary format conversion, or a
+  multi-journal publishing platform.
+
+- [ ] **Additional publication-output profile**
+  (Not IEEE/Nature/ACM registry or generic conversion pipeline.)
+  Entry condition: a real audience requires one specific second format.
+  Non-goal: multi-journal publishing infrastructure before user evidence.
+
 ---
 
 ## Design Rationale (Temporary)
