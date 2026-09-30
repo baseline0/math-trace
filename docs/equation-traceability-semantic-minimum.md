@@ -264,6 +264,22 @@ A shared framework, export schema, or cross-domain index is authorized **only if
 
 ---
 
+## Explicit Non-Authorization
+
+This document identifies a semantic minimum observed across two validated reference domains. It does **not** authorize:
+
+- A shared file layout, export schema, or build tool
+- A generic equation-trace framework or CLI
+- Cross-domain paper or artifact generation infrastructure
+- Any implementation work until a third domain independently validates the same semantic fields and a concrete user need emerges
+
+**Future work must demonstrate**:
+1. A third reference domain with independently derived equation traceability
+2. A specific user or stakeholder need for shared tooling
+3. A cost-benefit analysis showing maintenance burden is justified
+
+---
+
 ## Summary: No Shared Framework Yet
 
 | Question | Answer |
@@ -279,3 +295,4 @@ A shared framework, export schema, or cross-domain index is authorized **only if
 **Document Status**: REFERENCE (no framework changes authorized)  
 **Next Review**: After third domain reference contract is complete  
 **Audience**: Math-trace contributors, portfolio-ops governance  
+**Last Updated**: 2026-09-30  
