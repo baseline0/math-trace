@@ -267,6 +267,40 @@ Target: **Full paper build < 10 seconds**.
 - **Numerics:** Press, W. H., et al. (2007). *Numerical Recipes* (3rd ed.). Cambridge University Press.
 - **SSFM:** Feit, M. D., et al. (1982). Solution of the Schrödinger Equation by a Spectral Method. *J. Comput. Phys.* 47, 412-433.
 
+## Contract Status and Reference Scenario
+
+### Supported Reference Scenario
+
+**Harmonic Oscillator (SUPPORTED):** This template provides a complete reference implementation for the quantum harmonic oscillator with:
+- Analytical solution validation (E_n = hbar*omega*(n + 1/2))
+- 6 contract tests covering eigenvalues, normalization, energy conservation, expectation values, and uncertainty principle
+- Comprehensive numerical documentation (see PARAMETERS.md "Numerical Methods" section)
+- 20 passing test cases with deterministic repeatability
+
+**Validated Invariants:**
+1. **Eigenvalue Spectrum**: E_n accurate to 0.1% for first 5 levels (Contract Test 1)
+2. **Stationary-State Normalization**: integral(|psi|^2 dx) = 1 ± 1e-6 (Contract Test 2)
+3. **Time-Evolved Normalization**: Propagated states maintain normalization ± 1e-6 (Contract Test 3)
+4. **Energy Conservation**: |E(t)-E(0)|/E(0) < 1e-6 for omega >= 1.0 (Contract Test 4)
+5. **Expectation Values**: <x>=0, <p>=0 to ±1e-6 for eigenstates (Contract Test 5)
+6. **Uncertainty Principle**: Delta_x*Delta_p consistent with Heisenberg lower bound (Contract Test 6)
+
+See `src/tests/test_harmonic_oscillator.py` for test implementations and `PARAMETERS.md` for numerical tolerance justification.
+
+### Out-of-Scope Scenarios
+
+**Double-Slit Interference (NOT SUPPORTED for this lane):** 
+- Implementation exists in src/model.py::double_slit_potential()
+- Not validated under contract framework in this lane
+- Deferred to future reference-contract effort
+
+**Quantum Tunneling (NOT SUPPORTED for this lane):**
+- Implementation exists in src/model.py::tunneling_barrier()
+- Not validated under contract framework in this lane
+- Deferred to future reference-contract effort
+
+These scenarios are implemented in src/model.py for exploration, but do not have contract-level test coverage and are not recommended for publication without additional hardening.
+
 ## Reproducibility & Citation
 
 This template is designed for reproducible research. To cite:
@@ -277,7 +311,7 @@ This template is designed for reproducible research. To cite:
   title = {Quantum Systems: Computational Framework},
   year = {2026},
   url = {https://github.com/baseline0/math-trace/templates/quantum-systems},
-  note = {Equations traced to code via src/model.py, validated by tests in src/tests/}
+  note = {Harmonic oscillator reference scenario validated via 6 contract tests (src/tests/test_harmonic_oscillator.py); equations traced to code via src/model.py}
 }
 ```
 
@@ -286,6 +320,7 @@ All figures are **deterministic** (fixed random seed) and reproducible via `just
 ---
 
 **Template Version**: 1.0  
-**Last Updated**: 2026-09-21  
-**Test Coverage**: 94%  
-**Status**: ✅ Production Ready
+**Last Updated**: 2026-09-30  
+**Test Coverage**: 76% (src/model.py); 100% (harmonic oscillator contract tests)  
+**Reference Scenario Status**: ✅ Contract-Validated (Harmonic Oscillator Only)  
+**Production Status**: ✅ Ready for Publication (Harmonic Oscillator Reference)
