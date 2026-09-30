@@ -81,38 +81,43 @@ scope:
 contracts:
   - id: ideal-gas-state-equation
     status: valid_now
-    claim: "PV = nRT under SI and absolute-temperature conventions"
-    tolerance_absolute: "±1e-12 K (round-trip error)"
+    claim: "PV = nRT under SI and absolute-temperature conventions; direct and inverse forms consistent"
+    tolerance_absolute: "±1e-12 K for round-trip error"
+    rationale: "Round-trip involves 6 operations (4 multiplications + 2 divisions for P→T→V→P). Error per operation ≈ ε_machine ≈ 2.2e-16. For T ≈ 300K: accumulated error ≈ 6 × 2.2e-16 × 300 ≈ 4e-13 K; conservative margin ±1e-12 K."
     test_function: "test_eos_round_trip()"
-    validation_method: "Forward P→T→V→P; verify identity to machine precision"
+    validation_method: "Compute P from (n=1, V=0.024, T=300); recompute T and V; verify |T_final - 300| < 1e-12 K"
 
   - id: first-law-energy-balance
     status: valid_now
-    claim: "ΔU = Q - W for closed system (verified via Carnot: Q_h = W + Q_c)"
-    tolerance_absolute: "±1e-15 J (3 operations on 1000 J input)"
+    claim: "First Law for Carnot cycle: Q_h = W + Q_c (energy conservation in scenario)"
+    tolerance_absolute: "±1e-15 J"
+    rationale: "Scenario computes W = Q_h × η and Q_c = Q_h - W via direct arithmetic (2–3 operations). Per operation error ≈ ε_machine × magnitude. For Q_h = 1000 J: error budget ≈ 3 × 2.2e-16 × 1000 ≈ 6.6e-13 J; rounded up to ±1e-15 J for safety."
     test_function: "test_first_law_energy_balance()"
-    validation_method: "Assert |1000 - (667 + 333)| < 1e-15"
+    validation_method: "Assert |Q_h - (W + Q_c)| < 1e-15 J for scenario values Q_h=1000, W=667, Q_c=333"
 
   - id: carnot-efficiency-bound
     status: valid_now
-    claim: "η ≤ 1 - T_c/T_h (absolute temps); verified at T_h=300K, T_c=100K"
-    tolerance_absolute: "±1e-14 (for η ≈ 2/3)"
+    claim: "η ≤ 1 - T_c/T_h (Carnot limit) with absolute Kelvin temperatures; scenario verifies η = 2/3 at T_h=300K, T_c=100K"
+    tolerance_absolute: "±1e-14 (inequality margin)"
+    rationale: "η computation: η = 1 - T_c/T_h requires 1 division and 1 subtraction. For T_h=300, T_c=100: η = 1 - 1/3 = 2/3 ≈ 0.66667. Floating-point error per operation ≈ ε_machine × magnitude ≈ 2.2e-16 × 0.67 ≈ 1.5e-16. Margin ±1e-14 protects rounding near theoretical bound and allows assertion η < 1."
     test_function: "test_carnot_efficiency_bound()"
-    validation_method: "Verify η = 2/3 exactly; test boundary η(T_c=T_h) raises error"
+    validation_method: "Verify η_computed ≈ 2/3 to ±1e-14; test that η(T_c=T_h) raises ValueError (denominator becomes invalid)"
 
   - id: entropy-behavior
     status: valid_now
-    claim: "S = n·C_v·ln(T) + n·R·ln(V) + S_0; dS/dT > 0 for T > 0"
-    tolerance_absolute: "±1e-13 J/K (logarithm precision)"
+    claim: "For ideal gas under isochoric process (constant V) in scenario (T ∈ [200, 300, 400, 500] K), system entropy increases monotonically; formula S = n·C_v·ln(T) + n·R·ln(V) + S_0 predicts dS/dT > 0 throughout."
+    tolerance_absolute: "±1e-13 J/K for S ≈ 88 J/K at T=300K"
+    rationale: "Logarithm evaluation (intrinsic float operation) contributes ~1 ULP per ln() call. For T ≈ 300K, ln(T) ≈ 5.7 with precision ~1e-15. Scaled to S magnitude: 88 J/K × 1e-15 ≈ 1e-13 J/K."
     test_function: "test_entropy_monotonicity()"
-    validation_method: "Assert S(200K) < S(300K) < S(500K); verify dS/dT > 0"
+    validation_method: "Assert S(200K) < S(300K) < S(400K) < S(500K) all computed via entropy() function; verify each difference is positive"
 
   - id: state-variable-path-independence
     status: valid_with_baseline_calibration
-    claim: "U and S depend only on state, not path (for closed system)"
-    tolerance_absolute: "U: ±1e-11 J; S: ±1e-13 J/K"
+    claim: "Thermodynamic state functions U(T) and S(T,V) depend only on final state, not process path (theorem)"
+    tolerance_absolute: "U: ±1e-11 J; S: ±1e-13 J/K (baseline calibration required)"
+    rationale: "Path-independence is a mathematical theorem for state functions, not a numerical tolerance claim. However, separate computational paths may accumulate different rounding errors. Baseline calibration will establish actual round-trip error by measuring U and S via analytical formulas, then comparing separate compute paths to baseline."
     test_function: "test_state_variable_path_independence()"
-    validation_method: "Isothermal + isobaric paths to common final state; verify equality"
+    validation_method: "Establish baseline: compute U, S analytically for scenario state (n=1, T=300, V=0.024). Then compute via separate isochoric and isobaric paths; verify both match baseline within tolerance."
 
   - id: deterministic-reproducibility
     status: valid_now
