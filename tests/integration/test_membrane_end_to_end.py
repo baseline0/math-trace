@@ -10,16 +10,15 @@ This test demonstrates the full workflow:
 """
 
 import json
-from pathlib import Path
 import sys
-from typing import Tuple
+from pathlib import Path
 
 import pytest
 
 # Add examples to path
 sys.path.insert(0, str(Path(__file__).parent / '../../examples/membrane-dynamics/src'))
 
-from model import FORMULAS, export_json
+from model import FORMULAS
 from simulate import simulate
 
 
@@ -29,7 +28,7 @@ class TestWorkflowEndToEnd:
     def test_model_exports_json(self, tmp_path) -> None:
         """Step 1: Model exports formulas to JSON."""
         # Change to temp directory for this test
-        orig_cwd = Path.cwd()
+        Path.cwd()
         try:
             # Export formulas
             data = {}
@@ -48,7 +47,7 @@ class TestWorkflowEndToEnd:
 
     def test_formulas_convertible_to_latex(self) -> None:
         """Step 2: Formulas are convertible to LaTeX."""
-        for name, formula in FORMULAS.items():
+        for _name, formula in FORMULAS.items():
             latex = formula.to_latex()
             assert latex is not None
             assert len(latex) > 0

@@ -150,7 +150,7 @@ class TestReproducibility:
     def test_build_runs_without_errors(self, sir_example_dir):
         """Build pipeline completes successfully."""
         build_file = sir_example_dir / "build_paper.py"
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603
             [sys.executable, str(build_file)],
             cwd=str(sir_example_dir),
             capture_output=True,
@@ -167,7 +167,7 @@ class TestReproducibility:
         outputs2 = {}
 
         for run_num, outputs in [(1, outputs1), (2, outputs2)]:
-            result = subprocess.run(
+            result = subprocess.run(  # noqa: S603
                 [sys.executable, str(build_file)],
                 cwd=str(sir_example_dir),
                 capture_output=True,
@@ -195,7 +195,7 @@ class TestReproducibility:
     def test_r0_value_formula_consistency(self, sir_example_dir):
         """R0 value matches beta/gamma formula in outputs."""
         build_file = sir_example_dir / "build_paper.py"
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603
             [sys.executable, str(build_file)],
             cwd=str(sir_example_dir),
             capture_output=True,
@@ -224,7 +224,7 @@ class TestIntegration:
     def test_full_build_and_validate(self, sir_example_dir):
         """Complete build pipeline produces all required artifacts."""
         build_file = sir_example_dir / "build_paper.py"
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603
             [sys.executable, str(build_file)],
             cwd=str(sir_example_dir),
             capture_output=True,
@@ -248,7 +248,7 @@ class TestIntegration:
         model_file = sir_example_dir / "model.py"
         paper_file = sir_example_dir / "main.typ"
 
-        model_content = model_file.read_text()
+        model_file.read_text()
         paper_content = paper_file.read_text()
 
         # Both should reference the same key equations

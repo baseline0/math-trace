@@ -10,12 +10,8 @@ Uses known fixed paper for reproducibility.
 Run on demand: just e2e-test
 """
 
-import json
-from pathlib import Path
-from typing import Dict, List
 
 import pytest
-
 
 # Known paper with predictable structure for testing
 TEST_PAPER_ID = "2301.13848"
@@ -27,7 +23,7 @@ class TestArxivExtraction:
 
     def test_extract_known_paper(self):
         """Download and extract equations from known paper."""
-        from math_trace.arxiv_extractor import extract_arxiv_id, download_and_extract_equations
+        from math_trace.arxiv_extractor import download_and_extract_equations, extract_arxiv_id
 
         # Validate ID extraction
         paper_id = extract_arxiv_id(f"https://arxiv.org/abs/{TEST_PAPER_ID}")
@@ -50,7 +46,7 @@ class TestArxivExtraction:
 
     def test_equation_structure(self):
         """Verify extracted equations have required fields."""
-        from math_trace.arxiv_extractor import download_and_extract_equations, Equation
+        from math_trace.arxiv_extractor import Equation, download_and_extract_equations
 
         tex_content, equations = download_and_extract_equations(TEST_PAPER_ID, max_equations=10)
 
@@ -85,7 +81,7 @@ class TestArxivCaching:
 
     def test_save_and_load_paper(self):
         """Save extracted paper to cache and reload it."""
-        from math_trace.arxiv_extractor import save_extracted_paper, load_extracted_paper
+        from math_trace.arxiv_extractor import load_extracted_paper, save_extracted_paper
 
         # Save
         paper_dir = save_extracted_paper(TEST_PAPER_ID)
@@ -119,7 +115,7 @@ class TestArxivCaching:
         assert len(paper1["equations"]) == len(paper2["equations"])
         assert paper1["equations"][0]["latex"] == paper2["equations"][0]["latex"]
 
-        print(f"✅ Cache persistence verified")
+        print("✅ Cache persistence verified")
 
 
 class TestSymPyConversion:
@@ -168,6 +164,7 @@ class TestAPIEndpoints:
     def client(self):
         """Create FastAPI test client."""
         from fastapi.testclient import TestClient
+
         from math_trace.server import app
 
         return TestClient(app)
@@ -212,7 +209,7 @@ class TestAPIEndpoints:
         assert response.status_code == 200
         assert "text/html" in response.headers.get("content-type", "")
 
-        print(f"✅ Formula browser endpoints working")
+        print("✅ Formula browser endpoints working")
 
 
 class TestEndToEndWorkflow:
@@ -221,10 +218,7 @@ class TestEndToEndWorkflow:
     @pytest.mark.skip(reason="antlr4 (v4.7.2) incompatible with Python 3.13; upgrade when available")
     def test_complete_pipeline(self):
         """Test complete workflow: extract → cache → load → convert."""
-        from math_trace.arxiv_extractor import (
-            save_extracted_paper,
-            load_extracted_paper
-        )
+        from math_trace.arxiv_extractor import load_extracted_paper, save_extracted_paper
         from math_trace.ollama_arxiv_worker import process_paper
 
         # Step 1: Extract and cache
@@ -233,7 +227,7 @@ class TestEndToEndWorkflow:
         assert paper_dir.exists()
 
         # Step 2: Verify cache
-        print(f"[2/4] Verifying cache...")
+        print("[2/4] Verifying cache...")
         paper_data = load_extracted_paper(TEST_PAPER_ID)
         assert paper_data["paper_id"] == TEST_PAPER_ID
         initial_eq_count = len(paper_data["equations"])
@@ -245,7 +239,7 @@ class TestEndToEndWorkflow:
         assert result["status"] == "success"
 
         # Step 4: Verify conversion
-        print(f"[4/4] Verifying conversion results...")
+        print("[4/4] Verifying conversion results...")
         paper_data_after = load_extracted_paper(TEST_PAPER_ID)
         converted_count = sum(
             1 for eq in paper_data_after["equations"]
@@ -253,7 +247,7 @@ class TestEndToEndWorkflow:
         )
 
         conversion_rate = converted_count / initial_eq_count * 100
-        print(f"\n✅ End-to-end test complete!")
+        print("\n✅ End-to-end test complete!")
         print(f"   Papers: {TEST_PAPER_ID}")
         print(f"   Equations extracted: {initial_eq_count}")
         print(f"   Equations converted: {converted_count} ({conversion_rate:.0f}%)")

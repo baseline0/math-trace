@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import pytest
 from fastapi.testclient import TestClient
+from math_trace.presentation_server import PresentationServer
 
 from math_trace.formula import Formula
-from math_trace.presentation_server import PresentationServer
 from math_trace.server import app
 
 
@@ -162,7 +161,7 @@ class TestHTMLSanitizationComprehensive:
 
         # Check that problematic characters are escaped
         # (specific to content that shouldn't have HTML tags)
-        lines = html.split("\n")
+        html.split("\n")
 
         # Verify structure is maintained
         assert '<!DOCTYPE html>' in html

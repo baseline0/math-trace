@@ -6,7 +6,6 @@ published mathematics. High coverage here is critical for correctness.
 """
 
 import sympy as sp
-import pytest
 
 from math_trace.generators import SymPyToTypst, TypstEnvironmentBuilder
 
@@ -130,7 +129,7 @@ class TestSymPyToTypstGreekLetters:
         """Convert alpha symbol."""
         converter = SymPyToTypst()
 
-        alpha = sp.Symbol('alpha')
+        sp.Symbol('alpha')
         result = converter._latex_to_typst(r"\alpha")
 
         assert "α" in result
@@ -292,8 +291,8 @@ class TestSymPyToTypstComplexExpressions:
         """Convert SIR model rate expression."""
         converter = SymPyToTypst()
 
-        # dS/dt = -β * S * I / N
-        beta, S, I, N = sp.symbols('beta S I N')
+        # dS/dt = -β * S * I / N (epidemiological notation: S=susceptible, I=infected, N=population)
+        beta, S, I, N = sp.symbols('beta S I N')  # noqa: N806, E741
         expr = -beta * S * I / N
         result = converter.convert(expr)
 
@@ -350,7 +349,7 @@ class TestTypstEnvironmentBuilder:
 
     def test_theorem_basic(self):
         """Create basic theorem environment."""
-        theorem_text = TypstEnvironmentBuilder.theorem(name="theorem", 
+        theorem_text = TypstEnvironmentBuilder.theorem(name="theorem",
             title="Pythagorean Theorem",
             statement="a² + b² = c²"
         )

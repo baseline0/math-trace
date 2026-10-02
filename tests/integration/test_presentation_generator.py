@@ -5,15 +5,15 @@ edge cases, and failure modes to catch issues before they reach the UI.
 """
 
 import json
+import sys
 import tempfile
 from pathlib import Path
-import sys
 
 import pytest
 import yaml
 
 sys.path.insert(0, str(Path(__file__).parent / "../../src"))
-from math_trace.presentation_generator import PresentationGenerator, PresentationConfig, MarpBackend
+from math_trace.presentation_generator import MarpBackend, PresentationConfig, PresentationGenerator
 
 
 class TestPresentationGeneratorLoading:

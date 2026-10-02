@@ -7,16 +7,14 @@ These tests ensure that all guaranteed features work as documented.
 
 import json
 import sys
-from dataclasses import fields
 from pathlib import Path
-
-import pytest
 
 # Add examples to path for model imports
 sys.path.insert(0, str(Path(__file__).parent / '../../examples/membrane-dynamics/src'))
 
-from math_trace.services import ExtractedEquation
 from model import FORMULAS, export_json
+
+from math_trace.services import ExtractedEquation
 
 # Alias for tests that use Formula
 Formula = ExtractedEquation
@@ -80,7 +78,7 @@ class TestSourceLineTraceability:
 
     def test_equations_have_description(self):
         """Guarantee: Equations include descriptions (for metadata schema)."""
-        for name, formula in FORMULAS.items():
+        for _name, formula in FORMULAS.items():
             assert hasattr(formula, 'description')
             assert isinstance(formula.description, str)
             assert len(formula.description) > 0
@@ -101,14 +99,14 @@ class TestMetadataSchemaAPI:
 
     def test_formula_name_is_string(self):
         """Guarantee: Equation name is human-readable string."""
-        for name, formula in FORMULAS.items():
+        for _name, formula in FORMULAS.items():
             assert hasattr(formula, 'name')
             assert isinstance(formula.name, str)
             assert len(formula.name) > 0
 
     def test_formula_provides_latex_method(self):
         """Guarantee: Equations provide to_latex() method for publication."""
-        for name, formula in FORMULAS.items():
+        for _name, formula in FORMULAS.items():
             assert hasattr(formula, 'to_latex')
             assert callable(formula.to_latex)
             latex_str = formula.to_latex()
@@ -130,12 +128,12 @@ class TestReproducibility:
 
     def test_json_export_deterministic(self):
         """Guarantee: Reproducibility — JSON export is deterministic."""
-        import tempfile
         import json as json_module
+        import tempfile
 
         # Export twice
         exports = []
-        for i in range(2):
+        for _i in range(2):
             with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
                 json_path = Path(f.name)
 
@@ -188,7 +186,7 @@ class TestAPIStability:
         rate_formula = FORMULAS['rate']
 
         # Should have consistent interface
-        assert callable(getattr(rate_formula, 'to_latex'))
+        assert callable(rate_formula.to_latex)
 
         # Should be able to access key fields
         _ = rate_formula.name

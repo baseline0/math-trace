@@ -4,11 +4,10 @@ Tests the live preview and export API endpoints with various inputs
 to catch configuration and parsing errors before they reach the UI.
 """
 
-import json
-import pytest
-from fastapi.testclient import TestClient
-from pathlib import Path
 import sys
+from pathlib import Path
+
+from fastapi.testclient import TestClient
 
 # Import server app
 sys.path.insert(0, str(Path(__file__).parent / "../../src"))
@@ -202,7 +201,7 @@ class TestExportEndpoint:
                 # If error message present, should not be cryptic
                 msg = str(data.get("detail", "")) + str(data.get("message", ""))
                 assert "Unexpected token" not in msg
-        except:
+        except (ValueError, TypeError):
             # If not JSON, that's fine - just checking for cryptic parse errors
             pass
 
