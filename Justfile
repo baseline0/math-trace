@@ -43,6 +43,17 @@ paper:
     @echo "📚 Building paper (formulas → figures → PDF)..."
     cd examples/membrane-dynamics && uv run python build_paper.py
 
+[group("build")]
+serve:
+    @echo "🌐 Starting interactive slide editor..."
+    @echo ""
+    @echo "Dashboard: http://localhost:8000"
+    @echo "API: http://localhost:8000/api/health"
+    @echo ""
+    @echo "Press Ctrl+C to stop"
+    @echo ""
+    uv run uvicorn math_trace.server:app --reload --host 127.0.0.1 --port 8000
+
 [group("verify")]
 test:
     @echo "🧪 Running unit tests (CI-safe)..."
@@ -221,6 +232,7 @@ help:
     @echo "  just figures   — Generate matplotlib figures"
     @echo "  just pdf       — Compile Typst document to PDF"
     @echo "  just paper     — Full build (formulas + figures + pdf)"
+    @echo "  just serve     — Start interactive slide editor (http://localhost:8000)"
     @echo ""
     @echo "VERIFY:"
     @echo "  just test              — Run unit tests (CI-safe)"

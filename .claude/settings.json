@@ -28,7 +28,8 @@
       "Bash(python -c \"from math_trace.formula import Formula; f = Formula\\('test', 'x^2', 'test formula', 10\\); print\\(f'✅ Formula dataclass works: {f.name}'\\)\")",
       "Bash(PYTHONPATH=src python -c \"from math_trace.formula import Formula; f = Formula\\('test', 'x^2', 'test formula', 10\\); print\\(f'✅ Formula dataclass works: {f.name}'\\)\")",
       "Bash(python -c ' *)",
-      "Bash(python src/model.py)"
+      "Bash(python src/model.py)",
+      "Bash(git commit -m 'feat\\(server\\): FastAPI interactive slide editor with live preview *)"
     ]
   }
 }
