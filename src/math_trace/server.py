@@ -134,30 +134,38 @@ async def export_slides(
                     config["title"] = "Untitled"
                 if "format" not in config:
                     config["format"] = "talk"
-                if "backend" not in config:
-                    config["backend"] = format or "marp"
                 if "slides" not in config:
                     config["slides"] = []
                 if metadata:
                     config["metadata"] = metadata
 
-                # Create presentation config
-                pres_config = PresentationConfig(**config)
+                # Use PresentationServer to export HTML
+                title = config.get("title", "Untitled Presentation")
+                server = PresentationServer(title=title, theme="white")
 
-                # Render using Marp backend
-                marp = MarpBackend()
-                result_path = marp.render(pres_config, formulas, tmpdir_path)
+                # Convert formulas to Formula objects
+                for formula_name, formula_data in formulas.items():
+                    if isinstance(formula_data, dict):
+                        formula = Formula(
+                            name=formula_data.get("name", formula_name),
+                            latex=formula_data.get("latex", ""),
+                            description=formula_data.get("description", ""),
+                            source_line=formula_data.get("source_line", 0),
+                        )
+                        parameters = formula_data.get("parameters", {})
+                        server.add_formula_slide(
+                            title=formula.name,
+                            formulas={formula_name: formula},
+                            parameters=parameters,
+                            description=formula.description,
+                        )
 
-                # Return file content (can't use FileResponse with temp dir that will be deleted)
-                if result_path.exists():
-                    content = result_path.read_text()
-                    return {
-                        "status": "success",
-                        "markdown": content,
-                        "filename": "slides.md"
-                    }
-                else:
-                    raise HTTPException(500, "Export generation failed")
+                html_content = server._render_presentation()
+                return {
+                    "status": "success",
+                    "html": html_content,
+                    "filename": "presentation.html"
+                }
             except TypeError as e:
                 raise HTTPException(422, f"Config error: {str(e)}")
 
@@ -460,7 +468,7 @@ theme: default
         <div class="preview-panel">
             <div class="preview-header">
                 <h2>👀 Live Preview</h2>
-                <span style="font-size: 12px; color: #999;">Marp backend</span>
+                <span style="font-size: 12px; color: #999;">Revealjs + HTMX</span>
             </div>
             <div class="preview-content">
                 <div class="status-message" id="status"></div>
@@ -543,7 +551,7 @@ theme: default
                 const response = await fetch('/api/preview', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ formulas, config, backend: 'marp' })
+                    body: JSON.stringify({ formulas, config, theme: 'white' })
                 });
 
                 const data = await response.json();

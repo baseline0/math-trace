@@ -31,7 +31,6 @@ __license__ = "MIT"
 
 from .generators import SymPyToTypst, TypstEnvironmentBuilder
 from .presentation_generator import (
-    MarpBackend,
     PresentationBackend,
     PresentationConfig,
     PresentationGenerator,
@@ -54,7 +53,6 @@ __all__ = [
     # Presentation
     "PresentationGenerator",
     "PresentationBackend",
-    "MarpBackend",
     "PresentationConfig",
     # Services
     "PaperDownloader",
