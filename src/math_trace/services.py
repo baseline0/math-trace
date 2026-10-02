@@ -20,8 +20,8 @@ import pdfplumber
 
 
 @dataclass
-class Formula:
-    """Extracted formula with metadata."""
+class ExtractedEquation:
+    """Equation extracted from a PDF paper with metadata."""
 
     name: str
     latex: str
@@ -37,7 +37,7 @@ class PaperMetadata:
     title: str
     url: str
     pages: int
-    formulas: list[Formula]
+    formulas: list[ExtractedEquation]
 
 
 class PaperDownloader:
@@ -126,7 +126,7 @@ class FormulaExtractor:
     ]
 
     @staticmethod
-    def extract(pdf_path: Path) -> list[Formula]:
+    def extract(pdf_path: Path) -> list[ExtractedEquation]:
         """Extract formulas from PDF.
 
         Args:
@@ -161,7 +161,7 @@ class FormulaExtractor:
                         context = text[start:end].strip()
 
                         formulas.append(
-                            Formula(
+                            ExtractedEquation(
                                 name=f"eq_{formula_counter}",
                                 latex=latex,
                                 description="",  # Will be filled by user or Claude
@@ -176,7 +176,7 @@ class FormulaExtractor:
     def extract_with_descriptions(
         pdf_path: Path,
         use_claude: bool = False,
-    ) -> list[Formula]:
+    ) -> list[ExtractedEquation]:
         """Extract formulas with auto-generated descriptions.
 
         Args:
@@ -256,7 +256,7 @@ class PresentationBuilder:
         return config
 
     @staticmethod
-    def build_formulas_json(formulas: list[Formula]) -> dict:
+    def build_formulas_json(formulas: list[ExtractedEquation]) -> dict:
         """Build formulas.json structure from extracted formulas.
 
         Args:

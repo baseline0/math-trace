@@ -89,7 +89,11 @@
       "Bash(just e2e-test *)",
       "Bash(curl -s -X POST 'http://localhost:8000/api/arxiv/extract' -H 'Content-Type: application/json' -d '{\"arxiv_id\":\"2301.13848\"}')",
       "Bash(curl -s 'http://localhost:8000/api/arxiv/extract?paper_url_or_id=2301.13848')",
-      "Bash(curl -s http://localhost:8000/api/arxiv/papers)"
+      "Bash(curl -s http://localhost:8000/api/arxiv/papers)",
+      "Bash(git worktree *)",
+      "Bash(git commit -m 'feat: add Revealjs + HTMX presentation system *)",
+      "Bash(python -m py_compile src/math_trace/constants.py src/math_trace/logging.py src/math_trace/formula_browser.py src/math_trace/services.py src/math_trace/arxiv_extractor.py)",
+      "Bash(python -c \"from math_trace.services import ExtractedEquation; print\\('✅ Import works'\\)\")"
     ]
   }
 }

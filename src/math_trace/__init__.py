@@ -35,12 +35,15 @@ from .presentation_generator import (
     PresentationGenerator,
 )
 from .services import (
-    Formula,
+    ExtractedEquation,
     FormulaExtractor,
     PaperDownloader,
     PaperMetadata,
     PresentationBuilder,
 )
+
+# Backward compatibility alias
+Formula = ExtractedEquation
 
 __all__ = [
     # Generators

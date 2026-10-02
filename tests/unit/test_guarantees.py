@@ -15,8 +15,11 @@ import pytest
 # Add examples to path for model imports
 sys.path.insert(0, str(Path(__file__).parent / '../../examples/membrane-dynamics/src'))
 
-from math_trace.services import Formula
+from math_trace.services import ExtractedEquation
 from model import FORMULAS, export_json
+
+# Alias for tests that use Formula
+Formula = ExtractedEquation
 
 
 class TestEquationExtraction:

@@ -4,12 +4,20 @@ Typer CLI commands that are auto-generated as FastAPI endpoints.
 Provides unified interface for formula discovery.
 """
 
+from __future__ import annotations
+
 import json
+import logging
+import re
 from pathlib import Path
 from typing import Optional
 
 import typer
 
+from .constants import CACHE_DIR
+from .logging import get_logger
+
+logger = get_logger(__name__)
 app = typer.Typer(help="Browse and select formulas from various sources")
 
 
@@ -19,33 +27,46 @@ def arxiv_papers(limit: int = typer.Option(20, help="Max papers to return")) -> 
 
     Returns: [{paper_id, title, authors, equation_count}, ...]
     """
-    cache_dir = Path.home() / ".math-trace" / "arxiv-cache" / "papers"
+    papers_dir = CACHE_DIR / "papers"
 
-    if not cache_dir.exists():
+    if not papers_dir.exists():
+        logger.debug(f"Papers cache directory not found: {papers_dir}")
         return []
 
     papers = []
-    for paper_dir in sorted(cache_dir.iterdir())[:limit]:
+    for paper_dir in sorted(papers_dir.iterdir())[:limit]:
         if not paper_dir.is_dir():
             continue
 
         metadata_path = paper_dir / "metadata.json"
         if not metadata_path.exists():
+            logger.warning(f"Missing metadata for paper {paper_dir.name}")
             continue
 
-        metadata = json.loads(metadata_path.read_text())
+        try:
+            metadata = json.loads(metadata_path.read_text())
+        except (json.JSONDecodeError, IOError) as e:
+            logger.error(f"Failed to read metadata for {paper_dir.name}: {e}")
+            continue
+
         equations_path = paper_dir / "equations.jsonl"
 
         # Count equations
         eq_count = 0
         converted_count = 0
         if equations_path.exists():
-            for line in equations_path.read_text().strip().split('\n'):
-                if line:
-                    eq_count += 1
-                    eq = json.loads(line)
-                    if eq.get('conversion_status') == 'converted':
-                        converted_count += 1
+            try:
+                for line in equations_path.read_text().strip().split('\n'):
+                    if line:
+                        eq_count += 1
+                        try:
+                            eq = json.loads(line)
+                            if eq.get('conversion_status') == 'converted':
+                                converted_count += 1
+                        except json.JSONDecodeError as e:
+                            logger.debug(f"Invalid JSON in equations file: {e}")
+            except IOError as e:
+                logger.error(f"Failed to read equations for {paper_dir.name}: {e}")
 
         papers.append({
             'paper_id': paper_dir.name,
@@ -66,31 +87,36 @@ def local_models(pattern: str = "*/src/model.py", root: str = ".") -> list[dict]
     root_path = Path(root).resolve()
     models = []
 
-    for model_path in root_path.glob(pattern):
+    try:
+        model_paths = list(root_path.glob(pattern))
+    except (ValueError, OSError) as e:
+        logger.error(f"Invalid glob pattern '{pattern}': {e}")
+        return []
+
+    for model_path in model_paths:
         try:
-            content = model_path.read_text()
-
-            # Look for FORMULAS dict
-            if 'FORMULAS' not in content:
-                continue
-
-            # Try to extract formula names via regex (safe, doesn't execute)
-            import re
-            formula_names = re.findall(r"'(\w+)':\s*Formula\(", content)
-
-            if not formula_names:
-                # Try alternate format
-                formula_names = re.findall(r'"(\w+)":\s*Formula\(', content)
-
-            if formula_names:
-                models.append({
-                    'path': str(model_path.relative_to(root_path)),
-                    'formula_count': len(formula_names),
-                    'formulas': [{'name': name} for name in formula_names],
-                })
-
-        except Exception:
+            content = model_path.read_text(encoding="utf-8")
+        except (IOError, UnicodeDecodeError) as e:
+            logger.debug(f"Failed to read {model_path}: {e}")
             continue
+
+        # Look for FORMULAS dict
+        if 'FORMULAS' not in content:
+            continue
+
+        # Try to extract formula names via regex (safe, doesn't execute)
+        formula_names = re.findall(r"'(\w+)':\s*Formula\(", content)
+
+        if not formula_names:
+            # Try alternate format
+            formula_names = re.findall(r'"(\w+)":\s*Formula\(', content)
+
+        if formula_names:
+            models.append({
+                'path': str(model_path.relative_to(root_path)),
+                'formula_count': len(formula_names),
+                'formulas': [{'name': name} for name in formula_names],
+            })
 
     return sorted(models, key=lambda m: m['path'])
 
@@ -143,23 +169,29 @@ def local_model_formulas(
 
     Returns: {path, formulas: [{name, latex}, ...]}
     """
+    import sys
+    import importlib.util
+
     model_path = Path(path).resolve()
 
     if not model_path.exists():
-        typer.echo(f"File not found: {path}", err=True)
+        msg = f"File not found: {path}"
+        logger.error(msg)
+        typer.echo(msg, err=True)
         raise typer.Exit(1)
 
     try:
         # Import the model dynamically
-        import sys
-        import importlib.util
-
         spec = importlib.util.spec_from_file_location("model", model_path)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"Cannot load module spec from {model_path}")
+
         module = importlib.util.module_from_spec(spec)
         sys.modules["model"] = module
         spec.loader.exec_module(module)
 
         if not hasattr(module, 'FORMULAS'):
+            logger.debug(f"No FORMULAS dict in {model_path}")
             return {
                 'path': str(model_path),
                 'error': 'No FORMULAS dict found',
@@ -175,10 +207,11 @@ def local_model_formulas(
                     'latex': latex,
                     'description': getattr(formula_obj, 'description', ''),
                 })
-            except Exception as e:
+            except (AttributeError, TypeError, ValueError) as e:
+                logger.warning(f"Failed to extract LaTeX for formula '{name}': {e}")
                 formulas.append({
                     'name': name,
-                    'latex': f"[Error: {e}]",
+                    'latex': f"[Error: {type(e).__name__}: {e}]",
                     'description': '',
                 })
 
@@ -187,10 +220,11 @@ def local_model_formulas(
             'formulas': formulas,
         }
 
-    except Exception as e:
+    except (ImportError, OSError, SyntaxError) as e:
+        logger.error(f"Failed to load module {model_path}: {e}")
         return {
             'path': str(model_path),
-            'error': str(e),
+            'error': f"{type(e).__name__}: {e}",
             'formulas': [],
         }
 

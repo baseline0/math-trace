@@ -7,7 +7,10 @@ Workflow:
 4. Results available via /api/arxiv/papers/{paper_id}
 """
 
+from __future__ import annotations
+
 import json
+import logging
 import re
 import tarfile
 import tempfile
@@ -16,6 +19,11 @@ from pathlib import Path
 from typing import Optional
 
 import requests
+
+from .constants import CACHE_DIR, EQUATIONS_FILE, METADATA_FILE
+from .logging import get_logger
+
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -156,7 +164,7 @@ def save_extracted_paper(paper_id: str, output_dir: Path = None) -> Path:
           equations.jsonl  (one equation per line)
     """
     if output_dir is None:
-        output_dir = Path.home() / ".math-trace" / "arxiv-cache"
+        output_dir = CACHE_DIR
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -192,7 +200,7 @@ def save_extracted_paper(paper_id: str, output_dir: Path = None) -> Path:
 def load_extracted_paper(paper_id: str, cache_dir: Path = None) -> dict:
     """Load previously extracted paper from cache."""
     if cache_dir is None:
-        cache_dir = Path.home() / ".math-trace" / "arxiv-cache"
+        cache_dir = CACHE_DIR
 
     paper_dir = cache_dir / "papers" / paper_id
 
