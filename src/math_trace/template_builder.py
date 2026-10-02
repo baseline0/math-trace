@@ -7,11 +7,13 @@ Provides reusable components for:
 - Matplotlib figure generation with consistent styling
 """
 
+from __future__ import annotations
+
 import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional, Callable, Any
+from typing import Any, Callable, Optional
 
 
 class FormulaPipeline:

@@ -49,8 +49,10 @@ See Also:
     - https://palomar.tech: Public proof registry
 """
 
-from abc import ABC, abstractmethod
+from __future__ import annotations
+
 import subprocess
+from abc import ABC, abstractmethod
 
 
 class ProofFramework(ABC):

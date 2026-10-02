@@ -44,9 +44,11 @@ See Also:
     - examples/*/build_paper.py: Orchestration
 """
 
+from __future__ import annotations
+
+import subprocess
 from abc import ABC, abstractmethod
 from pathlib import Path
-import subprocess
 
 
 class Publisher(ABC):

@@ -34,8 +34,10 @@ See Also:
     - examples/*/build_paper.py: Orchestration
 """
 
-from abc import ABC, abstractmethod
+from __future__ import annotations
+
 import re
+from abc import ABC, abstractmethod
 
 
 class Converter(ABC):

@@ -3,6 +3,8 @@
 Provides consistent logging setup across all modules.
 """
 
+from __future__ import annotations
+
 import logging
 from pathlib import Path
 

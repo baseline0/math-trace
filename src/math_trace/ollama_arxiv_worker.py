@@ -7,7 +7,10 @@ Usage:
   python -m math_trace.ollama_arxiv_worker convert {paper_id}
 """
 
+from __future__ import annotations
+
 import json
+import re
 from pathlib import Path
 from typing import Optional
 
@@ -22,7 +25,7 @@ def convert_equation_to_sympy(latex: str, context: str = "") -> dict:
     try:
         # Clean up LaTeX for sympy
         latex_clean = latex.strip()
-        latex_clean = __import__('re').sub(r'&=|&|\\\\|\\label\{[^}]*\}', '', latex_clean)
+        latex_clean = re.sub(r'&=|&|\\\\|\\label\{[^}]*\}', '', latex_clean)
 
         # Attempt conversion
         sympy_expr = latex2sympy(latex_clean)

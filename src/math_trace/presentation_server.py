@@ -56,12 +56,16 @@ server.run(port=8000)
 - **Export:** Print to PDF with all formulas rendered
 """
 
-from fastapi import FastAPI, HTTPException
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
+
 import sympy as sp
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+
 from math_trace.formula import Formula
 
 

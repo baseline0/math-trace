@@ -23,6 +23,8 @@ For more examples, see:
 - tests/ for usage patterns
 """
 
+from __future__ import annotations
+
 __version__ = "0.1.0"
 __author__ = "Mark Alexiuk"
 __license__ = "MIT"

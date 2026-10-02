@@ -10,18 +10,23 @@ Provides web UI for:
 from __future__ import annotations
 
 import json
+import logging
 import tempfile
 from pathlib import Path
 from typing import Optional
 
 import yaml
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
-from .presentation_generator import MarpBackend, PresentationConfig
-from .arxiv_extractor import extract_arxiv_id, save_extracted_paper, load_extracted_paper
+from .arxiv_extractor import extract_arxiv_id, load_extracted_paper, save_extracted_paper
 from .formula_browser import app as formula_browser_app
+from .logging import get_logger
+from .presentation_generator import MarpBackend, PresentationConfig
+from .responses import ApiResponse
+
+logger = get_logger(__name__)
 
 app = FastAPI(
     title="math-trace Slide Editor",
@@ -690,7 +695,7 @@ async def arxiv_extract(paper_url_or_id: str):
     Takes arXiv URL or ID (e.g., "2301.13848" or "https://arxiv.org/abs/2301.13848")
     Downloads source, extracts equations, saves to cache.
 
-    Returns: Extracted paper with equations ready for manual/automated conversion.
+    Returns: ApiResponse with extracted paper data or error message.
     """
     try:
         # Validate and normalize ID
@@ -702,41 +707,77 @@ async def arxiv_extract(paper_url_or_id: str):
         # Load and return
         paper_data = load_extracted_paper(paper_id)
 
-        return {
-            "status": "success",
-            "paper_id": paper_id,
-            "title": paper_data["title"],
-            "authors": paper_data["authors"],
-            "total_equations": paper_data["total_equations"],
-            "equations": paper_data["equations"],
-            "cache_path": str(paper_dir),
-            "message": f"Extracted {paper_data['total_equations']} equations. Ready for conversion task dispatch."
-        }
+        return ApiResponse.success(
+            data={
+                "paper_id": paper_id,
+                "title": paper_data["title"],
+                "authors": paper_data["authors"],
+                "total_equations": paper_data["total_equations"],
+                "equations": paper_data["equations"],
+                "cache_path": str(paper_dir),
+            },
+            message=f"Extracted {paper_data['total_equations']} equations. Ready for conversion.",
+            code=200,
+        ).to_dict()
 
     except ValueError as e:
-        return {"status": "error", "message": f"Invalid arXiv ID: {str(e)}"}
+        logger.error(f"Invalid arXiv ID: {e}")
+        return ApiResponse.error(
+            error="Invalid arXiv ID format",
+            message=str(e),
+            code=400,
+        ).to_dict()
+    except FileNotFoundError as e:
+        logger.error(f"Paper not found: {e}")
+        return ApiResponse.error(
+            error="Paper not found in cache",
+            message=str(e),
+            code=404,
+        ).to_dict()
     except Exception as e:
-        return {"status": "error", "message": f"Extraction failed: {str(e)}"}
+        logger.error(f"Extraction failed: {e}")
+        return ApiResponse.error(
+            error="Extraction failed",
+            message=str(e),
+            code=500,
+        ).to_dict()
 
 
 @app.get("/api/arxiv/papers/{paper_id}")
 async def arxiv_get_paper(paper_id: str):
-    """Get cached extracted paper."""
+    """Get cached extracted paper.
+
+    Returns: ApiResponse with paper data or error message.
+    """
     try:
         paper_data = load_extracted_paper(paper_id)
-        return {
-            "status": "success",
-            "paper_id": paper_id,
-            "title": paper_data["title"],
-            "authors": paper_data["authors"],
-            "extraction_timestamp": paper_data.get("extraction_timestamp"),
-            "total_equations": len(paper_data["equations"]),
-            "equations": paper_data["equations"],
-        }
+        return ApiResponse.success(
+            data={
+                "paper_id": paper_id,
+                "title": paper_data["title"],
+                "authors": paper_data["authors"],
+                "extraction_timestamp": paper_data.get("extraction_timestamp"),
+                "total_equations": len(paper_data["equations"]),
+                "equations": paper_data["equations"],
+            },
+            code=200,
+        ).to_dict()
+
     except FileNotFoundError:
-        return {"status": "error", "message": f"Paper not cached: {paper_id}"}
+        logger.warning(f"Paper not cached: {paper_id}")
+        return ApiResponse.error(
+            error="Paper not cached",
+            message=f"No cached data for {paper_id}",
+            code=404,
+        ).to_dict()
+
     except Exception as e:
-        return {"status": "error", "message": f"Error loading paper: {str(e)}"}
+        logger.error(f"Error loading paper {paper_id}: {e}")
+        return ApiResponse.error(
+            error="Error loading paper",
+            message=str(e),
+            code=500,
+        ).to_dict()
 
 
 # ============================================================================

@@ -4,6 +4,8 @@ This module centralizes all hardcoded paths, names, and magic values
 to reduce duplication and make configuration changes easier.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 # Cache directory for arXiv papers and extracted equations
