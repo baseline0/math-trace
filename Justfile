@@ -45,13 +45,23 @@ paper:
 
 [group("verify")]
 test:
-    @echo "🧪 Running tests..."
-    uv run pytest tests/ -v --tb=short
+    @echo "🧪 Running unit tests (CI-safe)..."
+    uv run pytest tests/unit -v --tb=short
+
+[group("verify")]
+test-integration:
+    @echo "🔗 Running integration tests (requires local setup)..."
+    uv run pytest tests/integration -v --tb=short
+
+[group("verify")]
+test-all:
+    @echo "🧪 Running all tests (unit + integration)..."
+    uv run pytest tests/unit tests/integration -v --tb=short
 
 [group("verify")]
 test-formulas:
     @echo "🔍 Testing formula generation..."
-    uv run pytest tests/test_model_export.py -v
+    uv run pytest tests/unit/test_model_export.py -v
 
 [group("verify")]
 test-model:
@@ -213,10 +223,12 @@ help:
     @echo "  just paper     — Full build (formulas + figures + pdf)"
     @echo ""
     @echo "VERIFY:"
-    @echo "  just test          — Run full test suite"
-    @echo "  just test-formulas — Test formula generation"
-    @echo "  just test-model    — Test model definitions"
-    @echo "  just typecheck     — Type check code"
+    @echo "  just test              — Run unit tests (CI-safe)"
+    @echo "  just test-integration  — Run integration tests (local only)"
+    @echo "  just test-all          — Run all tests (unit + integration)"
+    @echo "  just test-formulas     — Test formula generation"
+    @echo "  just test-model        — Test model definitions"
+    @echo "  just typecheck         — Type check code"
     @echo ""
     @echo "RELEASE:"
     @echo "  just prep-release VERSION    — Tag and push release (e.g., just prep-release 0.1.0)"

@@ -61,7 +61,11 @@ disallow_incomplete_defs = false
 check_untyped_defs = true
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests/unit", "tests/integration"]
+markers = [
+    "unit: deterministic, isolated, no external dependencies (runs in CI)",
+    "integration: requires sibling repos or local setup (skip in CI, run locally)",
+]
 addopts = "-v --tb=short --cov=src/math_trace --cov-report=term-missing"
 
 [tool.ruff]

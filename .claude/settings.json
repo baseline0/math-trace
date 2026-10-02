@@ -9,7 +9,9 @@
       "Bash(git commit -m 'chore: align pre-commit and ruff with PyPI best practices *)",
       "Bash(pre-commit run *)",
       "Bash(git reset *)",
-      "Bash(git commit -m 'chore: apply code-as-docs policy, remove CLAUDE.md and .claude/ from tracking *)"
+      "Bash(git commit -m 'chore: apply code-as-docs policy, remove CLAUDE.md and .claude/ from tracking *)",
+      "Bash(git commit -m 'docs: simplify README project structure tree *)",
+      "Bash(git commit -m 'refactor: reorganize tests with unit/integration split and conftest-based markers *)"
     ]
   }
 }
