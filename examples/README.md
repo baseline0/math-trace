@@ -17,15 +17,15 @@ Each example is a **reference pattern** — validated by CI/CD to compile correc
 - Lean proof tied to Palomar registry
 
 **Files:**
-- `model.py` — SymPy formulas (source of truth)
-- `simulate.py` — Gillespie algorithm simulation
+- `src/model.py` — SymPy formulas (source of truth)
+- `src/simulate.py` — Gillespie algorithm simulation
 - `build_paper.py` — Build pipeline (formulas → figures → PDF)
 - `main.typ` — Publication template
 - `lean/` — Lean formalization (optional)
 
 **Referenced in docs:**
-- `docs/TYPST-GOTCHAS.md` §1 — Shows correct escaping of `/*` in bold text (line 78)
-- `docs/TYPST-LINTING.md` — Demonstrates full workflow
+- `docs/guides/typst-troubleshooting.md` — Debug guide
+- `docs/guides/typst-linting.md` — Code quality checklist
 
 **How to use:**
 1. See it build: `cd membrane-dynamics && just paper`
@@ -76,8 +76,10 @@ All examples follow this pattern:
 
 ```
 example-name/
-├── model.py                    # SymPy formulas (SOURCE OF TRUTH)
-├── simulate.py                 # Simulation code
+├── src/                        # Python source code
+│   ├── __init__.py             # Package marker
+│   ├── model.py                # SymPy formulas (SOURCE OF TRUTH)
+│   └── simulate.py             # Simulation code
 ├── build_paper.py              # Build orchestration
 ├── main.typ                    # Typst paper template
 ├── lean/                       # Lean formalization (optional)
@@ -146,9 +148,9 @@ To add another example to this directory:
 ## See also
 
 - **Templates:** `templates/` — Fork-friendly starting points
-- **Docs:** `docs/TYPST-LINTING.md` — How we validate Typst
-- **Gotchas:** `docs/TYPST-GOTCHAS.md` — Common Typst syntax issues
-- **Getting started:** `docs/getting-started-external.md` — For new users
+- **Documentation:** `docs/` — See `docs/README.md` for structure
+- **Getting started:** `docs/guides/getting-started-external.md` — For new users
+- **Troubleshooting:** `docs/guides/typst-troubleshooting.md` — Common issues
 
 ---
 

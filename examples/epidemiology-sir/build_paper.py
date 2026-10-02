@@ -22,6 +22,7 @@ except ImportError:
     HAS_MATPLOTLIB = False
     print("⚠️  matplotlib not available; skipping figure generation")
 
+sys.path.insert(0, str(Path(__file__).parent / "src"))
 from model import export_formulas, FORMULAS
 from simulate import covid_baseline, measles_scenario, generate_report
 

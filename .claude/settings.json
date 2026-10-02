@@ -29,7 +29,23 @@
       "Bash(PYTHONPATH=src python -c \"from math_trace.formula import Formula; f = Formula\\('test', 'x^2', 'test formula', 10\\); print\\(f'✅ Formula dataclass works: {f.name}'\\)\")",
       "Bash(python -c ' *)",
       "Bash(python src/model.py)",
-      "Bash(git commit -m 'feat\\(server\\): FastAPI interactive slide editor with live preview *)"
+      "Bash(git commit -m 'feat\\(server\\): FastAPI interactive slide editor with live preview *)",
+      "Bash(awk '{print $NF}')",
+      "Bash(mv getting-started-external.md guides/)",
+      "Bash(mv TYPST-GOTCHAS.md guides/typst-troubleshooting.md)",
+      "Bash(mv TYPST-LINTING.md guides/typst-linting.md)",
+      "Bash(mv FORMULA_SLIDES_MARKET_ASSESSMENT.md research/)",
+      "Bash(mv POSITIONING.md research/competitive-positioning.md)",
+      "Bash(mv ARXIV-PLAN.md research/arxiv-publication-plan.md)",
+      "Bash(mv equation-traceability-semantic-minimum.md research/)",
+      "Bash(mv EPIDEMIOLOGY-GOLDEN-PATH.md docs/archived/)",
+      "Bash(mv IMPLEMENTATION_COMPLETE_*.md docs/archived/)",
+      "Bash(mv LAUNCH_RECORD_*.md docs/archived/)",
+      "Bash(mv MEMBRANE-REFERENCE.md docs/archived/)",
+      "Bash(mkdir -p src)",
+      "Bash(mv model.py src/)",
+      "Bash(touch src/__init__.py)",
+      "Bash(grep -E \"^-.*\\\\.py$\")"
     ]
   }
 }

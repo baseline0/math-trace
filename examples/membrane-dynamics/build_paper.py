@@ -21,8 +21,8 @@ def generate_formulas() -> bool:
     """Convert SymPy formulas to Typst via LaTeX."""
     print("📐 Generating Typst formulas...")
 
-    # 1. Run model.py to get JSON
-    result = subprocess.run([sys.executable, 'model.py'], capture_output=True, text=True)
+    # 1. Run src/model.py to get JSON
+    result = subprocess.run([sys.executable, 'src/model.py'], capture_output=True, text=True)
     if result.returncode != 0:
         print(f"❌ model.py failed:\n{result.stderr}")
         return False
@@ -57,6 +57,7 @@ def generate_figures() -> bool:
     print("📊 Running simulation and generating figures...")
 
     try:
+        sys.path.insert(0, str(Path(__file__).parent / "src"))
         from simulate import simulate
         import matplotlib
         matplotlib.use('Agg')  # Non-interactive backend
