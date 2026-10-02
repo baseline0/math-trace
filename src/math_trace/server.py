@@ -465,7 +465,13 @@ theme: default
 
                 // Parse JSON/YAML
                 const formulas = JSON.parse(formulas_str);
-                const config = YAML.parse(config_str);
+                let config;
+                try {
+                    config = typeof YAML !== 'undefined' ? YAML.parse(config_str) : JSON.parse(config_str);
+                } catch (yaml_err) {
+                    // Fallback: try JSON if YAML fails
+                    config = JSON.parse(config_str);
+                }
 
                 status.innerHTML = '<div class="loading">⏳ Rendering preview...</div>';
                 btn.disabled = true;
@@ -505,7 +511,13 @@ theme: default
                 const config_str = document.getElementById('config').value;
 
                 const formulas = JSON.parse(formulas_str);
-                const config = YAML.parse(config_str);
+                let config;
+                try {
+                    config = typeof YAML !== 'undefined' ? YAML.parse(config_str) : JSON.parse(config_str);
+                } catch (yaml_err) {
+                    // Fallback: try JSON if YAML fails
+                    config = JSON.parse(config_str);
+                }
 
                 status.innerHTML = '<div class="loading">⏳ Exporting...</div>';
 
@@ -543,13 +555,19 @@ theme: default
             return div.innerHTML;
         }
 
-        // Load YAML library
+        // Load YAML library (non-blocking)
         const script = document.createElement('script');
         script.src = 'https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js';
+        script.async = true;
         document.head.appendChild(script);
 
-        // Initial preview on load
+        // Initial preview on load (with fallback if YAML fails to load)
         script.onload = () => {
+            previewSlide();
+        };
+
+        script.onerror = () => {
+            console.warn('YAML library failed to load; using JSON fallback');
             previewSlide();
         };
     </script>
