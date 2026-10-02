@@ -2,31 +2,43 @@
   "michaelis_menten": {
     "latex": "v = \\frac{S V_{max}}{K_{m} + S}",
     "description": "Michaelis-Menten equation: reaction velocity vs substrate concentration",
-    "source_line": 15
+    "source_line": 27,
+    "assumptions": "Quasi-steady-state assumption (d[ES]/dt \u2248 0)",
+    "units": "\u03bcmol/min"
   },
   "max_velocity": {
     "latex": "V_{max} = E_{0} k_{2}",
     "description": "Maximum velocity proportional to enzyme concentration",
-    "source_line": 19
+    "source_line": 34,
+    "assumptions": "[S] >> Km at saturation",
+    "units": "\u03bcmol/min"
   },
   "michaelis_constant": {
     "latex": "K_{m} = \\frac{k_{2} + k_{-1}}{k_{1}}",
     "description": "Michaelis constant relates binding and turnover rates",
-    "source_line": 23
+    "source_line": 41,
+    "assumptions": "Pre-equilibrium binding",
+    "units": "mM"
   },
   "enzyme_mechanism": {
     "latex": "E + S \\rightarrow ES \\rightarrow E + P",
     "description": "Three-step enzyme mechanism (binding \u2192 catalysis \u2192 release)",
-    "source_line": 27
+    "source_line": 48,
+    "assumptions": "Reaction reaches steady state",
+    "units": "dimensionless"
   },
   "turnover_number": {
     "latex": "k_{cat} = k_{2}",
     "description": "Turnover number: catalytic events per enzyme per second",
-    "source_line": 31
+    "source_line": 55,
+    "assumptions": "First-order reaction at catalytic step",
+    "units": "s^-1"
   },
   "specificity": {
     "latex": "k_{cat}/K_m = \\frac{k_{2}}{K_{m}}",
     "description": "Catalytic efficiency: how selective and fast the enzyme is",
-    "source_line": 35
+    "source_line": 62,
+    "assumptions": "Low substrate concentration regime",
+    "units": "mM^-1 s^-1"
   }
 }

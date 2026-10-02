@@ -11,7 +11,24 @@
       "Bash(git reset *)",
       "Bash(git commit -m 'chore: apply code-as-docs policy, remove CLAUDE.md and .claude/ from tracking *)",
       "Bash(git commit -m 'docs: simplify README project structure tree *)",
-      "Bash(git commit -m 'refactor: reorganize tests with unit/integration split and conftest-based markers *)"
+      "Bash(git commit -m 'refactor: reorganize tests with unit/integration split and conftest-based markers *)",
+      "Bash(sed -i 's/def test_formulas_use_type_hints/def test_formulas_are_dataclasses/' tests/unit/test_guarantees.py)",
+      "Bash(sed -i 's/Code uses type hints/Formulas are structured data with typed fields/' tests/unit/test_guarantees.py)",
+      "Bash(sed -i 's/Formula class should be well-typed/Formulas should have dataclass-like interface/' tests/unit/test_guarantees.py)",
+      "Bash(sed -i 's/Check it.s an instance of Formula/Should have dataclass fields/' tests/unit/test_guarantees.py)",
+      "Bash(sed -i 's/assert isinstance\\(rate_formula, Formula\\)/assert hasattr\\(rate_formula, \"__dataclass_fields__\"\\)/' tests/unit/test_guarantees.py)",
+      "Bash(git commit -m 'test: add guarantee validation tests from AGMAI-READY claims *)",
+      "Bash(sed -i 's/body=\"a² + b² = c²\"/statement=\"a² + b² = c²\"/' tests/unit/test_generators.py)",
+      "Bash(sed -i 's/TypstEnvironmentBuilder.theorem\\(/TypstEnvironmentBuilder.theorem\\(name=\"theorem\", /' tests/unit/test_generators.py)",
+      "Bash(git commit -m 'test: comprehensive coverage for generators.py \\(SymPy→Typst conversion\\) *)",
+      "Bash(python /tmp/fix_tests.py)",
+      "Bash(git commit -m 'test: add services and CLI smoke tests \\(25% → 46% overall coverage\\) *)",
+      "Bash(git commit -m 'docs: absorb AGMAI-READY into README and portfolio materials *)",
+      "Bash(python -m pytest tests/unit/test_template_consistency.py::TestTemplateStructure::test_template_exists -v)",
+      "Bash(python -c \"from math_trace.formula import Formula; f = Formula\\('test', 'x^2', 'test formula', 10\\); print\\(f'✅ Formula dataclass works: {f.name}'\\)\")",
+      "Bash(PYTHONPATH=src python -c \"from math_trace.formula import Formula; f = Formula\\('test', 'x^2', 'test formula', 10\\); print\\(f'✅ Formula dataclass works: {f.name}'\\)\")",
+      "Bash(python -c ' *)",
+      "Bash(python src/model.py)"
     ]
   }
 }

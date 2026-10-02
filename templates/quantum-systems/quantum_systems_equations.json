@@ -1,0 +1,16 @@
+{
+  "schrodinger": {
+    "latex": "i\\hbar\\frac{\\partial \\Psi}{\\partial t} = \\hat{H}\\Psi",
+    "description": "Time-dependent Schr\u00f6dinger equation",
+    "source_line": 14,
+    "assumptions": "non-relativistic quantum mechanics",
+    "units": "energy (eV)"
+  },
+  "hamiltonian": {
+    "latex": "\\hat{H} = \\frac{\\hat{p}^2}{2m} + V(\\hat{x})",
+    "description": "Quantum Hamiltonian: kinetic + potential energy operators",
+    "source_line": 21,
+    "assumptions": "single particle, no spin",
+    "units": "energy (eV)"
+  }
+}
