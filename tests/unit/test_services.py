@@ -8,12 +8,15 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from math_trace.services import (
-    Formula,
+    ExtractedEquation,
     FormulaExtractor,
     PaperDownloader,
     PaperMetadata,
     PresentationBuilder,
 )
+
+# Alias for tests
+Formula = ExtractedEquation
 
 
 class TestPaperDownloader:
