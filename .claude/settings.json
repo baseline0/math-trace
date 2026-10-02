@@ -73,7 +73,16 @@
       "Bash(timeout 90 python arxiv_spike_v2.py)",
       "Bash(git commit -m 'feat: add arXiv paper extraction pipeline *)",
       "Bash(git commit -m 'docs: add arXiv extraction workflow guide *)",
-      "Bash(git commit -m 'feat: add HTMX-powered formula browser UI *)"
+      "Bash(git commit -m 'feat: add HTMX-powered formula browser UI *)",
+      "Bash(git commit -m 'fix: make formula_browser functions callable directly \\(not just Typer CLI\\) *)",
+      "Bash(git commit -m 'feat: add Docker Compose setup for easy deployment *)",
+      "Bash(git commit -m 'feat: add Docker lifecycle commands to Justfile *)",
+      "Bash(git commit -m 'feat: add end-to-end arXiv pipeline test *)",
+      "Bash(git commit -m 'fix: remove deprecated version attribute from compose.yaml *)",
+      "Bash(docker compose *)",
+      "Bash(python -c \"import latex2sympy2; print\\(latex2sympy2.__version__\\)\")",
+      "Bash(pip show *)",
+      "Bash(curl -s http://localhost:8000/api/health)"
     ]
   }
 }

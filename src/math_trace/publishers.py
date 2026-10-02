@@ -1,0 +1,169 @@
+"""Publishing layer: Convert formatted documents to PDF.
+
+## Architecture: Pluggable PDF Backends
+
+This module defines the abstraction for publishing formatted documents (LaTeX,
+Typst) to PDF. By decoupling the publication tool from the document format,
+we can swap publishers without affecting the pipeline.
+
+## Design Principle: Graceful Degradation
+
+Currently uses Typst for PDF generation. If Typst becomes unmaintained or its
+development stalls, we have a fallback: pdflatex/XeLaTeX.
+
+**Migration Path:** If Typst stops being maintained:
+1. Implement LatexPublisher using pdflatex
+2. Change one line: publisher = LatexPublisher()
+3. Paper still builds (just using different compiler)
+
+## Implementations
+
+- **TypstPublisher:** Uses Typst compiler (current default)
+  - Excellent math typesetting
+  - Modern, actively maintained
+
+- **LatexPublisher:** Uses pdflatex/XeLaTeX (fallback)
+  - Mature ecosystem
+  - Available everywhere
+
+## To Add a New Publisher
+
+1. Subclass Publisher
+2. Implement compile(tex_file: Path) -> bytes
+3. Update build_paper.py to use the new publisher
+
+Example:
+    class WeasyPrintPublisher(Publisher):
+        def compile(self, html_file: Path) -> bytes:
+            # Use WeasyPrint to convert HTML to PDF
+            return pdf_bytes
+
+See Also:
+    - formula.py: Formula abstraction (pluggable source)
+    - exporters.py: Exporter abstraction (pluggable conversion)
+    - examples/*/build_paper.py: Orchestration
+"""
+
+from abc import ABC, abstractmethod
+from pathlib import Path
+import subprocess
+
+
+class Publisher(ABC):
+    """Base class for document publishers.
+
+    Converts formatted documents (LaTeX, Typst, HTML, etc.) to PDF.
+    Subclasses implement specific publishing tools.
+    """
+
+    @abstractmethod
+    def compile(self, source_file: Path) -> bytes:
+        """Compile source document to PDF.
+
+        Args:
+            source_file: Path to source document (e.g., main.typ, main.tex)
+
+        Returns:
+            PDF file content as bytes
+
+        Raises:
+            RuntimeError: If compilation fails
+        """
+        pass
+
+
+class TypstPublisher(Publisher):
+    """Publishes Typst documents to PDF.
+
+    MIGRATION PATH: If Typst's maintenance becomes a concern, replace this
+    with LatexPublisher. All upstream code (formula definitions, exports)
+    continues to work—only the final compilation step changes.
+
+    Typst provides excellent mathematical typesetting and is actively maintained.
+    This is the preferred publisher for math-trace.
+    """
+
+    def compile(self, source_file: Path) -> bytes:
+        """Compile Typst document to PDF.
+
+        Args:
+            source_file: Path to .typ file
+
+        Returns:
+            PDF bytes
+
+        Raises:
+            RuntimeError: If typst compiler not found or compilation fails
+        """
+        try:
+            result = subprocess.run(
+                ["typst", "compile", str(source_file), "-"],
+                capture_output=True,
+                timeout=30,
+            )
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"Typst compilation failed: {result.stderr.decode()}"
+                )
+            return result.stdout
+
+        except FileNotFoundError:
+            raise RuntimeError(
+                "Typst compiler not found. Install with: cargo install typst-cli"
+            )
+
+
+class LatexPublisher(Publisher):
+    """Publishes LaTeX documents to PDF (fallback).
+
+    RATIONALE: Provides a fallback if Typst becomes unmaintained or stalls.
+    LaTeX/pdflatex is mature and available on all systems.
+
+    TRADE-OFF: LaTeX's math output is less elegant than Typst, but it works.
+    Use this only if Typst is unavailable or explicitly needed for compatibility.
+
+    To use this publisher instead of Typst:
+        publisher = LatexPublisher()
+    """
+
+    def compile(self, source_file: Path) -> bytes:
+        """Compile LaTeX document to PDF.
+
+        Args:
+            source_file: Path to .tex file
+
+        Returns:
+            PDF bytes
+
+        Raises:
+            RuntimeError: If pdflatex not found or compilation fails
+        """
+        try:
+            # Run pdflatex
+            result = subprocess.run(
+                [
+                    "pdflatex",
+                    "-interaction=nonstopmode",
+                    "-output-directory=/tmp",
+                    str(source_file),
+                ],
+                capture_output=True,
+                timeout=60,
+            )
+
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"pdflatex compilation failed: {result.stderr.decode()}"
+                )
+
+            # Return generated PDF
+            pdf_path = Path("/tmp") / source_file.stem / ".pdf"
+            if not pdf_path.exists():
+                raise RuntimeError("PDF file not generated by pdflatex")
+
+            return pdf_path.read_bytes()
+
+        except FileNotFoundError:
+            raise RuntimeError(
+                "pdflatex not found. Install with: apt-get install texlive-latex-base"
+            )

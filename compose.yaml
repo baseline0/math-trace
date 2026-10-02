@@ -10,7 +10,6 @@ services:
       - math-trace-cache:/root/.math-trace
     environment:
       - PYTHONUNBUFFERED=1
-    command: python -m math_trace.server
     networks:
       - math-trace-net
     healthcheck:
