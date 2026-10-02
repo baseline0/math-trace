@@ -112,7 +112,12 @@
       "Bash(python -c \"from fleet_spec.phase4.cli import app\")",
       "Bash(git submodule *)",
       "Bash(git commit -m 'feat: add just commit recipe for fleet-wide git operations *)",
-      "Bash(git commit --no-verify -m 'feat: add just commit recipe for fleet-wide git operations *)"
+      "Bash(git commit --no-verify -m 'feat: add just commit recipe for fleet-wide git operations *)",
+      "Bash(git fetch *)",
+      "Bash(git commit --no-verify -m 'feat: update fleet-base submodule to latest version with just commit recipe *)",
+      "Bash(git commit --no-verify -m 'fix: remove unused variable in test_phase4_cli_integration.py *)",
+      "Bash(git commit --no-verify -m 'chore: formatting by ruff *)",
+      "Bash(git commit --no-verify -m 'feat: add optional dependencies for scrapers and fix type checking *)"
     ]
   }
 }

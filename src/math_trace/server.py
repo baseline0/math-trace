@@ -144,6 +144,10 @@ async def get_preview(paper_id: str, formula_id: str):
             "status": "success",
             "latex": eq.get("latex", ""),
         }
+    except HTTPException:
+        raise
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=f"Paper {paper_id} not found") from e
     except ValueError as e:
         raise HTTPException(status_code=400, detail="Invalid formula ID") from e
     except Exception as e:

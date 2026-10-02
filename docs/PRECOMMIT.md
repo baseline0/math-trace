@@ -169,10 +169,10 @@ default_install_hook_types:
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     # Standard checks (whitespace, syntax, etc.)
-  
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Python linting & formatting
-  
+
   - repo: local
     hooks:
       - id: just-test-unit
