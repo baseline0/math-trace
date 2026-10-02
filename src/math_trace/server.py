@@ -19,7 +19,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from .presentation_generator import PresentationGenerator, PresentationConfig, MarpBackend
+from .presentation_generator import MarpBackend, PresentationConfig
 
 app = FastAPI(
     title="math-trace Slide Editor",
@@ -64,35 +64,31 @@ async def preview_slide(
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir_path = Path(tmpdir)
 
-            # Write formulas + config to temp files
-            formulas_file = tmpdir_path / "formulas.json"
-            config_file = tmpdir_path / "config.yaml"
-
-            formulas_file.write_text(json.dumps(formulas, indent=2))
-            config_file.write_text(yaml.dump(config))
-
             # Render presentation
             try:
-                gen = PresentationGenerator(
-                    formulas_file,
-                    config_file,
-                    backend=backend,
-                )
-                result_path = gen.build(tmpdir_path)
+                # Ensure config has required fields for PresentationConfig
+                if "format" not in config:
+                    config["format"] = "talk"
+                if "backend" not in config:
+                    config["backend"] = backend
+                if "slides" not in config:
+                    config["slides"] = []
 
-                # Read result
-                if result_path.suffix == ".html":
-                    html = result_path.read_text()
-                    return {"status": "success", "html": html}
-                elif result_path.suffix == ".md":
+                # Create presentation config
+                pres_config = PresentationConfig(**config)
+
+                # Render using Marp backend
+                marp = MarpBackend()
+                result_path = marp.render(pres_config, formulas, tmpdir_path)
+
+                # Read and return result
+                if result_path.exists():
                     markdown = result_path.read_text()
                     return {"status": "success", "markdown": markdown}
                 else:
-                    # For PDF, return base64 (would require additional encoding)
-                    return {
-                        "status": "success",
-                        "message": f"Rendered to {result_path.name}",
-                    }
+                    return {"status": "error", "message": "Rendering produced no output"}
+            except TypeError as e:
+                return {"status": "error", "message": f"Config error: {str(e)}"}
             except Exception as e:
                 return {"status": "error", "message": f"Render failed: {str(e)}"}
 
@@ -130,28 +126,33 @@ async def export_slides(
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir_path = Path(tmpdir)
 
-            formulas_file = tmpdir_path / "formulas.json"
-            config_file = tmpdir_path / "config.yaml"
+            try:
+                # Ensure config has required fields
+                if "format" not in config:
+                    config["format"] = "talk"
+                if "backend" not in config:
+                    config["backend"] = format or "marp"
+                if "slides" not in config:
+                    config["slides"] = []
 
-            formulas_file.write_text(json.dumps(formulas, indent=2))
-            config_file.write_text(yaml.dump(config))
+                # Create presentation config
+                pres_config = PresentationConfig(**config)
 
-            gen = PresentationGenerator(
-                formulas_file,
-                config_file,
-                backend="marp",
-            )
-            result_path = gen.build(tmpdir_path)
+                # Render using Marp backend
+                marp = MarpBackend()
+                result_path = marp.render(pres_config, formulas, tmpdir_path)
 
-            # Return file for download
-            if result_path.exists():
-                return FileResponse(
-                    result_path,
-                    media_type="application/octet-stream",
-                    filename=f"slides.{result_path.suffix.lstrip('.')}",
-                )
-            else:
-                raise HTTPException(500, "Export generation failed")
+                # Return file for download
+                if result_path.exists():
+                    return FileResponse(
+                        result_path,
+                        media_type="text/markdown",
+                        filename="slides.md",
+                    )
+                else:
+                    raise HTTPException(500, "Export generation failed")
+            except TypeError as e:
+                raise HTTPException(422, f"Config error: {str(e)}")
 
     except Exception as e:
         raise HTTPException(500, str(e))
