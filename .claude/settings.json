@@ -103,7 +103,11 @@
       "Bash(python -c \"import sys; print\\('\\\\n'.join\\(sys.path\\)\\)\")",
       "Bash(python -m pytest tests/unit tests/e2e -q --tb=line)",
       "Bash(chmod +x /home/mark/projects/math-trace/scripts/regenerate-autogen.sh)",
-      "Bash(pre-commit --version)"
+      "Bash(pre-commit --version)",
+      "Bash(chmod +x /home/mark/projects/math-trace/scripts/validate-precommit-consistency.sh)",
+      "Bash(bash scripts/validate-precommit-consistency.sh)",
+      "Bash(git commit -m 'fix: add priority tag to fleet-governance-validate hook *)",
+      "Bash(git commit -m 'fix: add priority tag and comment out unavailable fleet-base hook *)"
     ]
   }
 }

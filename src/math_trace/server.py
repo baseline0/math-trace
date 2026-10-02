@@ -1,10 +1,10 @@
-"""FastAPI server for interactive slide development & formula debugging.
+"""FastAPI server for formula extraction and verification.
 
 Provides web UI for:
-- Live formula editing (JSON)
-- Configuration editing (YAML)
-- Real-time slide preview (Revealjs + HTMX)
-- Export (HTML with live formula evaluation)
+- Paste arXiv URL to extract formulas
+- View extracted formulas in JSON
+- Navigate formulas with arrow keys
+- Preview formula rendering
 """
 
 from __future__ import annotations
@@ -22,11 +22,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from .arxiv_extractor import extract_arxiv_id, load_extracted_paper, save_extracted_paper
-from .formula import Formula
-from .formula_browser import app as formula_browser_app
 from .logging import get_logger
-from .presentation_generator import PresentationConfig
-from .presentation_server import PresentationServer
 from .responses import ApiResponse
 
 logger = get_logger(__name__)
@@ -41,137 +37,6 @@ app = FastAPI(
 # ============================================================================
 # API Routes
 # ============================================================================
-
-
-@app.post("/api/preview")
-async def preview_slide(
-    formulas: dict,
-    config: Optional[dict] = None,
-    theme: str = "white",
-):
-    """Live preview of slides with current formulas + config.
-
-    Args:
-        formulas: Dictionary of formula definitions (name → latex)
-        config: Presentation config (title, author, etc.)
-        theme: Revealjs theme (white, black, league, sky, beige, etc.)
-
-    Returns:
-        JSON with rendered HTML
-    """
-    try:
-        if not formulas:
-            return {"status": "error", "message": "No formulas provided"}
-
-        # Create presentation server
-        title = config.get("title", "Untitled Presentation") if config else "Untitled Presentation"
-        server = PresentationServer(title=title, theme=theme)
-
-        # Convert formulas dict to Formula objects and add as slides
-        for formula_name, formula_data in formulas.items():
-            if isinstance(formula_data, dict):
-                formula = Formula(
-                    name=formula_data.get("name", formula_name),
-                    latex=formula_data.get("latex", ""),
-                    description=formula_data.get("description", ""),
-                    source_line=formula_data.get("source_line", 0),
-                )
-                parameters = formula_data.get("parameters", {})
-                server.add_formula_slide(
-                    title=formula.name,
-                    formulas={formula_name: formula},
-                    parameters=parameters,
-                    description=formula.description,
-                )
-
-        # Return rendered HTML as JSON
-        html = server._render_presentation()
-        return {"status": "success", "html": html}
-
-    except KeyError as e:
-        return {"status": "error", "message": f"Missing field: {e}"}
-    except Exception as e:
-        return {"status": "error", "message": f"Preview failed: {str(e)}"}
-
-
-@app.post("/api/export")
-async def export_slides(
-    formulas: dict,
-    config: Optional[dict] = None,
-    format: str = "markdown",
-):
-    """Export presentation in specified format.
-
-    Args:
-        formulas: Dictionary of formulas
-        config: Presentation config
-        format: Output format ("markdown", "html", "pdf")
-
-    Returns:
-        File download or error
-    """
-    try:
-        if not formulas:
-            raise HTTPException(400, "No formulas provided")
-
-        if config is None:
-            config = {"title": "Untitled Presentation", "author": "Unknown"}
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmpdir_path = Path(tmpdir)
-
-            try:
-                # Restructure config to match PresentationConfig schema
-                pres_fields = {"title", "format", "backend", "slides", "metadata", "paper_url", "paper_doi"}
-                metadata = {}
-
-                # Extract non-PresentationConfig fields into metadata
-                for key in list(config.keys()):
-                    if key not in pres_fields:
-                        metadata[key] = config.pop(key)
-
-                # Set defaults for required fields
-                if "title" not in config:
-                    config["title"] = "Untitled"
-                if "format" not in config:
-                    config["format"] = "talk"
-                if "slides" not in config:
-                    config["slides"] = []
-                if metadata:
-                    config["metadata"] = metadata
-
-                # Use PresentationServer to export HTML
-                title = config.get("title", "Untitled Presentation")
-                server = PresentationServer(title=title, theme="white")
-
-                # Convert formulas to Formula objects
-                for formula_name, formula_data in formulas.items():
-                    if isinstance(formula_data, dict):
-                        formula = Formula(
-                            name=formula_data.get("name", formula_name),
-                            latex=formula_data.get("latex", ""),
-                            description=formula_data.get("description", ""),
-                            source_line=formula_data.get("source_line", 0),
-                        )
-                        parameters = formula_data.get("parameters", {})
-                        server.add_formula_slide(
-                            title=formula.name,
-                            formulas={formula_name: formula},
-                            parameters=parameters,
-                            description=formula.description,
-                        )
-
-                html_content = server._render_presentation()
-                return {
-                    "status": "success",
-                    "html": html_content,
-                    "filename": "presentation.html"
-                }
-            except TypeError as e:
-                raise HTTPException(422, f"Config error: {str(e)}")
-
-    except Exception as e:
-        raise HTTPException(500, str(e))
 
 
 @app.get("/api/health")

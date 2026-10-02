@@ -317,6 +317,11 @@ regenerate:
     @echo "   git status"
     @echo "   git diff"
 
+[group("maintain")]
+validate-precommit:
+    @echo "🔍 Validating pre-commit consistency across fleet..."
+    bash scripts/validate-precommit-consistency.sh
+
 [group("help")]
 help:
     @echo "🎓 math-trace: Formula-to-code traceability"

@@ -30,11 +30,6 @@ __author__ = "Mark Alexiuk"
 __license__ = "MIT"
 
 from .generators import SymPyToTypst, TypstEnvironmentBuilder
-from .presentation_generator import (
-    PresentationBackend,
-    PresentationConfig,
-    PresentationGenerator,
-)
 from .services import (
     ExtractedEquation,
     FormulaExtractor,
@@ -50,10 +45,6 @@ __all__ = [
     # Generators
     "SymPyToTypst",
     "TypstEnvironmentBuilder",
-    # Presentation
-    "PresentationGenerator",
-    "PresentationBackend",
-    "PresentationConfig",
     # Services
     "PaperDownloader",
     "FormulaExtractor",
