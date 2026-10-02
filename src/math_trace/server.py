@@ -66,13 +66,27 @@ async def preview_slide(
 
             # Render presentation
             try:
-                # Ensure config has required fields for PresentationConfig
+                # Restructure config to match PresentationConfig schema
+                # PresentationConfig fields: title, format, backend, slides, metadata, paper_url, paper_doi
+                pres_fields = {"title", "format", "backend", "slides", "metadata", "paper_url", "paper_doi"}
+                metadata = {}
+
+                # Extract non-PresentationConfig fields into metadata
+                for key in list(config.keys()):
+                    if key not in pres_fields:
+                        metadata[key] = config.pop(key)
+
+                # Set defaults for required fields
+                if "title" not in config:
+                    config["title"] = "Untitled"
                 if "format" not in config:
                     config["format"] = "talk"
                 if "backend" not in config:
                     config["backend"] = backend
                 if "slides" not in config:
                     config["slides"] = []
+                if metadata:
+                    config["metadata"] = metadata
 
                 # Create presentation config
                 pres_config = PresentationConfig(**config)
@@ -127,13 +141,26 @@ async def export_slides(
             tmpdir_path = Path(tmpdir)
 
             try:
-                # Ensure config has required fields
+                # Restructure config to match PresentationConfig schema
+                pres_fields = {"title", "format", "backend", "slides", "metadata", "paper_url", "paper_doi"}
+                metadata = {}
+
+                # Extract non-PresentationConfig fields into metadata
+                for key in list(config.keys()):
+                    if key not in pres_fields:
+                        metadata[key] = config.pop(key)
+
+                # Set defaults for required fields
+                if "title" not in config:
+                    config["title"] = "Untitled"
                 if "format" not in config:
                     config["format"] = "talk"
                 if "backend" not in config:
                     config["backend"] = format or "marp"
                 if "slides" not in config:
                     config["slides"] = []
+                if metadata:
+                    config["metadata"] = metadata
 
                 # Create presentation config
                 pres_config = PresentationConfig(**config)
@@ -142,13 +169,14 @@ async def export_slides(
                 marp = MarpBackend()
                 result_path = marp.render(pres_config, formulas, tmpdir_path)
 
-                # Return file for download
+                # Return file content (can't use FileResponse with temp dir that will be deleted)
                 if result_path.exists():
-                    return FileResponse(
-                        result_path,
-                        media_type="text/markdown",
-                        filename="slides.md",
-                    )
+                    content = result_path.read_text()
+                    return {
+                        "status": "success",
+                        "markdown": content,
+                        "filename": "slides.md"
+                    }
                 else:
                     raise HTTPException(500, "Export generation failed")
             except TypeError as e:
