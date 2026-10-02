@@ -467,10 +467,16 @@ theme: default
                 const formulas = JSON.parse(formulas_str);
                 let config;
                 try {
-                    config = typeof YAML !== 'undefined' ? YAML.parse(config_str) : JSON.parse(config_str);
+                    config = typeof YAML !== 'undefined' ? YAML.parse(config_str) : {title: "Config Error", author: "Error"};
+                    if (!config) {
+                        status.innerHTML = '<div class="error">❌ YAML library not loaded. Install js-yaml or use JSON format for config.</div>';
+                        btn.disabled = false;
+                        return;
+                    }
                 } catch (yaml_err) {
-                    // Fallback: try JSON if YAML fails
-                    config = JSON.parse(config_str);
+                    status.innerHTML = '<div class="error">❌ Config parse error: ' + yaml_err.message + '</div>';
+                    btn.disabled = false;
+                    return;
                 }
 
                 status.innerHTML = '<div class="loading">⏳ Rendering preview...</div>';
@@ -513,10 +519,14 @@ theme: default
                 const formulas = JSON.parse(formulas_str);
                 let config;
                 try {
-                    config = typeof YAML !== 'undefined' ? YAML.parse(config_str) : JSON.parse(config_str);
+                    config = typeof YAML !== 'undefined' ? YAML.parse(config_str) : {title: "Untitled", author: "Unknown"};
+                    if (!config) {
+                        status.innerHTML = '<div class="error">❌ Config parse failed: YAML library not available</div>';
+                        return;
+                    }
                 } catch (yaml_err) {
-                    // Fallback: try JSON if YAML fails
-                    config = JSON.parse(config_str);
+                    status.innerHTML = '<div class="error">❌ Config parse error: ' + yaml_err.message + '</div>';
+                    return;
                 }
 
                 status.innerHTML = '<div class="loading">⏳ Exporting...</div>';
