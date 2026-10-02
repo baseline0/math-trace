@@ -101,14 +101,81 @@ class TestExportEndpoint:
     """Tests for /api/export endpoint."""
 
     def test_export_with_valid_inputs(self):
-        """Export succeeds or fails gracefully with valid formulas and config."""
+        """Export succeeds with valid formulas and config."""
         response = client.post("/api/export", json={
             "formulas": {"rate": {"latex": "k n"}},
             "config": {"title": "Export Test", "author": "Me"},
             "format": "markdown"
         })
-        # Export may fail if backend not available, but shouldn't crash with cryptic error
-        assert response.status_code in [200, 400, 500]
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "success"
+        assert "markdown" in data
+        assert "slides.md" in data["filename"]
+
+    def test_export_markdown_contains_marp_frontmatter(self):
+        """Exported markdown includes Marp frontmatter."""
+        response = client.post("/api/export", json={
+            "formulas": {"rate": {"latex": "k \\binom{n}{2}"}},
+            "config": {
+                "title": "Test Presentation",
+                "author": "Test Author"
+            }
+        })
+        assert response.status_code == 200
+        data = response.json()
+        markdown = data["markdown"]
+
+        # Should have Marp frontmatter
+        assert "---" in markdown
+        assert "marp: true" in markdown
+        assert "theme: default" in markdown
+        assert "paginate: true" in markdown
+        assert 'title: "Test Presentation"' in markdown
+
+    def test_export_markdown_includes_title_and_author(self):
+        """Exported markdown includes title and author from config."""
+        response = client.post("/api/export", json={
+            "formulas": {"placeholder": {"latex": "x"}},
+            "config": {
+                "title": "Disease Modeling",
+                "author": "Dr. Smith"
+            }
+        })
+        assert response.status_code == 200
+        data = response.json()
+        markdown = data["markdown"]
+
+        assert "# Disease Modeling" in markdown
+        assert "Dr. Smith" in markdown
+
+    def test_export_with_slides_containing_formulas(self):
+        """Export includes formulas when slides reference them."""
+        response = client.post("/api/export", json={
+            "formulas": {
+                "rate": {"latex": "k \\binom{n}{2}", "description": "Rate law"}
+            },
+            "config": {
+                "title": "Kinetics",
+                "format": "talk",
+                "backend": "marp",
+                "slides": [
+                    {
+                        "title": "Reaction Rate",
+                        "text": "The rate follows a binomial distribution.",
+                        "formulas": ["rate"]
+                    }
+                ]
+            }
+        })
+        assert response.status_code == 200
+        data = response.json()
+        markdown = data["markdown"]
+
+        # Should contain slide content
+        assert "Reaction Rate" in markdown
+        assert "binomial distribution" in markdown
+        assert "Rate law" in markdown
 
     def test_export_rejects_empty_formulas(self):
         """Export returns error for empty formulas."""
