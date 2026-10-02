@@ -28,6 +28,28 @@ open main.pdf
 
 **What you get**: A publication-ready PDF with equations, theorems, and simulation figures—all traced back to `model.py`.
 
+## What math-trace Guarantees
+
+Every formula in your paper is:
+- **Traced to source code** — Equations in your SymPy model automatically appear in the paper
+- **Marked with source location** — Every equation tagged with filename:line for easy reference
+- **Tested** — Core conversion pipeline validated (see `tests/unit/test_guarantees.py`)
+- **Reproducible** — Same equation produces same LaTeX output every time
+- **Publication-ready** — Generates Typst PDF from a fresh Python 3.11+ environment in seconds
+
+⚠️ **What this does NOT mean**: math-trace verifies your equations are **transcribed correctly from code**. It does NOT verify scientific validity, empirical adequacy, or physical realism—that's peer review's job.
+
+## What math-trace Does NOT Verify
+
+math-trace is **NOT** responsible for:
+- **Scientific validity** — Whether your theory is correct (peer review's job)
+- **Empirical adequacy** — Whether equations match real-world data
+- **Domain expertise** — Whether you understand your model's assumptions
+- **Numerical stability** — Behavior of external libraries (SymPy, NumPy)
+- **Parameter estimation** — Fitting constants to measurements
+
+**Bottom line**: A ✅ "verified" badge means "equation transcribed correctly," NOT "equation is scientifically sound."
+
 ## What Is math-trace?
 
 Every formula in your paper should link to the code that uses it. Every theorem should have a proof. Every proof should be verified.
@@ -43,10 +65,18 @@ One edit to `model.py` updates your paper automatically.
 
 ### Requirements
 
-- Python 3.13
+**Core**:
+- Python 3.11, 3.12, or 3.13
 - `pip install math-trace` (or `just setup` for one-command installation)
-- Optional: Typst compiler (`just install-typst` for PDF generation)
-- Optional: Lean 4 (for formal proofs)
+
+**Optional**:
+- Typst ≥0.10 (required for PDF generation; `just install-typst` to set up)
+- Lean 4 (required only for optional formal proofs)
+
+**Supported Platforms**:
+- **macOS** (Intel and Apple Silicon)
+- **Linux** (Ubuntu 20.04+, other distributions)
+- **Windows** (via WSL2; native cmd.exe not supported)
 
 ## Example: Stochastic P Systems
 
