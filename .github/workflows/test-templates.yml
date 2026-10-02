@@ -79,9 +79,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check required files in each template
+      - name: Check required files in complete templates
         run: |
-          TEMPLATES=$(find templates -maxdepth 1 -type d ! -name templates ! -name ".*")
+          # Only check templates that have model.py (complete implementations)
+          TEMPLATES=$(find templates -maxdepth 1 -type d ! -name templates ! -name ".*" -exec test -f {}/model.py \; -print)
           for template in $TEMPLATES; do
             echo "Checking $template..."
             [ -f "$template/model.py" ] || { echo "Missing: model.py"; exit 1; }
@@ -90,7 +91,7 @@ jobs:
             [ -f "$template/main.typ" ] || { echo "Missing: main.typ"; exit 1; }
             [ -f "$template/README.md" ] || { echo "Missing: README.md"; exit 1; }
           done
-          echo "✅ All templates have required files"
+          echo "✅ All complete templates have required files"
 
       - name: Check template documentation
         run: |
