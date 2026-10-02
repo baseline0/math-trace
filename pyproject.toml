@@ -94,12 +94,8 @@ select = [
 ]
 ignore = [
     "E501",  # line too long (handled by formatter)
+    "S101",  # use of assert (often used in tests)
 ]
-
-[tool.ruff.lint.flake8-bandit]
-# Bandit security rules to catch common issues
-# S101: use of assert (often used in tests, so selectively ignored)
-skips = ["S101"]
 
 [tool.pyright]
 include = ["src"]
