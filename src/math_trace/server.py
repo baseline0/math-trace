@@ -43,7 +43,7 @@ app = FastAPI(
 # ============================================================================
 
 
-@app.post("/api/preview", response_class=HTMLResponse)
+@app.post("/api/preview")
 async def preview_slide(
     formulas: dict,
     config: Optional[dict] = None,
@@ -57,11 +57,11 @@ async def preview_slide(
         theme: Revealjs theme (white, black, league, sky, beige, etc.)
 
     Returns:
-        Rendered HTML with Revealjs + HTMX
+        JSON with rendered HTML
     """
     try:
         if not formulas:
-            raise HTTPException(400, "No formulas provided")
+            return {"status": "error", "message": "No formulas provided"}
 
         # Create presentation server
         title = config.get("title", "Untitled Presentation") if config else "Untitled Presentation"
@@ -84,13 +84,14 @@ async def preview_slide(
                     description=formula.description,
                 )
 
-        # Return rendered HTML
-        return server._render_presentation()
+        # Return rendered HTML as JSON
+        html = server._render_presentation()
+        return {"status": "success", "html": html}
 
     except KeyError as e:
-        raise HTTPException(400, f"Missing field: {e}")
+        return {"status": "error", "message": f"Missing field: {e}"}
     except Exception as e:
-        raise HTTPException(500, f"Preview failed: {str(e)}")
+        return {"status": "error", "message": f"Preview failed: {str(e)}"}
 
 
 @app.post("/api/export")
