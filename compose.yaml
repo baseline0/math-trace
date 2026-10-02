@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  math-trace:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./examples:/workspace/examples
+      - math-trace-cache:/root/.math-trace
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: python -m math_trace.server
+    networks:
+      - math-trace-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # Optional: Ollama for batch LaTeX→SymPy conversion (GPU-accelerated)
+  # Uncomment to enable overnight batch processing
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    networks:
+      - math-trace-net
+    # Uncomment for GPU support:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    profiles:
+      - dev  # Run with: docker compose --profile dev up
+
+networks:
+  math-trace-net:
+    driver: bridge
+
+volumes:
+  math-trace-cache:
+    driver: local
+  ollama-models:
+    driver: local
