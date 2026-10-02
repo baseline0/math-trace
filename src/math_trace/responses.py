@@ -6,16 +6,16 @@ and client expectations.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass
 from typing import Any, Generic, TypeVar
 
-from .constants import API_STATUS_SUCCESS, API_STATUS_ERROR
+from .constants import API_STATUS_ERROR, API_STATUS_SUCCESS
 
 T = TypeVar("T")
 
 
 @dataclass
-class ApiResponse(Generic[T]):
+class ApiResponse(Generic[T]):  # noqa: UP046
     """Standard API response wrapper.
 
     All API endpoints should return this format to ensure:
@@ -59,11 +59,11 @@ class ApiResponse(Generic[T]):
         )
 
     @staticmethod
-    def error(error: str, message: str | None = None, code: int = 400) -> ApiResponse:
+    def error(error_msg: str, message: str | None = None, code: int = 400) -> ApiResponse:  # noqa: F811
         """Create an error response.
 
         Args:
-            error: Error message
+            error_msg: Error message
             message: Optional additional context
             code: HTTP status code
 
@@ -72,7 +72,7 @@ class ApiResponse(Generic[T]):
         """
         return ApiResponse(
             status=API_STATUS_ERROR,
-            error=error,
+            error=error_msg,
             message=message,
             code=code,
         )

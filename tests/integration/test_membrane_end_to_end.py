@@ -16,7 +16,7 @@ from pathlib import Path
 import pytest
 
 # Add examples to path
-sys.path.insert(0, str(Path(__file__).parent / '../../examples/membrane-dynamics/src'))
+sys.path.insert(0, str(Path(__file__).parent / "../../examples/membrane-dynamics/src"))
 
 from model import FORMULAS
 from simulate import simulate
@@ -40,8 +40,8 @@ class TestWorkflowEndToEnd:
 
             assert json_file.exists()
             loaded = json.loads(json_file.read_text())
-            assert 'rate' in loaded
-            assert 'latex' in loaded['rate']
+            assert "rate" in loaded
+            assert "latex" in loaded["rate"]
         finally:
             pass
 
@@ -52,7 +52,7 @@ class TestWorkflowEndToEnd:
             assert latex is not None
             assert len(latex) > 0
             # Should contain math notation
-            assert any(c in latex for c in ['\\', 'frac', 'cdot', '^', '_'])
+            assert any(c in latex for c in ["\\", "frac", "cdot", "^", "_"])
 
     def test_simulation_runs_deterministically(self) -> None:
         """Step 3: Simulation runs and produces consistent results."""
@@ -98,8 +98,8 @@ class TestWorkflowEndToEnd:
     def test_traceability_chain(self, tmp_path) -> None:
         """Step 7: Verify complete traceability from model → simulation → formula."""
         # 1. Model defines formulas
-        assert 'rate' in FORMULAS
-        rate_formula = FORMULAS['rate']
+        assert "rate" in FORMULAS
+        rate_formula = FORMULAS["rate"]
 
         # 2. Formula has metadata pointing to source
         assert rate_formula.source_line == 25
@@ -111,8 +111,8 @@ class TestWorkflowEndToEnd:
 
         # 4. Formulas can be exported
         data = {name: f.to_dict() for name, f in FORMULAS.items()}
-        assert 'rate' in data
-        assert 'latex' in data['rate']
+        assert "rate" in data
+        assert "latex" in data["rate"]
 
 
 class TestMonotonicity:
@@ -153,7 +153,7 @@ class TestPaperConsistency:
         Paper Theorem 1: r(n_a) = (k*n_a*(n_a-1))/2 is strictly increasing for k > 0, n_a >= 2.
         Model definition (line 25): rate_expr = k * sp.binomial(n_a, 2)
         """
-        rate_formula = FORMULAS['rate']
+        rate_formula = FORMULAS["rate"]
 
         # Description should match paper
         assert "2a → b" in rate_formula.description or "rule" in rate_formula.description
@@ -170,14 +170,14 @@ class TestPaperConsistency:
         This matches model.py rate formula exactly.
         """
         # The rate formula should match Lean's definition
-        rate_formula = FORMULAS['rate']
+        rate_formula = FORMULAS["rate"]
         latex = rate_formula.to_latex()
 
         # Should contain the structure k * n * (n-1) / 2
         # (exact representation varies by SymPy formatting)
-        assert 'k' in latex or 'K' in latex
-        assert '2' in latex  # Denominator
+        assert "k" in latex or "K" in latex
+        assert "2" in latex  # Denominator
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from fastapi.testclient import TestClient
-from math_trace.presentation_server import PresentationServer
 
 from math_trace.formula import Formula
+from math_trace.presentation_server import PresentationServer
 from math_trace.server import app
 
 
@@ -164,8 +164,8 @@ class TestHTMLSanitizationComprehensive:
         html.split("\n")
 
         # Verify structure is maintained
-        assert '<!DOCTYPE html>' in html
-        assert '<script' not in html.lower() or 'MathJax' in html  # Only MathJax script ok
+        assert "<!DOCTYPE html>" in html
+        assert "<script" not in html.lower() or "MathJax" in html  # Only MathJax script ok
 
     def test_formula_latex_not_double_escaped(self):
         """LaTeX is escaped for HTML but still renderable by MathJax."""

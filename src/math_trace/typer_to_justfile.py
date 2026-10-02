@@ -9,7 +9,7 @@ Philosophy: Typer is the source of truth; justfile is generated.
 from __future__ import annotations
 
 import inspect
-from typing import Any, Callable, get_type_hints
+from collections.abc import Callable
 
 import typer
 
@@ -74,7 +74,6 @@ class TyperToJustfile:
                 continue
 
             # Check if it's a typer.Option or typer.Argument
-            annotation = param.annotation
             default = param.default
 
             if isinstance(default, typer.models.OptionInfo):
@@ -87,10 +86,7 @@ class TyperToJustfile:
 
         # Build recipe line
         recipe_params = " ".join(params)
-        if recipe_params:
-            recipe_header = f"{command_name} {recipe_params}"
-        else:
-            recipe_header = command_name
+        recipe_header = f"{command_name} {recipe_params}" if recipe_params else command_name
 
         recipe_content = f"uv run python -m {module_name} {command_name}"
         if flags or params:

@@ -12,7 +12,6 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Optional
 
 from latex2sympy2 import latex2sympy
 
@@ -25,22 +24,22 @@ def convert_equation_to_sympy(latex: str, context: str = "") -> dict:
     try:
         # Clean up LaTeX for sympy
         latex_clean = latex.strip()
-        latex_clean = re.sub(r'&=|&|\\\\|\\label\{[^}]*\}', '', latex_clean)
+        latex_clean = re.sub(r"&=|&|\\\\|\\label\{[^}]*\}", "", latex_clean)
 
         # Attempt conversion
         sympy_expr = latex2sympy(latex_clean)
 
         return {
-            'sympy_expr': str(sympy_expr),
-            'conversion_status': 'converted',
-            'error': None,
+            "sympy_expr": str(sympy_expr),
+            "conversion_status": "converted",
+            "error": None,
         }
 
     except Exception as e:
         return {
-            'sympy_expr': None,
-            'conversion_status': 'failed',
-            'error': f"{type(e).__name__}: {str(e)[:80]}",
+            "sympy_expr": None,
+            "conversion_status": "failed",
+            "error": f"{type(e).__name__}: {str(e)[:80]}",
         }
 
 
@@ -61,7 +60,7 @@ def process_paper(paper_id: str, cache_dir: Path = None) -> dict:
 
     # Read all equations
     equations = []
-    for line in equations_path.read_text().strip().split('\n'):
+    for line in equations_path.read_text().strip().split("\n"):
         if line:
             equations.append(json.loads(line))
 
@@ -72,10 +71,10 @@ def process_paper(paper_id: str, cache_dir: Path = None) -> dict:
     failed = 0
 
     for i, eq in enumerate(equations):
-        result = convert_equation_to_sympy(eq['latex'], eq.get('context', ''))
+        result = convert_equation_to_sympy(eq["latex"], eq.get("context", ""))
         eq.update(result)
 
-        if result['conversion_status'] == 'converted':
+        if result["conversion_status"] == "converted":
             converted += 1
             print(f"  [{i+1}/{len(equations)}] ✅ {eq['latex'][:50]}")
         else:
@@ -83,18 +82,18 @@ def process_paper(paper_id: str, cache_dir: Path = None) -> dict:
             print(f"  [{i+1}/{len(equations)}] ❌ {eq['latex'][:50]}")
 
     # Save back
-    with open(equations_path, 'w') as f:
+    with open(equations_path, "w") as f:
         for eq in equations:
-            f.write(json.dumps(eq) + '\n')
+            f.write(json.dumps(eq) + "\n")
 
     # Update metadata with conversion summary
     metadata_path = paper_dir / "metadata.json"
     metadata = json.loads(metadata_path.read_text())
-    metadata['conversion_summary'] = {
-        'total': len(equations),
-        'converted': converted,
-        'failed': failed,
-        'success_rate': converted / len(equations) if equations else 0,
+    metadata["conversion_summary"] = {
+        "total": len(equations),
+        "converted": converted,
+        "failed": failed,
+        "success_rate": converted / len(equations) if equations else 0,
     }
     metadata_path.write_text(json.dumps(metadata, indent=2))
 

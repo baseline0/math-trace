@@ -101,7 +101,9 @@ class TestProvenance:
         model_file = sir_example_dir / "model.py"
         lines = model_file.read_text().split("\n")
         # Should have meaningful comments or documentation
-        comment_count = sum(1 for line in lines if "#" in line and not line.strip().startswith("#!/"))
+        comment_count = sum(
+            1 for line in lines if "#" in line and not line.strip().startswith("#!/")
+        )
         assert comment_count > 0, "Model should have explanatory comments"
 
     def test_citations_present(self, sir_example_dir):
@@ -132,7 +134,9 @@ class TestOutputManifest:
         # Verify it's valid Python
         build_file = sir_example_dir / "build_paper.py"
         content = build_file.read_text()
-        assert "def " in content or "class " in content, "build_paper.py should define functions/classes"
+        assert (
+            "def " in content or "class " in content
+        ), "build_paper.py should define functions/classes"
 
     def test_expected_outputs_documented(self, sir_example_dir):
         """Expected output files/formats are documented."""
@@ -212,8 +216,9 @@ class TestReproducibility:
                     # If data contains beta, gamma, R0, verify formula
                     if "beta" in data and "gamma" in data and "R0" in data:
                         expected_r0 = data["beta"] / data["gamma"]
-                        assert abs(data["R0"] - expected_r0) < 1e-10, \
-                            f"R0 formula mismatch in {json_file.name}"
+                        assert (
+                            abs(data["R0"] - expected_r0) < 1e-10
+                        ), f"R0 formula mismatch in {json_file.name}"
                 except json.JSONDecodeError:
                     pass  # Skip invalid JSON
 

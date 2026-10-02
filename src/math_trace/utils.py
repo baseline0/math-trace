@@ -9,9 +9,8 @@ Centralizes common operations to avoid duplication:
 from __future__ import annotations
 
 import json
-import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from .constants import CACHE_DIR
 from .logging import get_logger
@@ -31,10 +30,7 @@ def ensure_cache_dir(paper_id: str = None) -> Path:
     Raises:
         OSError: If directory creation fails
     """
-    if paper_id:
-        cache_path = CACHE_DIR / "papers" / paper_id
-    else:
-        cache_path = CACHE_DIR
+    cache_path = CACHE_DIR / "papers" / paper_id if paper_id else CACHE_DIR
 
     try:
         cache_path.mkdir(parents=True, exist_ok=True)
@@ -44,7 +40,7 @@ def ensure_cache_dir(paper_id: str = None) -> Path:
         raise
 
 
-def safe_json_load(file_path: Path) -> Optional[dict]:
+def safe_json_load(file_path: Path) -> dict | None:
     """Safely load JSON from file with error handling.
 
     Args:

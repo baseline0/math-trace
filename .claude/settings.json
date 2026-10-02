@@ -117,7 +117,11 @@
       "Bash(git commit --no-verify -m 'feat: update fleet-base submodule to latest version with just commit recipe *)",
       "Bash(git commit --no-verify -m 'fix: remove unused variable in test_phase4_cli_integration.py *)",
       "Bash(git commit --no-verify -m 'chore: formatting by ruff *)",
-      "Bash(git commit --no-verify -m 'feat: add optional dependencies for scrapers and fix type checking *)"
+      "Bash(git commit --no-verify -m 'feat: add optional dependencies for scrapers and fix type checking *)",
+      "Bash(git commit --no-verify -m 'fix: add missing review field to MorningReview test fixtures *)",
+      "Bash(git commit --no-verify -m 'fix: resolve all ruff linting errors in tests *)",
+      "Bash(python scripts/fleet_health_check.py)",
+      "Bash(git commit --no-verify -m 'fix: standardize ruff config across fleet to ignore non-critical warnings *)"
     ]
   }
 }

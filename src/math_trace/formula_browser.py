@@ -8,10 +8,8 @@ from __future__ import annotations
 
 import html
 import json
-import logging
 import re
 from pathlib import Path
-from typing import Optional
 
 import typer
 
@@ -51,10 +49,10 @@ def arxiv_papers(limit: int = typer.Option(20, help="Max papers to return")) -> 
             if not isinstance(metadata, dict):
                 logger.warning(f"Invalid metadata format for {paper_dir.name}: expected dict")
                 continue
-            if 'paper_id' not in metadata:
+            if "paper_id" not in metadata:
                 logger.warning(f"Missing 'paper_id' in metadata for {paper_dir.name}")
                 continue
-        except (json.JSONDecodeError, IOError, ValueError) as e:
+        except (OSError, json.JSONDecodeError, ValueError) as e:
             logger.error(f"Failed to read metadata for {paper_dir.name}: {e}")
             continue
 
@@ -66,11 +64,10 @@ def arxiv_papers(limit: int = typer.Option(20, help="Max papers to return")) -> 
         converted_count = 0
         if equations_path.exists():
             try:
-                for line in equations_path.read_text().strip().split('\n'):
+                for line in equations_path.read_text().strip().split("\n"):
                     if eq_count >= MAX_EQUATIONS:
                         logger.warning(
-                            f"Paper {paper_dir.name} has >{MAX_EQUATIONS} equations, "
-                            f"truncating"
+                            f"Paper {paper_dir.name} has >{MAX_EQUATIONS} equations, " f"truncating"
                         )
                         break
 
@@ -78,21 +75,23 @@ def arxiv_papers(limit: int = typer.Option(20, help="Max papers to return")) -> 
                         eq_count += 1
                         try:
                             eq = json.loads(line)
-                            if eq.get('conversion_status') == 'converted':
+                            if eq.get("conversion_status") == "converted":
                                 converted_count += 1
                         except json.JSONDecodeError as e:
                             logger.debug(f"Invalid JSON in equations file: {e}")
-            except IOError as e:
+            except OSError as e:
                 logger.error(f"Failed to read equations for {paper_dir.name}: {e}")
 
         # HTML escape metadata for safe output
-        papers.append({
-            'paper_id': paper_dir.name,
-            'title': html.escape(metadata.get('title', 'Unknown')),
-            'authors': html.escape(str(metadata.get('authors', 'Unknown'))[:50]),
-            'total_equations': eq_count,
-            'converted_equations': converted_count,
-        })
+        papers.append(
+            {
+                "paper_id": paper_dir.name,
+                "title": html.escape(metadata.get("title", "Unknown")),
+                "authors": html.escape(str(metadata.get("authors", "Unknown"))[:50]),
+                "total_equations": eq_count,
+                "converted_equations": converted_count,
+            }
+        )
 
     return papers
 
@@ -117,9 +116,7 @@ def local_models(pattern: str = "*/src/model.py", root: str = ".") -> list[dict]
         # Limit results to prevent DoS
         MAX_MODELS = 1000
         if len(model_paths) > MAX_MODELS:
-            logger.warning(
-                f"Pattern returned {len(model_paths)} files, truncating to {MAX_MODELS}"
-            )
+            logger.warning(f"Pattern returned {len(model_paths)} files, truncating to {MAX_MODELS}")
             model_paths = model_paths[:MAX_MODELS]
     except (ValueError, OSError) as e:
         logger.error(f"Invalid glob pattern '{pattern}': {e}")
@@ -128,12 +125,12 @@ def local_models(pattern: str = "*/src/model.py", root: str = ".") -> list[dict]
     for model_path in model_paths:
         try:
             content = model_path.read_text(encoding="utf-8")
-        except (IOError, UnicodeDecodeError) as e:
+        except (OSError, UnicodeDecodeError) as e:
             logger.debug(f"Failed to read {model_path}: {e}")
             continue
 
         # Look for FORMULAS dict
-        if 'FORMULAS' not in content:
+        if "FORMULAS" not in content:
             continue
 
         # Try to extract formula names via regex (safe, doesn't execute)
@@ -146,19 +143,19 @@ def local_models(pattern: str = "*/src/model.py", root: str = ".") -> list[dict]
         # Limit formulas per file
         MAX_FORMULAS_PER_FILE = 500
         if len(formula_names) > MAX_FORMULAS_PER_FILE:
-            logger.warning(
-                f"File {model_path} has >{MAX_FORMULAS_PER_FILE} formulas, truncating"
-            )
+            logger.warning(f"File {model_path} has >{MAX_FORMULAS_PER_FILE} formulas, truncating")
             formula_names = formula_names[:MAX_FORMULAS_PER_FILE]
 
         if formula_names:
-            models.append({
-                'path': str(model_path.relative_to(root_path)),
-                'formula_count': len(formula_names),
-                'formulas': [{'name': name} for name in formula_names],
-            })
+            models.append(
+                {
+                    "path": str(model_path.relative_to(root_path)),
+                    "formula_count": len(formula_names),
+                    "formulas": [{"name": name} for name in formula_names],
+                }
+            )
 
-    return sorted(models, key=lambda m: m['path'])
+    return sorted(models, key=lambda m: m["path"])
 
 
 @app.command()
@@ -188,16 +185,16 @@ def arxiv_equations(paper_id: str) -> dict:
     equations = []
     equations_path = paper_dir / "equations.jsonl"
     if equations_path.exists():
-        for line in equations_path.read_text().strip().split('\n'):
+        for line in equations_path.read_text().strip().split("\n"):
             if line:
                 equations.append(json.loads(line))
 
     return {
-        'paper_id': paper_id,
-        'title': metadata.get('title'),
-        'authors': metadata.get('authors'),
-        'total_equations': len(equations),
-        'equations': equations,
+        "paper_id": paper_id,
+        "title": metadata.get("title"),
+        "authors": metadata.get("authors"),
+        "total_equations": len(equations),
+        "equations": equations,
     }
 
 
@@ -209,8 +206,8 @@ def local_model_formulas(
 
     Returns: {path, formulas: [{name, latex}, ...]}
     """
-    import sys
     import importlib.util
+    import sys
 
     model_path = Path(path).resolve()
 
@@ -230,12 +227,12 @@ def local_model_formulas(
         sys.modules["model"] = module
         spec.loader.exec_module(module)
 
-        if not hasattr(module, 'FORMULAS'):
+        if not hasattr(module, "FORMULAS"):
             logger.debug(f"No FORMULAS dict in {model_path}")
             return {
-                'path': str(model_path),
-                'error': 'No FORMULAS dict found',
-                'formulas': [],
+                "path": str(model_path),
+                "error": "No FORMULAS dict found",
+                "formulas": [],
             }
 
         formulas = []
@@ -258,30 +255,34 @@ def local_model_formulas(
                     )
                     continue
 
-                formulas.append({
-                    'name': name,
-                    'latex': latex,
-                    'description': getattr(formula_obj, 'description', ''),
-                })
+                formulas.append(
+                    {
+                        "name": name,
+                        "latex": latex,
+                        "description": getattr(formula_obj, "description", ""),
+                    }
+                )
             except (AttributeError, TypeError, ValueError) as e:
                 logger.warning(f"Failed to extract LaTeX for formula '{name}': {e}")
-                formulas.append({
-                    'name': name,
-                    'latex': "[Error: unable to extract LaTeX]",
-                    'description': '',
-                })
+                formulas.append(
+                    {
+                        "name": name,
+                        "latex": "[Error: unable to extract LaTeX]",
+                        "description": "",
+                    }
+                )
 
         return {
-            'path': str(model_path),
-            'formulas': formulas,
+            "path": str(model_path),
+            "formulas": formulas,
         }
 
     except (ImportError, OSError, SyntaxError) as e:
         logger.error(f"Failed to load module {model_path}: {e}")
         return {
-            'path': str(model_path),
-            'error': f"{type(e).__name__}: {e}",
-            'formulas': [],
+            "path": str(model_path),
+            "error": f"{type(e).__name__}: {e}",
+            "formulas": [],
         }
 
 

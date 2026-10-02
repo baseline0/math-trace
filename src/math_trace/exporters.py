@@ -88,8 +88,8 @@ class LatexToTypstConverter(Converter):
 
         # Common substitutions
         substitutions = {
-            r"\\frac{([^}]*)}{([^}]*)}" : r"\1 / \2",
-            r"\\sqrt{([^}]*)}" : r"sqrt(\1)",
+            r"\\frac{([^}]*)}{([^}]*)}": r"\1 / \2",
+            r"\\sqrt{([^}]*)}": r"sqrt(\1)",
             r"\\alpha": "α",
             r"\\beta": "β",
             r"\\gamma": "γ",
@@ -114,7 +114,7 @@ class LatexExporter:
     Works with any Formula representation that provides to_dict().
     """
 
-    def export(self, formulas: dict[str, "Formula"]) -> str:  # noqa: F821
+    def export(self, formulas: dict[str, Formula]) -> str:  # noqa: F821
         """Export formulas to LaTeX.
 
         Args:

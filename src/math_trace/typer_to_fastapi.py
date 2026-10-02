@@ -9,7 +9,7 @@ Philosophy: Define API once in Typer; get CLI + web endpoints automatically.
 from __future__ import annotations
 
 import inspect
-from typing import Callable, Optional
+from collections.abc import Callable
 
 
 class TyperToFastAPI:
@@ -44,11 +44,7 @@ class TyperToFastAPI:
             default = param.default
 
             # Build parameter with type hint
-            type_hint = (
-                annotation.__name__
-                if hasattr(annotation, "__name__")
-                else str(annotation)
-            )
+            type_hint = annotation.__name__ if hasattr(annotation, "__name__") else str(annotation)
 
             if default is inspect.Parameter.empty:
                 params.append(f"{param_name}: {type_hint}")
@@ -61,15 +57,15 @@ class TyperToFastAPI:
         # Build route code
         lines = [
             f'@app.{method.lower()}("{route_path}")',
-            f'async def route_{command_name}({params_str}):',
-            f'    """',
-            f'    {docstring.split(chr(10))[0]}',
-            f'    """',
-            f'    try:',
+            f"async def route_{command_name}({params_str}):",
+            '    """',
+            f"    {docstring.split(chr(10))[0]}",
+            '    """',
+            "    try:",
             f'        result = {command_name}({", ".join(p.split(":")[0].strip() for p in params.split(", ") if p)})',
-            f'        return {{"status": "success", "data": result}}',
-            f'    except Exception as e:',
-            f'        return {{"status": "error", "message": str(e)}}',
+            '        return {"status": "success", "data": result}',
+            "    except Exception as e:",
+            '        return {"status": "error", "message": str(e)}',
         ]
 
         return "\n".join(lines)

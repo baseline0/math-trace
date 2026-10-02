@@ -22,11 +22,14 @@ class TestPresentationGeneratorLoading:
     @pytest.fixture
     def temp_formula_file(self):
         """Create a temporary formula JSON file."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-            json.dump({
-                "rate": {"latex": "k \\binom{n}{2}"},
-                "equilibrium": {"latex": "I^* = (1 - 1/R_0) N"}
-            }, f)
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            json.dump(
+                {
+                    "rate": {"latex": "k \\binom{n}{2}"},
+                    "equilibrium": {"latex": "I^* = (1 - 1/R_0) N"},
+                },
+                f,
+            )
             path = Path(f.name)
         yield path
         path.unlink(missing_ok=True)
@@ -34,15 +37,16 @@ class TestPresentationGeneratorLoading:
     @pytest.fixture
     def temp_config_file(self):
         """Create a temporary config YAML file."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
-            yaml.dump({
-                "title": "Disease Modeling",
-                "format": "talk",
-                "backend": "marp",
-                "slides": [
-                    {"title": "Introduction", "text": "Disease dynamics"}
-                ]
-            }, f)
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+            yaml.dump(
+                {
+                    "title": "Disease Modeling",
+                    "format": "talk",
+                    "backend": "marp",
+                    "slides": [{"title": "Introduction", "text": "Disease dynamics"}],
+                },
+                f,
+            )
             path = Path(f.name)
         yield path
         path.unlink(missing_ok=True)
@@ -61,10 +65,10 @@ class TestPresentationGeneratorLoading:
             "title": "My P: the sequel",  # Colon is fine when quoted in YAML
             "format": "talk",
             "backend": "marp",
-            "slides": [{"title": "Intro"}]
+            "slides": [{"title": "Intro"}],
         }
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             yaml.dump(config_content, f)
             config_path = Path(f.name)
 
@@ -80,10 +84,10 @@ class TestPresentationGeneratorLoading:
             "title": "分子動力学",  # Japanese
             "format": "talk",
             "backend": "marp",
-            "slides": [{"title": "Overview"}]
+            "slides": [{"title": "Overview"}],
         }
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             yaml.dump(config_content, f)
             config_path = Path(f.name)
 
@@ -95,12 +99,9 @@ class TestPresentationGeneratorLoading:
 
     def test_generator_loads_formula_json(self, temp_config_file):
         """Generator loads formulas from JSON file."""
-        formulas_data = {
-            "rate": {"latex": "k n"},
-            "equilibrium": {"latex": "I^*"}
-        }
+        formulas_data = {"rate": {"latex": "k n"}, "equilibrium": {"latex": "I^*"}}
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(formulas_data, f)
             formula_path = Path(f.name)
 
@@ -124,12 +125,7 @@ class TestConfigParsingEdgeCases:
 
     def test_yaml_dict_parsing(self):
         """Dict-format config parses correctly."""
-        yaml_dict = {
-            "title": "Test",
-            "format": "talk",
-            "backend": "marp",
-            "slides": []
-        }
+        yaml_dict = {"title": "Test", "format": "talk", "backend": "marp", "slides": []}
         yaml_str = yaml.dump(yaml_dict)
         parsed = yaml.safe_load(yaml_str)
         assert parsed["title"] == "Test"
@@ -139,10 +135,7 @@ class TestConfigParsingEdgeCases:
         """Special characters in metadata survive round-trip."""
         config_dict = {
             "title": "My P: colon version",
-            "metadata": {
-                "author": "O'Brien & Associates",
-                "affiliation": "New York, USA"
-            }
+            "metadata": {"author": "O'Brien & Associates", "affiliation": "New York, USA"},
         }
         yaml_str = yaml.dump(config_dict)
         parsed = yaml.safe_load(yaml_str)
@@ -165,7 +158,7 @@ class TestMarpBackendRendering:
             format="talk",
             backend="marp",
             slides=[],
-            metadata={"author": "Dr. Smith", "date": "2026-10-02"}
+            metadata={"author": "Dr. Smith", "date": "2026-10-02"},
         )
         formulas = {"rate": {"latex": "k n", "description": "Rate law"}}
 
@@ -182,12 +175,7 @@ class TestMarpBackendRendering:
             title="Formulas",
             format="talk",
             backend="marp",
-            slides=[
-                {
-                    "title": "Rate Law",
-                    "formulas": ["rate"]
-                }
-            ]
+            slides=[{"title": "Rate Law", "formulas": ["rate"]}],
         )
         formulas = {"rate": {"latex": "k \\binom{n}{2}", "description": "Rate law"}}
 
@@ -203,9 +191,7 @@ class TestMarpBackendRendering:
             title="Test",
             format="talk",
             backend="marp",
-            slides=[
-                {"title": "Slide", "formulas": ["undefined_formula"]}
-            ]
+            slides=[{"title": "Slide", "formulas": ["undefined_formula"]}],
         )
         formulas = {}  # Empty - the referenced formula doesn't exist
 

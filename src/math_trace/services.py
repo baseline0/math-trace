@@ -12,7 +12,6 @@ import re
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
@@ -44,7 +43,7 @@ class PaperDownloader:
     """Download papers from various sources."""
 
     @staticmethod
-    def _parse_arxiv_url(url: str) -> Optional[str]:
+    def _parse_arxiv_url(url: str) -> str | None:
         """Convert arXiv page URL to PDF URL.
 
         Examples:
@@ -59,7 +58,7 @@ class PaperDownloader:
         return None
 
     @staticmethod
-    def _parse_pubmed_url(url: str) -> Optional[str]:
+    def _parse_pubmed_url(url: str) -> str | None:
         """Convert PubMed page URL to PDF URL (if available)."""
         # PubMed URLs typically don't have direct PDF links
         # Would need to scrape or use API
@@ -209,7 +208,7 @@ class PresentationBuilder:
     def build_config(
         paper_metadata: PaperMetadata,
         paper_url: str,
-        paper_doi: Optional[str] = None,
+        paper_doi: str | None = None,
     ) -> dict:
         """Build presentation_config.yaml structure from formulas.
 

@@ -18,33 +18,33 @@ class TestSymPyToTypstBasic:
         converter = SymPyToTypst()
 
         # Basic operations
-        x = sp.Symbol('x')
+        x = sp.Symbol("x")
         expr = x + 1
         result = converter.convert(expr)
-        assert 'x' in result
-        assert '1' in result
+        assert "x" in result
+        assert "1" in result
 
     def test_multiplication(self):
         """Convert multiplication expressions."""
         converter = SymPyToTypst()
 
-        x, y = sp.symbols('x y')
+        x, y = sp.symbols("x y")
         expr = x * y
         result = converter.convert(expr)
 
         # Should contain both variables
-        assert 'x' in result
-        assert 'y' in result
+        assert "x" in result
+        assert "y" in result
 
     def test_power_expression(self):
         """Convert power expressions."""
         converter = SymPyToTypst()
 
-        x = sp.Symbol('x')
-        expr = x ** 2
+        x = sp.Symbol("x")
+        expr = x**2
         result = converter.convert(expr)
 
-        assert 'x' in result
+        assert "x" in result
         # Power should be represented (either as ^ or superscript)
         assert len(result) > 0
 
@@ -91,15 +91,15 @@ class TestSymPyToTypstBinomial:
         """Convert binomial coefficient."""
         converter = SymPyToTypst()
 
-        n, k = sp.symbols('n k')
+        n, k = sp.symbols("n k")
         expr = sp.binomial(n, k)
         result = converter.convert(expr)
 
         # Should contain binom function or similar
         assert len(result) > 0
         # Should have n and k
-        assert 'n' in result
-        assert 'k' in result
+        assert "n" in result
+        assert "k" in result
 
     def test_binomial_with_numbers(self):
         """Convert binomial with numeric values."""
@@ -129,7 +129,7 @@ class TestSymPyToTypstGreekLetters:
         """Convert alpha symbol."""
         converter = SymPyToTypst()
 
-        sp.Symbol('alpha')
+        sp.Symbol("alpha")
         result = converter._latex_to_typst(r"\alpha")
 
         assert "α" in result
@@ -200,7 +200,7 @@ class TestSymPyToTypstFraction:
         """Convert simple fraction."""
         converter = SymPyToTypst()
 
-        x = sp.Symbol('x')
+        x = sp.Symbol("x")
         expr = 1 / x
         result = converter.convert(expr)
 
@@ -210,7 +210,7 @@ class TestSymPyToTypstFraction:
         """Convert complex fraction."""
         converter = SymPyToTypst()
 
-        x, y = sp.symbols('x y')
+        x, y = sp.symbols("x y")
         expr = (x + 1) / (y + 2)
         result = converter.convert(expr)
 
@@ -222,7 +222,7 @@ class TestSymPyToTypstFraction:
         converter = SymPyToTypst()
 
         latex = r"\frac{a}{b}"
-        result = converter._replace_macro(latex, 'frac', '({0})/({1})')
+        result = converter._replace_macro(latex, "frac", "({0})/({1})")
 
         assert "a" in result
         assert "b" in result
@@ -236,7 +236,7 @@ class TestSymPyToTypstSqrt:
         """Convert simple square root."""
         converter = SymPyToTypst()
 
-        x = sp.Symbol('x')
+        x = sp.Symbol("x")
         expr = sp.sqrt(x)
         result = converter.convert(expr)
 
@@ -247,7 +247,7 @@ class TestSymPyToTypstSqrt:
         converter = SymPyToTypst()
 
         latex = r"\sqrt{x}"
-        result = converter._replace_macro(latex, 'sqrt', 'sqrt({0})')
+        result = converter._replace_macro(latex, "sqrt", "sqrt({0})")
 
         assert "sqrt" in result
         assert "x" in result
@@ -279,12 +279,12 @@ class TestSymPyToTypstComplexExpressions:
         converter = SymPyToTypst()
 
         # Rate law: k * n_a * (n_a - 1) / 2
-        k, n_a = sp.symbols('k n_a')
+        k, n_a = sp.symbols("k n_a")
         expr = k * sp.binomial(n_a, 2)
         result = converter.convert(expr)
 
-        assert 'k' in result
-        assert 'n' in result  # n_a should be present
+        assert "k" in result
+        assert "n" in result  # n_a should be present
         assert len(result) > 0
 
     def test_sir_model_expression(self):
@@ -292,20 +292,20 @@ class TestSymPyToTypstComplexExpressions:
         converter = SymPyToTypst()
 
         # dS/dt = -β * S * I / N (epidemiological notation: S=susceptible, I=infected, N=population)
-        beta, S, I, N = sp.symbols('beta S I N')  # noqa: N806, E741
+        beta, S, I, N = sp.symbols("beta S I N")  # noqa: N806, E741
         expr = -beta * S * I / N
         result = converter.convert(expr)
 
-        assert 'β' in result or 'beta' in result
-        assert 'S' in result
-        assert 'I' in result
-        assert 'N' in result
+        assert "β" in result or "beta" in result
+        assert "S" in result
+        assert "I" in result
+        assert "N" in result
 
     def test_exponential_expression(self):
         """Convert exponential expression."""
         converter = SymPyToTypst()
 
-        x = sp.Symbol('x')
+        x = sp.Symbol("x")
         expr = sp.exp(x)
         result = converter.convert(expr)
 
@@ -329,10 +329,10 @@ class TestSymPyToTypstEdgeCases:
         """Convert single symbol."""
         converter = SymPyToTypst()
 
-        x = sp.Symbol('x')
+        x = sp.Symbol("x")
         result = converter.convert(x)
 
-        assert 'x' in result
+        assert "x" in result
 
     def test_constant_expression(self):
         """Convert constant."""
@@ -341,7 +341,7 @@ class TestSymPyToTypstEdgeCases:
         expr = sp.pi
         result = converter.convert(expr)
 
-        assert 'π' in result or 'pi' in result
+        assert "π" in result or "pi" in result
 
 
 class TestTypstEnvironmentBuilder:
@@ -349,9 +349,8 @@ class TestTypstEnvironmentBuilder:
 
     def test_theorem_basic(self):
         """Create basic theorem environment."""
-        theorem_text = TypstEnvironmentBuilder.theorem(name="theorem",
-            title="Pythagorean Theorem",
-            statement="a² + b² = c²"
+        theorem_text = TypstEnvironmentBuilder.theorem(
+            name="theorem", title="Pythagorean Theorem", statement="a² + b² = c²"
         )
 
         assert "Pythagorean Theorem" in theorem_text
@@ -360,9 +359,7 @@ class TestTypstEnvironmentBuilder:
 
     def test_proof_basic(self):
         """Create basic proof environment."""
-        proof_text = TypstEnvironmentBuilder.proof(
-            body="By construction, this is true."
-        )
+        proof_text = TypstEnvironmentBuilder.proof(body="By construction, this is true.")
 
         assert "By construction" in proof_text
         assert len(proof_text) > 0

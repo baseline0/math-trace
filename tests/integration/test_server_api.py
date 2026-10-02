@@ -21,11 +21,14 @@ class TestPreviewEndpoint:
 
     def test_preview_with_valid_formulas_and_config(self):
         """Preview succeeds with valid JSON formulas and config dict."""
-        response = client.post("/api/preview", json={
-            "formulas": {"rate": {"latex": "k \\binom{n}{2}"}},
-            "config": {"title": "Test", "author": "Me"},
-            "backend": "marp"
-        })
+        response = client.post(
+            "/api/preview",
+            json={
+                "formulas": {"rate": {"latex": "k \\binom{n}{2}"}},
+                "config": {"title": "Test", "author": "Me"},
+                "backend": "marp",
+            },
+        )
         assert response.status_code == 200
         data = response.json()
         assert "status" in data
@@ -33,10 +36,7 @@ class TestPreviewEndpoint:
 
     def test_preview_rejects_empty_formulas(self):
         """Preview returns error for empty formulas dict."""
-        response = client.post("/api/preview", json={
-            "formulas": {},
-            "config": {"title": "Test"}
-        })
+        response = client.post("/api/preview", json={"formulas": {}, "config": {"title": "Test"}})
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "error"
@@ -44,10 +44,9 @@ class TestPreviewEndpoint:
 
     def test_preview_rejects_non_dict_formulas(self):
         """Preview returns error when formulas is not a dict."""
-        response = client.post("/api/preview", json={
-            "formulas": "not a dict",
-            "config": {"title": "Test"}
-        })
+        response = client.post(
+            "/api/preview", json={"formulas": "not a dict", "config": {"title": "Test"}}
+        )
         # Should reject with validation error (422) or return error status
         assert response.status_code in [200, 422]
         if response.status_code == 200:
@@ -56,10 +55,9 @@ class TestPreviewEndpoint:
 
     def test_preview_uses_default_config_when_missing(self):
         """Preview uses default config if not provided."""
-        response = client.post("/api/preview", json={
-            "formulas": {"x": {"latex": "x"}},
-            "backend": "marp"
-        })
+        response = client.post(
+            "/api/preview", json={"formulas": {"x": {"latex": "x"}}, "backend": "marp"}
+        )
         assert response.status_code == 200
         data = response.json()
         # Should not crash due to missing config
@@ -67,10 +65,7 @@ class TestPreviewEndpoint:
 
     def test_preview_error_message_clarity(self):
         """Error messages should be clear and actionable, not 'Unexpected token'."""
-        response = client.post("/api/preview", json={
-            "formulas": {},
-            "config": {"title": ""}
-        })
+        response = client.post("/api/preview", json={"formulas": {}, "config": {"title": ""}})
         assert response.status_code == 200
         data = response.json()
         if data["status"] == "error":
@@ -78,18 +73,23 @@ class TestPreviewEndpoint:
             assert "Unexpected token" not in data["message"]
             assert "is not valid JSON" not in data["message"]
             # Should hint at the actual problem
-            assert any(word in data["message"].lower()
-                      for word in ["formula", "config", "empty", "invalid", "required"])
+            assert any(
+                word in data["message"].lower()
+                for word in ["formula", "config", "empty", "invalid", "required"]
+            )
 
     def test_preview_with_special_characters_in_formulas(self):
         """Preview handles special characters in LaTeX safely."""
-        response = client.post("/api/preview", json={
-            "formulas": {
-                "rate": {"latex": "k \\frac{n_a}{2} + \\int"},
-                "equilibrium": {"latex": "I^* = (1 - 1/R_0) \\times N"}
+        response = client.post(
+            "/api/preview",
+            json={
+                "formulas": {
+                    "rate": {"latex": "k \\frac{n_a}{2} + \\int"},
+                    "equilibrium": {"latex": "I^* = (1 - 1/R_0) \\times N"},
+                },
+                "config": {"title": "Complex Formulas", "author": "Test"},
             },
-            "config": {"title": "Complex Formulas", "author": "Test"}
-        })
+        )
         assert response.status_code == 200
         data = response.json()
         # Should handle special chars without escaping issues
@@ -101,11 +101,14 @@ class TestExportEndpoint:
 
     def test_export_with_valid_inputs(self):
         """Export succeeds with valid formulas and config."""
-        response = client.post("/api/export", json={
-            "formulas": {"rate": {"latex": "k n"}},
-            "config": {"title": "Export Test", "author": "Me"},
-            "format": "markdown"
-        })
+        response = client.post(
+            "/api/export",
+            json={
+                "formulas": {"rate": {"latex": "k n"}},
+                "config": {"title": "Export Test", "author": "Me"},
+                "format": "markdown",
+            },
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "success"
@@ -114,13 +117,13 @@ class TestExportEndpoint:
 
     def test_export_markdown_contains_marp_frontmatter(self):
         """Exported markdown includes Marp frontmatter."""
-        response = client.post("/api/export", json={
-            "formulas": {"rate": {"latex": "k \\binom{n}{2}"}},
-            "config": {
-                "title": "Test Presentation",
-                "author": "Test Author"
-            }
-        })
+        response = client.post(
+            "/api/export",
+            json={
+                "formulas": {"rate": {"latex": "k \\binom{n}{2}"}},
+                "config": {"title": "Test Presentation", "author": "Test Author"},
+            },
+        )
         assert response.status_code == 200
         data = response.json()
         markdown = data["markdown"]
@@ -134,13 +137,13 @@ class TestExportEndpoint:
 
     def test_export_markdown_includes_title_and_author(self):
         """Exported markdown includes title and author from config."""
-        response = client.post("/api/export", json={
-            "formulas": {"placeholder": {"latex": "x"}},
-            "config": {
-                "title": "Disease Modeling",
-                "author": "Dr. Smith"
-            }
-        })
+        response = client.post(
+            "/api/export",
+            json={
+                "formulas": {"placeholder": {"latex": "x"}},
+                "config": {"title": "Disease Modeling", "author": "Dr. Smith"},
+            },
+        )
         assert response.status_code == 200
         data = response.json()
         markdown = data["markdown"]
@@ -150,23 +153,24 @@ class TestExportEndpoint:
 
     def test_export_with_slides_containing_formulas(self):
         """Export includes formulas when slides reference them."""
-        response = client.post("/api/export", json={
-            "formulas": {
-                "rate": {"latex": "k \\binom{n}{2}", "description": "Rate law"}
+        response = client.post(
+            "/api/export",
+            json={
+                "formulas": {"rate": {"latex": "k \\binom{n}{2}", "description": "Rate law"}},
+                "config": {
+                    "title": "Kinetics",
+                    "format": "talk",
+                    "backend": "marp",
+                    "slides": [
+                        {
+                            "title": "Reaction Rate",
+                            "text": "The rate follows a binomial distribution.",
+                            "formulas": ["rate"],
+                        }
+                    ],
+                },
             },
-            "config": {
-                "title": "Kinetics",
-                "format": "talk",
-                "backend": "marp",
-                "slides": [
-                    {
-                        "title": "Reaction Rate",
-                        "text": "The rate follows a binomial distribution.",
-                        "formulas": ["rate"]
-                    }
-                ]
-            }
-        })
+        )
         assert response.status_code == 200
         data = response.json()
         markdown = data["markdown"]
@@ -178,20 +182,15 @@ class TestExportEndpoint:
 
     def test_export_rejects_empty_formulas(self):
         """Export returns error for empty formulas."""
-        response = client.post("/api/export", json={
-            "formulas": {},
-            "config": {"title": "Test"},
-            "format": "markdown"
-        })
+        response = client.post(
+            "/api/export", json={"formulas": {}, "config": {"title": "Test"}, "format": "markdown"}
+        )
         # Should reject with error status code
         assert response.status_code >= 400
 
     def test_export_error_message_not_cryptic(self):
         """Export error doesn't expose internal JSON parse errors."""
-        response = client.post("/api/export", json={
-            "formulas": {},
-            "config": {"title": ""}
-        })
+        response = client.post("/api/export", json={"formulas": {}, "config": {"title": ""}})
         # Should reject gracefully
         assert response.status_code >= 400
         # If it returns JSON, verify it has error info (not cryptic parse error)
@@ -240,4 +239,8 @@ class TestDashboardUI:
         response = client.get("/")
         assert response.status_code == 200
         # Should have fallback logic
-        assert "JSON" in response.text or "fallback" in response.text or "JSON fallback" in response.text
+        assert (
+            "JSON" in response.text
+            or "fallback" in response.text
+            or "JSON fallback" in response.text
+        )

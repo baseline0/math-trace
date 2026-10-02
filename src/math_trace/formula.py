@@ -50,8 +50,7 @@ See Also:
     - examples/*/build_paper.py: Orchestration (unchanged when swapping)
 """
 
-from dataclasses import dataclass, asdict
-from typing import Optional
+from dataclasses import asdict, dataclass
 
 
 @dataclass
@@ -105,9 +104,9 @@ def formula_to_json_dict(formula: Formula) -> dict:
         Dict with name, latex, description, source_line, assumptions, units
     """
     return {
-        'latex': formula.latex,
-        'description': formula.description,
-        'source_line': formula.source_line,
-        'assumptions': formula.assumptions,
-        'units': formula.units,
+        "latex": formula.latex,
+        "description": formula.description,
+        "source_line": formula.source_line,
+        "assumptions": formula.assumptions,
+        "units": formula.units,
     }

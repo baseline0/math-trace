@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 # Add examples to path for model imports
-sys.path.insert(0, str(Path(__file__).parent / '../../examples/membrane-dynamics/src'))
+sys.path.insert(0, str(Path(__file__).parent / "../../examples/membrane-dynamics/src"))
 
 from model import FORMULAS, export_json
 
@@ -28,24 +28,24 @@ class TestEquationExtraction:
         # FORMULAS dict should contain extracted equations
         assert FORMULAS is not None
         assert len(FORMULAS) > 0
-        assert 'rate' in FORMULAS
+        assert "rate" in FORMULAS
 
     def test_equations_have_latex_representation(self):
         """Guarantee: SymPy equations convert to LaTeX."""
-        rate_formula = FORMULAS['rate']
+        rate_formula = FORMULAS["rate"]
         latex = rate_formula.to_latex()
 
         # LaTeX should be a non-empty string
         assert isinstance(latex, str)
         assert len(latex) > 0
         # Should contain LaTeX-like content
-        assert any(char in latex for char in ['\\', '{', '}'])
+        assert any(char in latex for char in ["\\", "{", "}"])
 
     def test_json_export_produces_valid_json(self):
         """Guarantee: Equations export to valid JSON format."""
         import tempfile
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json_path = Path(f.name)
 
         try:
@@ -57,11 +57,11 @@ class TestEquationExtraction:
             # Should have equations
             assert len(data) > 0
             # Rate equation should be present
-            assert 'rate' in data
+            assert "rate" in data
             # Should have required fields
-            rate_data = data['rate']
-            assert 'latex' in rate_data
-            assert 'description' in rate_data
+            rate_data = data["rate"]
+            assert "latex" in rate_data
+            assert "description" in rate_data
         finally:
             json_path.unlink(missing_ok=True)
 
@@ -72,14 +72,14 @@ class TestSourceLineTraceability:
     def test_equations_have_source_line(self):
         """Guarantee: Every equation tagged with source line number."""
         for name, formula in FORMULAS.items():
-            assert hasattr(formula, 'source_line'), f"{name} missing source_line"
+            assert hasattr(formula, "source_line"), f"{name} missing source_line"
             assert isinstance(formula.source_line, int), f"{name} source_line not int"
             assert formula.source_line > 0, f"{name} source_line must be positive"
 
     def test_equations_have_description(self):
         """Guarantee: Equations include descriptions (for metadata schema)."""
         for _name, formula in FORMULAS.items():
-            assert hasattr(formula, 'description')
+            assert hasattr(formula, "description")
             assert isinstance(formula.description, str)
             assert len(formula.description) > 0
 
@@ -90,24 +90,25 @@ class TestMetadataSchemaAPI:
     def test_formula_class_has_required_fields(self):
         """Guarantee: Formula/Equation class implements documented schema."""
         # Check that Formula has at least these documented fields
-        rate_formula = FORMULAS['rate']
+        rate_formula = FORMULAS["rate"]
 
-        required_fields = ['name', 'description', 'source_line']
+        required_fields = ["name", "description", "source_line"]
         for field_name in required_fields:
-            assert hasattr(rate_formula, field_name), \
-                f"Formula missing documented field: {field_name}"
+            assert hasattr(
+                rate_formula, field_name
+            ), f"Formula missing documented field: {field_name}"
 
     def test_formula_name_is_string(self):
         """Guarantee: Equation name is human-readable string."""
         for _name, formula in FORMULAS.items():
-            assert hasattr(formula, 'name')
+            assert hasattr(formula, "name")
             assert isinstance(formula.name, str)
             assert len(formula.name) > 0
 
     def test_formula_provides_latex_method(self):
         """Guarantee: Equations provide to_latex() method for publication."""
         for _name, formula in FORMULAS.items():
-            assert hasattr(formula, 'to_latex')
+            assert hasattr(formula, "to_latex")
             assert callable(formula.to_latex)
             latex_str = formula.to_latex()
             assert isinstance(latex_str, str)
@@ -119,9 +120,9 @@ class TestReproducibility:
     def test_same_model_generates_same_latex(self):
         """Guarantee: Same equation definition produces same LaTeX (deterministic)."""
         # Get LaTeX multiple times
-        latex1 = FORMULAS['rate'].to_latex()
-        latex2 = FORMULAS['rate'].to_latex()
-        latex3 = FORMULAS['rate'].to_latex()
+        latex1 = FORMULAS["rate"].to_latex()
+        latex2 = FORMULAS["rate"].to_latex()
+        latex3 = FORMULAS["rate"].to_latex()
 
         # All should be identical
         assert latex1 == latex2 == latex3
@@ -134,7 +135,7 @@ class TestReproducibility:
         # Export twice
         exports = []
         for _i in range(2):
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
                 json_path = Path(f.name)
 
             try:
@@ -154,7 +155,7 @@ class TestCodeQualityStandards:
     def test_formulas_are_dataclasses(self):
         """Guarantee: Formulas are structured data with typed fields (Python 3.11+ standard)."""
         # Formulas should have dataclass-like interface
-        rate_formula = FORMULAS['rate']
+        rate_formula = FORMULAS["rate"]
 
         # Should have dataclass fields
         assert hasattr(rate_formula, "__dataclass_fields__")
@@ -174,8 +175,9 @@ class TestSupportedPythonVersions:
         import sys as sys_module
 
         # Current runtime should be 3.11+
-        assert sys_module.version_info >= (3, 11), \
-            f"Requires Python 3.11+, have {sys_module.version_info.major}.{sys_module.version_info.minor}"
+        assert (
+            sys_module.version_info >= (3, 11)
+        ), f"Requires Python 3.11+, have {sys_module.version_info.major}.{sys_module.version_info.minor}"
 
 
 class TestAPIStability:
@@ -183,7 +185,7 @@ class TestAPIStability:
 
     def test_formula_api_documented(self):
         """Guarantee: Formula API is consistent and documented."""
-        rate_formula = FORMULAS['rate']
+        rate_formula = FORMULAS["rate"]
 
         # Should have consistent interface
         assert callable(rate_formula.to_latex)
@@ -200,10 +202,10 @@ class TestEndToEndGuarantees:
     def test_model_to_latex_pipeline(self):
         """Guarantee: Complete pipeline from model.py to LaTeX works."""
         # 1. Equation defined in model.py ✓ (FORMULAS loaded)
-        assert 'rate' in FORMULAS
+        assert "rate" in FORMULAS
 
         # 2. Equation has metadata ✓
-        rate = FORMULAS['rate']
+        rate = FORMULAS["rate"]
         assert rate.name
         assert rate.description
         assert rate.source_line > 0
@@ -214,12 +216,13 @@ class TestEndToEndGuarantees:
 
         # 4. Export to JSON ✓
         import tempfile
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json_path = Path(f.name)
 
         try:
             export_json(json_path)
             data = json.loads(json_path.read_text())
-            assert 'rate' in data
+            assert "rate" in data
         finally:
             json_path.unlink(missing_ok=True)
