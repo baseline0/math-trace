@@ -197,50 +197,31 @@ just lean      # Compile Lean proofs
 
 ```
 math-trace/
-├── README.md                    # This file
-├── CLAUDE.md                    # Fleet integration
-├── Justfile                     # Build recipes
-├── pyproject.toml              # Python dependencies
+├── Justfile                    # Build recipes (just paper, just test, just help)
+├── pyproject.toml              # Dependencies and package config
+├── README.md                   # This file
 │
-├── src/math_trace/             # Reusable library
-│   ├── __init__.py
-│   ├── generators.py           # SymPy → Typst converters
-│   └── templates/              # Typst/Lean templates
+├── src/math_trace/             # Reusable library for formula conversion
+│   ├── generators.py           # SymPy → LaTeX/Typst converters
+│   └── services.py             # High-level API
 │
 ├── examples/
-│   └── membrane-dynamics/      # Complete working example
-│       ├── model.py            # SymPy formulas (SOURCE OF TRUTH)
-│       ├── simulate.py         # Stochastic simulation
-│       ├── build_paper.py      # Build orchestration
-│       ├── main.typ            # Typst paper
-│       ├── generated/          # Auto-generated (ignored in git)
-│       │   ├── formulas.typ
-│       │   └── figures/
-│       └── lean/               # Lean formalization
-│           ├── Challenge.lean
-│           ├── Solution.lean
-│           ├── comparator.json
-│           └── formalization.yaml
+│   ├── membrane-dynamics/      # Complete end-to-end example (clone & just paper)
+│   └── epidemiology/           # (Stub) Reference config for SIR/SEIR models
 │
-├── templates/                  # Fork-friendly templates by domain
-│   ├── TEMPLATE-USAGE.md       # Master guide for customizing templates
-│   ├── simple-physics/         # Template: Classical mechanics
-│   │   ├── model.py, simulate.py, build_paper.py, main.typ, README.md
-│   └── biochemistry/           # Template: Enzyme kinetics
-│       ├── model.py, simulate.py, build_paper.py, main.typ, README.md
+├── templates/                  # Fork-friendly domain templates
+│   ├── simple-physics/         # Classical mechanics template
+│   └── biochemistry/           # Enzyme kinetics template
 │
-├── tests/                      # Test suite
+├── tests/                      # Test suite (pytest)
 │   ├── test_model_export.py    # Formula generation tests
-│   └── examples/
-│       └── test_membrane_end_to_end.py
+│   └── examples/               # End-to-end workflow examples
 │
 ├── docs/
-│   └── adr/                    # Architecture Decision Records
-│       ├── ADR-001-typst-over-latex.md
-│       ├── ADR-002-python-first-formulas.md
-│       └── ADR-003-code-linked-traceability.md
+│   ├── adr/                    # Architecture decisions
+│   └── ARCHITECTURE.md         # System design and flexibility
 │
-└── scripts/                    # Utilities (optional)
+└── LICENSE                     # MIT license
 ```
 
 ## Standards & Philosophy
