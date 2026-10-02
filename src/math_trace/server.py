@@ -3,8 +3,8 @@
 Provides web UI for:
 - Live formula editing (JSON)
 - Configuration editing (YAML)
-- Real-time slide preview (Marp → HTML)
-- Export (slides.md, PDF via Marp)
+- Real-time slide preview (Revealjs + HTMX)
+- Export (HTML with live formula evaluation)
 """
 
 from __future__ import annotations
@@ -22,9 +22,11 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from .arxiv_extractor import extract_arxiv_id, load_extracted_paper, save_extracted_paper
+from .formula import Formula
 from .formula_browser import app as formula_browser_app
 from .logging import get_logger
-from .presentation_generator import MarpBackend, PresentationConfig
+from .presentation_generator import PresentationConfig
+from .presentation_server import PresentationServer
 from .responses import ApiResponse
 
 logger = get_logger(__name__)
@@ -41,85 +43,54 @@ app = FastAPI(
 # ============================================================================
 
 
-@app.post("/api/preview")
+@app.post("/api/preview", response_class=HTMLResponse)
 async def preview_slide(
     formulas: dict,
     config: Optional[dict] = None,
-    backend: str = "marp",
+    theme: str = "white",
 ):
     """Live preview of slides with current formulas + config.
 
     Args:
         formulas: Dictionary of formula definitions (name → latex)
-        config: Presentation config (title, author, theme, etc.)
-        backend: Rendering backend ("marp", "reveal", "beamer")
+        config: Presentation config (title, author, etc.)
+        theme: Revealjs theme (white, black, league, sky, beige, etc.)
 
     Returns:
-        Rendered HTML or error message
+        Rendered HTML with Revealjs + HTMX
     """
     try:
         if not formulas:
-            return {"status": "error", "message": "No formulas provided"}
+            raise HTTPException(400, "No formulas provided")
 
-        # Use default config if not provided
-        if config is None:
-            config = {
-                "title": "Untitled Presentation",
-                "author": "Unknown",
-                "theme": "default",
-            }
+        # Create presentation server
+        title = config.get("title", "Untitled Presentation") if config else "Untitled Presentation"
+        server = PresentationServer(title=title, theme=theme)
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmpdir_path = Path(tmpdir)
+        # Convert formulas dict to Formula objects and add as slides
+        for formula_name, formula_data in formulas.items():
+            if isinstance(formula_data, dict):
+                formula = Formula(
+                    name=formula_data.get("name", formula_name),
+                    latex=formula_data.get("latex", ""),
+                    description=formula_data.get("description", ""),
+                    source_line=formula_data.get("source_line", 0),
+                )
+                parameters = formula_data.get("parameters", {})
+                server.add_formula_slide(
+                    title=formula.name,
+                    formulas={formula_name: formula},
+                    parameters=parameters,
+                    description=formula.description,
+                )
 
-            # Render presentation
-            try:
-                # Restructure config to match PresentationConfig schema
-                # PresentationConfig fields: title, format, backend, slides, metadata, paper_url, paper_doi
-                pres_fields = {"title", "format", "backend", "slides", "metadata", "paper_url", "paper_doi"}
-                metadata = {}
+        # Return rendered HTML
+        return server._render_presentation()
 
-                # Extract non-PresentationConfig fields into metadata
-                for key in list(config.keys()):
-                    if key not in pres_fields:
-                        metadata[key] = config.pop(key)
-
-                # Set defaults for required fields
-                if "title" not in config:
-                    config["title"] = "Untitled"
-                if "format" not in config:
-                    config["format"] = "talk"
-                if "backend" not in config:
-                    config["backend"] = backend
-                if "slides" not in config:
-                    config["slides"] = []
-                if metadata:
-                    config["metadata"] = metadata
-
-                # Create presentation config
-                pres_config = PresentationConfig(**config)
-
-                # Render using Marp backend
-                marp = MarpBackend()
-                result_path = marp.render(pres_config, formulas, tmpdir_path)
-
-                # Read and return result
-                if result_path.exists():
-                    markdown = result_path.read_text()
-                    return {"status": "success", "markdown": markdown}
-                else:
-                    return {"status": "error", "message": "Rendering produced no output"}
-            except TypeError as e:
-                return {"status": "error", "message": f"Config error: {str(e)}"}
-            except Exception as e:
-                return {"status": "error", "message": f"Render failed: {str(e)}"}
-
-    except json.JSONDecodeError as e:
-        return {"status": "error", "message": f"Invalid JSON: {str(e)}"}
-    except yaml.YAMLError as e:
-        return {"status": "error", "message": f"Invalid YAML: {str(e)}"}
+    except KeyError as e:
+        raise HTTPException(400, f"Missing field: {e}")
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise HTTPException(500, f"Preview failed: {str(e)}")
 
 
 @app.post("/api/export")
