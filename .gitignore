@@ -89,6 +89,8 @@ docs/TYPST-GOTCHAS.md
 docs/TYPST-LINTING.md
 docs/equation-traceability-semantic-minimum.md
 
-# Local developer configuration
+# Local developer configuration (IDE settings, project-specific notes)
+# Code-as-Docs policy: recipes are documented in justfile, not markdown
+.claude/
 .fleetconfig.yaml
-.claude/settings.local.json
+CLAUDE.md

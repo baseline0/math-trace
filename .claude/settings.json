@@ -3,7 +3,13 @@
     "allow": [
       "Bash(grep -E \"\\\\.md$|\\\\.yaml$|\\\\.json$\")",
       "Bash(grep -E \"\\\\.md$|MANIFEST\")",
-      "Bash(ruff check *)"
+      "Bash(ruff check *)",
+      "Bash(git commit -m 'chore: add MIT license and PyPI release recipes *)",
+      "Bash(git commit -m 'fix: CI template check should only validate complete templates *)",
+      "Bash(git commit -m 'chore: align pre-commit and ruff with PyPI best practices *)",
+      "Bash(pre-commit run *)",
+      "Bash(git reset *)",
+      "Bash(git commit -m 'chore: apply code-as-docs policy, remove CLAUDE.md and .claude/ from tracking *)"
     ]
   }
 }
