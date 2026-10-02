@@ -12,7 +12,7 @@ import sys
 import pytest
 
 # Add examples to path
-sys.path.insert(0, str(Path(__file__).parent / '../../examples/membrane-dynamics'))
+sys.path.insert(0, str(Path(__file__).parent / '../../examples/membrane-dynamics/src'))
 
 from model import FORMULAS
 

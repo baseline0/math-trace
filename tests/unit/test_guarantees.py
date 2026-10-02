@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 
 # Add examples to path for model imports
-sys.path.insert(0, str(Path(__file__).parent / '../../examples/membrane-dynamics'))
+sys.path.insert(0, str(Path(__file__).parent / '../../examples/membrane-dynamics/src'))
 
 from math_trace.services import Formula
 from model import FORMULAS, export_json

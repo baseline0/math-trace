@@ -45,7 +45,9 @@
       "Bash(mkdir -p src)",
       "Bash(mv model.py src/)",
       "Bash(touch src/__init__.py)",
-      "Bash(grep -E \"^-.*\\\\.py$\")"
+      "Bash(grep -E \"^-.*\\\\.py$\")",
+      "Bash(python -m pytest tests/unit/test_guarantees.py::TestEquationExtraction::test_equations_extractable_from_sympy -xvs)",
+      "Bash(git commit -m 'fix: update test imports after moving model.py to src/ layout *)"
     ]
   }
 }
