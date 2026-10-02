@@ -219,8 +219,8 @@ class PresentationServer:
     def _evaluate_formula(self, latex_str: str, params: Dict[str, float]) -> str:
         """Evaluate a LaTeX formula with given parameters.
 
-        Converts LaTeX to SymPy expression, substitutes parameters, and evaluates.
-        If parsing fails, returns the original LaTeX.
+        Converts common LaTeX patterns to evaluable expressions.
+        If parsing fails, returns original LaTeX.
 
         Args:
             latex_str: LaTeX formula string (e.g., r"k \binom{n}{2}")
@@ -235,55 +235,72 @@ class PresentationServer:
         try:
             import re
 
+            # Pre-process LaTeX to Python-evaluable form
             expr_str = latex_str
 
-            # Convert LaTeX binomial \binom{a}{b} → binomial(a, b)
-            expr_str = re.sub(r"\\binom\s*\{\s*([^}]+)\s*\}\s*\{\s*([^}]+)\s*\}", r"binomial(\1, \2)", expr_str)
+            # Evaluate binomial coefficients with actual parameter values
+            def eval_binomial(match):
+                a_str, b_str = match.group(1), match.group(2)
+                try:
+                    # Try to parse as number or parameter name
+                    a = (
+                        float(a_str)
+                        if a_str.replace(".", "").replace("-", "").isdigit()
+                        else params.get(a_str, float("nan"))
+                    )
+                    b = (
+                        float(b_str)
+                        if b_str.replace(".", "").replace("-", "").isdigit()
+                        else params.get(b_str, float("nan"))
+                    )
+                    result = sp.binomial(int(a), int(b))
+                    return f"({result})"  # Wrap in parens for safety
+                except Exception:
+                    return match.group(0)
 
-            # Convert LaTeX fractions: \frac{a}{b} → (a)/(b)
-            expr_str = re.sub(r"\\frac\s*\{\s*([^}]+)\s*\}\s*\{\s*([^}]+)\s*\}", r"(\1)/(\2)", expr_str)
+            expr_str = re.sub(r"\\binom\s*\{\s*([^}]+)\s*\}\s*\{\s*([^}]+)\s*\}", eval_binomial, expr_str)
 
-            # Convert other LaTeX commands
+            # Replace LaTeX commands with function names
             expr_str = expr_str.replace(r"\sqrt", "sqrt")
-            expr_str = expr_str.replace(r"\alpha", "alpha")
-            expr_str = expr_str.replace(r"\beta", "beta")
             expr_str = expr_str.replace(r"\pi", "pi")
 
-            # Remove remaining braces (they're just grouping in LaTeX)
+            # Remove braces (they're just grouping in LaTeX)
             expr_str = expr_str.replace("{", "").replace("}", "")
 
-            # Insert * between adjacent symbol/number and ( or ) and symbol
-            expr_str = re.sub(r"([a-zA-Z0-9_\)])\s*\(", r"\1*(", expr_str)
-            expr_str = re.sub(r"\)\s*([a-zA-Z0-9_\(])", r")*\1", expr_str)
+            # Insert * between adjacent tokens: digit/paren and symbol, symbol and digit/paren
+            expr_str = re.sub(r"(\d)\s*([a-zA-Z])", r"\1*\2", expr_str)
+            expr_str = re.sub(r"([a-zA-Z])\s*(\()", r"\1*\2", expr_str)
+            expr_str = re.sub(r"(\))\s*([a-zA-Z0-9])", r"\1*\2", expr_str)
+            expr_str = re.sub(r"(\))\s*(\()", r"\1*\2", expr_str)
 
-            # Create SymPy symbols for all parameters
-            symbols = {name: sp.Symbol(name) for name in params.keys()}
-
-            # Add SymPy functions to namespace
-            symbols.update({
-                'binomial': sp.binomial,
-                'sqrt': sp.sqrt,
-                'pi': sp.pi,
+            # Create namespace
+            namespace = {name: sp.Symbol(name) for name in params.keys()}
+            namespace.update({
+                "sqrt": sp.sqrt,
+                "pi": sp.pi,
+                "exp": sp.exp,
+                "log": sp.log,
+                "sin": sp.sin,
+                "cos": sp.cos,
             })
 
-            # Parse expression
-            expr = sp.sympify(expr_str, locals=symbols, transformations='all')
+            # Parse and evaluate
+            expr = sp.sympify(expr_str, locals=namespace)
 
             # Substitute parameter values
             for name, value in params.items():
                 expr = expr.subs(sp.Symbol(name), value)
 
-            # Evaluate numerically
+            # Compute result
             result = float(expr.evalf())
 
             # Format: integers without decimals, floats with 4 sig figs
-            if result == int(result):
-                return str(int(result))
+            if abs(result - round(result)) < 1e-9:
+                return str(int(round(result)))
             else:
                 return f"{result:.4g}"
 
         except Exception:
-            # If evaluation fails, return original LaTeX
             return latex_str
 
     def _render_presentation(self) -> str:
