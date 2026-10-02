@@ -11,15 +11,9 @@ from __future__ import annotations
 
 import html
 import json
-import logging
-import tempfile
-from pathlib import Path
-from typing import Optional
 
-import yaml
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 
 from .arxiv_extractor import extract_arxiv_id, load_extracted_paper, save_extracted_paper
 from .logging import get_logger
@@ -56,8 +50,8 @@ DASHBOARD_HTML = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>math-trace: Interactive Slide Editor</title>
-    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoXAqLObVeqkrf3xrjsKMBLQhArt8z0KH0u0p4kjJLnp6E/QTtz" crossorigin="anonymous"></script>
+    <title>math-trace: Formula Extractor</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         * {
             margin: 0;
@@ -68,452 +62,322 @@ DASHBOARD_HTML = """
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f5f5;
-            height: 100vh;
             display: flex;
             flex-direction: column;
+            height: 100vh;
         }
 
         header {
             background: #1e1e1e;
             color: white;
-            padding: 16px 20px;
+            padding: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         header h1 {
-            font-size: 20px;
-            font-weight: 600;
+            font-size: 24px;
+            margin-bottom: 15px;
         }
 
-        header p {
-            font-size: 12px;
-            color: #aaa;
-            margin-top: 4px;
-        }
-
-        .container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .editor-panel {
-            background: white;
-            border-right: 1px solid #ddd;
+        .input-group {
             display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
-        .preview-panel {
-            background: #f9f9f9;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .editor-section {
+        #arxiv-url {
             flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .editor-section:last-child {
-            border-bottom: none;
-        }
-
-        .editor-section h2 {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #333;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        textarea {
-            width: 100%;
-            height: calc(100% - 30px);
-            padding: 8px;
-            border: 1px solid #ddd;
+            padding: 10px;
+            border: 1px solid #555;
             border-radius: 4px;
-            font-family: 'Monaco', 'Courier New', monospace;
-            font-size: 12px;
-            resize: none;
+            background: #2a2a2a;
+            color: white;
+            font-size: 14px;
         }
 
-        textarea:focus {
-            outline: none;
-            border-color: #0066cc;
-            box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
-        }
-
-        .controls {
-            padding: 12px 16px;
-            border-top: 1px solid #ddd;
-            display: flex;
-            gap: 8px;
-            background: white;
+        #arxiv-url::placeholder {
+            color: #888;
         }
 
         button {
-            padding: 8px 16px;
+            padding: 10px 20px;
+            background: #2196f3;
+            color: white;
             border: none;
             border-radius: 4px;
-            font-size: 13px;
-            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
         }
 
-        button.primary {
-            background: #0066cc;
-            color: white;
-        }
-
-        button.primary:hover {
-            background: #0052a3;
-        }
-
-        button.secondary {
-            background: #f0f0f0;
-            color: #333;
-            border: 1px solid #ddd;
-        }
-
-        button.secondary:hover {
-            background: #e6e6e6;
-        }
-
-        button:active {
-            transform: scale(0.98);
+        button:hover {
+            background: #1976d2;
         }
 
         button:disabled {
-            opacity: 0.6;
+            background: #666;
             cursor: not-allowed;
         }
 
-        .preview-header {
-            padding: 12px 16px;
-            border-bottom: 1px solid #ddd;
+        .status-bar {
+            padding: 10px 20px;
+            background: #2a2a2a;
+            color: #aaa;
+            font-size: 13px;
+            border-top: 1px solid #444;
+        }
+
+        .container {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-        }
-
-        .preview-header h2 {
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .preview-header button {
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-
-        .preview-content {
             flex: 1;
+            overflow: hidden;
+        }
+
+        .left-panel, .right-panel {
+            flex: 1;
+            padding: 20px;
             overflow-y: auto;
-            padding: 16px;
+            border-right: 1px solid #ddd;
+        }
+
+        .right-panel {
+            border-right: none;
             background: white;
-            margin: 8px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
         }
 
-        .preview-content iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+        .panel-header {
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #333;
         }
 
-        .error {
-            color: #d32f2f;
-            background: #ffebee;
-            padding: 8px 12px;
+        pre {
+            background: #f0f0f0;
+            padding: 12px;
             border-radius: 4px;
+            font-size: 13px;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .formula-preview {
+            padding: 20px;
+            background: white;
+            border-radius: 4px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .formula-math {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+
+        .formula-info {
             font-size: 12px;
-            margin-bottom: 8px;
+            color: #666;
+            margin-top: 20px;
+            text-align: center;
         }
 
-        .success {
-            color: #388e3c;
-            background: #e8f5e9;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-bottom: 8px;
+        .formula-nav {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            align-items: center;
+        }
+
+        .formula-nav button {
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+
+        .formula-counter {
+            font-size: 14px;
+            color: #666;
+            min-width: 80px;
+            text-align: center;
         }
 
         .loading {
-            color: #1976d2;
-            background: #e3f2fd;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-bottom: 8px;
+            text-align: center;
+            color: #999;
+            padding: 40px;
         }
 
-        .status-message {
-            min-height: 20px;
-            font-size: 12px;
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>📊 math-trace Slide Editor</h1>
-        <p>Interactive formula → slide development with live preview</p>
+        <h1>📄 Math-Trace Formula Extractor</h1>
+        <div class="input-group">
+            <input
+                type="text"
+                id="arxiv-url"
+                placeholder="https://arxiv.org/abs/2609.21904"
+            />
+            <button id="fetch-btn" onclick="fetchPaper()">🔽 Fetch Paper</button>
+        </div>
+        <div id="message"></div>
     </header>
 
+    <div class="status-bar">
+        <span id="status">Ready to extract | Paper: <strong id="paper-name">None loaded</strong></span>
+    </div>
+
     <div class="container">
-        <!-- Left: Browser + Editors -->
-        <div class="editor-panel">
-            <div class="editor-section" style="flex: 0 0 auto; padding: 12px; border-bottom: 1px solid #ddd;">
-                <h2 style="margin: 0 0 8px 0; font-size: 13px;">📚 Formula Browser</h2>
-                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                    <button class="secondary"
-                            hx-get="/api/formulas/arxiv-papers"
-                            hx-target="#formula-browser-list"
-                            hx-swap="innerHTML"
-                            style="padding: 6px 12px; font-size: 12px;">
-                        📄 Cached Papers
-                    </button>
-                    <button class="secondary"
-                            hx-get="/api/formulas/local-models"
-                            hx-target="#formula-browser-list"
-                            hx-swap="innerHTML"
-                            style="padding: 6px 12px; font-size: 12px;">
-                        🐍 Local Models
-                    </button>
-                </div>
-                <div id="formula-browser-list" style="margin-top: 8px; max-height: 200px; overflow-y: auto; font-size: 12px; border: 1px solid #eee; border-radius: 4px; padding: 8px;">
-                    <p style="color: #999; margin: 0;">Click a button above to browse formulas</p>
-                </div>
-            </div>
-
-            <div class="editor-section">
-                <h2>📐 Formulas (JSON)</h2>
-                <textarea id="formulas" spellcheck="false">{
-  "rate": {
-    "latex": "k \\\\binom{n_a}{2}",
-    "description": "Rate law for 2a → b"
-  }
-}</textarea>
-            </div>
-
-            <div class="editor-section">
-                <h2>⚙️ Config (YAML)</h2>
-                <textarea id="config" spellcheck="false">title: My Presentation
-author: Your Name
-theme: default
-</textarea>
-            </div>
-
-            <div class="controls">
-                <button class="primary" onclick="previewSlide()" id="preview-btn">
-                    👁️ Preview
-                </button>
-                <button class="secondary" onclick="exportSlides()">
-                    📥 Export
-                </button>
-                <button class="secondary" onclick="resetEditors()">
-                    🔄 Reset
-                </button>
-            </div>
+        <div class="left-panel">
+            <div class="panel-header">📋 Formula JSON</div>
+            <pre id="json-display">{
+  "formulas": []
+}</pre>
         </div>
 
-        <!-- Right: Preview -->
-        <div class="preview-panel">
-            <div class="preview-header">
-                <h2>👀 Live Preview</h2>
-                <span style="font-size: 12px; color: #999;">Revealjs + HTMX</span>
+        <div class="right-panel">
+            <div class="panel-header">👁️ Preview</div>
+            <div id="preview-container">
+                <div class="loading">
+                    No formulas loaded yet.<br>
+                    Paste an arXiv URL above to start.
+                </div>
             </div>
-            <div class="preview-content">
-                <div class="status-message" id="status"></div>
-                <div id="preview" style="min-height: 300px;"></div>
+
+            <div class="formula-nav" id="nav-container" style="display: none;">
+                <button onclick="prevFormula()">← Prev</button>
+                <div class="formula-counter">
+                    <span id="formula-index">0</span> / <span id="formula-total">0</span>
+                </div>
+                <button onclick="nextFormula()">Next →</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Insert formula from browser into editor
-        window.insertFormula = function(name, latex) {
-            const currentText = document.getElementById('formulas').value.trim();
-            let formulas = {};
+        let currentFormulas = [];
+        let currentIndex = 0;
 
-            try {
-                formulas = JSON.parse(currentText);
-            } catch (e) {
-                formulas = {};
+        async function fetchPaper() {
+            const url = document.getElementById('arxiv-url').value.trim();
+            if (!url) {
+                showMessage('Please enter an arXiv URL', 'error');
+                return;
             }
 
-            // Add or update formula
-            formulas[name] = {
-                latex: latex,
-                description: ''
-            };
-
-            // Update editor
-            document.getElementById('formulas').value = JSON.stringify(formulas, null, 2);
-            localStorage.setItem('formulas', document.getElementById('formulas').value);
-
-            // Auto-preview
-            previewSlide();
-        };
-
-        // Load from localStorage
-        window.addEventListener('load', () => {
-            const saved_formulas = localStorage.getItem('formulas');
-            const saved_config = localStorage.getItem('config');
-            if (saved_formulas) document.getElementById('formulas').value = saved_formulas;
-            if (saved_config) document.getElementById('config').value = saved_config;
-        });
-
-        // Save to localStorage on edit
-        document.getElementById('formulas').addEventListener('change', () => {
-            localStorage.setItem('formulas', document.getElementById('formulas').value);
-        });
-        document.getElementById('config').addEventListener('change', () => {
-            localStorage.setItem('config', document.getElementById('config').value);
-        });
-
-        async function previewSlide() {
-            const status = document.getElementById('status');
-            const preview = document.getElementById('preview');
-            const btn = document.getElementById('preview-btn');
+            document.getElementById('fetch-btn').disabled = true;
+            showMessage('Extracting formulas...', 'loading');
 
             try {
-                const formulas_str = document.getElementById('formulas').value;
-                const config_str = document.getElementById('config').value;
-
-                // Parse JSON/YAML
-                const formulas = JSON.parse(formulas_str);
-                let config;
-                try {
-                    config = typeof YAML !== 'undefined' ? YAML.parse(config_str) : {title: "Config Error", author: "Error"};
-                    if (!config) {
-                        status.innerHTML = '<div class="error">❌ YAML library not loaded. Install js-yaml or use JSON format for config.</div>';
-                        btn.disabled = false;
-                        return;
-                    }
-                } catch (yaml_err) {
-                    status.innerHTML = '<div class="error">❌ Config parse error: ' + yaml_err.message + '</div>';
-                    btn.disabled = false;
-                    return;
-                }
-
-                status.innerHTML = '<div class="loading">⏳ Rendering preview...</div>';
-                btn.disabled = true;
-
-                // Call API
-                const response = await fetch('/api/preview', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ formulas, config, theme: 'white' })
-                });
-
-                const data = await response.json();
-
-                if (data.status === 'success') {
-                    if (data.html) {
-                        preview.innerHTML = data.html;
-                        status.innerHTML = '<div class="success">✅ Preview rendered successfully</div>';
-                    } else if (data.markdown) {
-                        preview.innerHTML = '<pre style="font-size: 11px; overflow: auto;">' +
-                                           escapeHtml(data.markdown) + '</pre>';
-                        status.innerHTML = '<div class="success">✅ Markdown generated</div>';
-                    }
-                } else {
-                    status.innerHTML = '<div class="error">❌ ' + data.message + '</div>';
-                }
-            } catch (e) {
-                status.innerHTML = '<div class="error">❌ Error: ' + e.message + '</div>';
+                // TODO: Call /api/fetch-paper endpoint
+                showMessage('Endpoint not yet implemented (Phase 3)', 'error');
+                currentFormulas = [];
+                updatePreview();
+            } catch (error) {
+                showMessage(`Error: ${error.message}`, 'error');
             } finally {
-                btn.disabled = false;
+                document.getElementById('fetch-btn').disabled = false;
             }
         }
 
-        async function exportSlides() {
-            const status = document.getElementById('status');
-            try {
-                const formulas_str = document.getElementById('formulas').value;
-                const config_str = document.getElementById('config').value;
-
-                const formulas = JSON.parse(formulas_str);
-                let config;
-                try {
-                    config = typeof YAML !== 'undefined' ? YAML.parse(config_str) : {title: "Untitled", author: "Unknown"};
-                    if (!config) {
-                        status.innerHTML = '<div class="error">❌ Config parse failed: YAML library not available</div>';
-                        return;
-                    }
-                } catch (yaml_err) {
-                    status.innerHTML = '<div class="error">❌ Config parse error: ' + yaml_err.message + '</div>';
-                    return;
-                }
-
-                status.innerHTML = '<div class="loading">⏳ Exporting...</div>';
-
-                const response = await fetch('/api/export', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ formulas, config, format: 'markdown' })
-                });
-
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'slides.md';
-                    a.click();
-                    status.innerHTML = '<div class="success">✅ Downloaded slides.md</div>';
-                } else {
-                    status.innerHTML = '<div class="error">❌ Export failed</div>';
-                }
-            } catch (e) {
-                status.innerHTML = '<div class="error">❌ Error: ' + e.message + '</div>';
+        function showMessage(msg, type) {
+            const el = document.getElementById('message');
+            el.innerHTML = `<div class="${type}">${msg}</div>`;
+            if (type === 'loading') {
+                setTimeout(() => { el.innerHTML = ''; }, 3000);
             }
         }
 
-        function resetEditors() {
-            localStorage.removeItem('formulas');
-            localStorage.removeItem('config');
-            location.reload();
+        function updatePreview() {
+            const container = document.getElementById('preview-container');
+            const navContainer = document.getElementById('nav-container');
+
+            if (currentFormulas.length === 0) {
+                container.innerHTML = `
+                    <div class="loading">
+                        No formulas loaded yet.<br>
+                        Paste an arXiv URL above to start.
+                    </div>
+                `;
+                navContainer.style.display = 'none';
+                document.getElementById('json-display').innerText =
+                    JSON.stringify({ formulas: [] }, null, 2);
+                return;
+            }
+
+            const formula = currentFormulas[currentIndex];
+            container.innerHTML = `
+                <div class="formula-preview">
+                    <div><strong>${formula.name || 'Formula'}</strong></div>
+                    <div class="formula-math">\\[${formula.latex}\\]</div>
+                    <div class="formula-info">
+                        ${formula.description || ''}<br>
+                        Line ${formula.source_line} in ${formula.source_file || 'source'}
+                    </div>
+                </div>
+            `;
+
+            // Update JSON display
+            document.getElementById('json-display').innerText =
+                JSON.stringify({ formulas: currentFormulas }, null, 2);
+
+            // Update navigation
+            navContainer.style.display = 'flex';
+            document.getElementById('formula-index').innerText = currentIndex + 1;
+            document.getElementById('formula-total').innerText = currentFormulas.length;
+
+            // Re-render math
+            if (window.MathJax) {
+                MathJax.typesetPromise().catch(e => console.log(e));
+            }
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        function prevFormula() {
+            if (currentFormulas.length === 0) return;
+            currentIndex = (currentIndex - 1 + currentFormulas.length) % currentFormulas.length;
+            updatePreview();
         }
 
-        // Load YAML library (non-blocking)
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js';
-        script.async = true;
-        document.head.appendChild(script);
+        function nextFormula() {
+            if (currentFormulas.length === 0) return;
+            currentIndex = (currentIndex + 1) % currentFormulas.length;
+            updatePreview();
+        }
 
-        // Initial preview on load (with fallback if YAML fails to load)
-        script.onload = () => {
-            previewSlide();
-        };
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (currentFormulas.length === 0) return;
+            if (e.key === 'ArrowLeft') prevFormula();
+            if (e.key === 'ArrowRight') nextFormula();
+        });
 
-        script.onerror = () => {
-            console.warn('YAML library failed to load; using JSON fallback');
-            previewSlide();
-        };
+        // Enter to fetch
+        document.getElementById('arxiv-url').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') fetchPaper();
+        });
     </script>
 </body>
 </html>
+
 """
 
 
@@ -640,9 +504,7 @@ async def browse_arxiv_papers(limit: int = 20):
         papers = arxiv_papers(limit=limit)
     except Exception as e:
         logger.error(f"Error listing papers: {e}")
-        return HTMLResponse(
-            '<p style="color: #999;">Unable to load papers. Please try again.</p>'
-        )
+        return HTMLResponse('<p style="color: #999;">Unable to load papers. Please try again.</p>')
 
     if not papers:
         return HTMLResponse(
@@ -651,11 +513,10 @@ async def browse_arxiv_papers(limit: int = 20):
 
     html_parts = ['<div style="display: flex; flex-direction: column; gap: 6px;">']
     for paper in papers:
-        safe_paper_id = html.escape(str(paper['paper_id']), quote=True)
-        safe_title = html.escape(str(paper['title'][:50]))
-        safe_authors = html.escape(str(paper.get('authors', 'Unknown')))
+        safe_paper_id = html.escape(str(paper["paper_id"]), quote=True)
+        safe_title = html.escape(str(paper["title"][:50]))
 
-        html_parts.append(f'''
+        html_parts.append(f"""
         <div style="padding: 8px; background: #f5f5f5; border-radius: 4px; cursor: pointer;"
              hx-get="/api/formulas/arxiv/{safe_paper_id}/equations"
              hx-target="#formula-browser-equations"
@@ -663,10 +524,10 @@ async def browse_arxiv_papers(limit: int = 20):
             <div style="font-weight: 500; font-size: 12px;">{safe_title}</div>
             <div style="font-size: 11px; color: #666;">{safe_paper_id} • {paper['total_equations']} eq • {paper['converted_equations']} ✅</div>
         </div>
-        ''')
-    html_parts.append('</div>')
+        """)
+    html_parts.append("</div>")
 
-    response = HTMLResponse(''.join(html_parts))
+    response = HTMLResponse("".join(html_parts))
     response.headers["X-Content-Type-Options"] = "nosniff"
     return response
 
@@ -680,9 +541,7 @@ async def browse_local_models(pattern: str = "*/src/model.py", root: str = "."):
         models = local_models(pattern=pattern, root=root)
     except Exception as e:
         logger.error(f"Error listing models: {e}")
-        return HTMLResponse(
-            '<p style="color: #999;">Unable to load models. Please try again.</p>'
-        )
+        return HTMLResponse('<p style="color: #999;">Unable to load models. Please try again.</p>')
 
     if not models:
         return HTMLResponse(
@@ -691,10 +550,10 @@ async def browse_local_models(pattern: str = "*/src/model.py", root: str = "."):
 
     html_parts = ['<div style="display: flex; flex-direction: column; gap: 6px;">']
     for model in models:
-        safe_path = html.escape(str(model['path']), quote=True)
-        safe_path_display = html.escape(str(model['path']))
+        safe_path = html.escape(str(model["path"]), quote=True)
+        safe_path_display = html.escape(str(model["path"]))
 
-        html_parts.append(f'''
+        html_parts.append(f"""
         <div style="padding: 8px; background: #f5f5f5; border-radius: 4px; cursor: pointer;"
              hx-get="/api/formulas/local/{safe_path}/equations"
              hx-target="#formula-browser-equations"
@@ -702,10 +561,10 @@ async def browse_local_models(pattern: str = "*/src/model.py", root: str = "."):
             <div style="font-weight: 500; font-size: 12px;">🐍 {safe_path_display}</div>
             <div style="font-size: 11px; color: #666;">{model['formula_count']} formulas</div>
         </div>
-        ''')
-    html_parts.append('</div>')
+        """)
+    html_parts.append("</div>")
 
-    response = HTMLResponse(''.join(html_parts))
+    response = HTMLResponse("".join(html_parts))
     response.headers["X-Content-Type-Options"] = "nosniff"
     return response
 
@@ -717,7 +576,7 @@ async def get_arxiv_equations(paper_id: str):
 
     try:
         result = arxiv_equations(paper_id)
-        equations = result['equations']
+        equations = result["equations"]
 
         safe_title = html.escape(str(result.get("title", "Unknown"))[:40])
         safe_authors = html.escape(str(result.get("authors", "Unknown"))[:50])
@@ -725,28 +584,30 @@ async def get_arxiv_equations(paper_id: str):
         html_parts = [
             f'<div style="padding: 8px;"><strong>{safe_title}</strong><br>',
             f'<span style="font-size: 11px; color: #666;">{safe_authors}</span>',
-            '<div style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">'
+            '<div style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">',
         ]
 
         for eq in equations[:10]:  # Show first 10
-            status_icon = "✅" if eq.get('sympy_expr') else "⏳"
-            latex_preview = html.escape(eq['latex'][:40].replace('{', '').replace('}', ''))
-            eq_name = html.escape(str(eq.get('name', eq.get('index', 'unknown'))), quote=True)
-            latex_json = json.dumps(eq['latex']).replace('"', '&quot;')
+            status_icon = "✅" if eq.get("sympy_expr") else "⏳"
+            latex_preview = html.escape(eq["latex"][:40].replace("{", "").replace("}", ""))
+            eq_name = html.escape(str(eq.get("name", eq.get("index", "unknown"))), quote=True)
+            latex_json = json.dumps(eq["latex"]).replace('"', "&quot;")
 
-            html_parts.append(f'''
+            html_parts.append(f"""
             <button style="text-align: left; padding: 6px; background: white; border: 1px solid #ddd; border-radius: 3px; cursor: pointer; font-size: 11px;"
                     onclick="window.insertFormula('{eq_name}', {latex_json})">
                 {status_icon} {latex_preview}...
             </button>
-            ''')
+            """)
 
         if len(equations) > 10:
-            html_parts.append(f'<p style="font-size: 11px; color: #999;">... and {len(equations)-10} more</p>')
+            html_parts.append(
+                f'<p style="font-size: 11px; color: #999;">... and {len(equations)-10} more</p>'
+            )
 
-        html_parts.append('</div></div>')
+        html_parts.append("</div></div>")
 
-        response = HTMLResponse(''.join(html_parts))
+        response = HTMLResponse("".join(html_parts))
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
     except Exception as e:
@@ -763,37 +624,35 @@ async def get_local_model_formulas(path: str):
 
     try:
         result = local_model_formulas(path)
-        if result.get('error'):
+        if result.get("error"):
             logger.warning(f"Error loading formulas from {path}: {result['error']}")
             return HTMLResponse(
                 '<p style="color: #d32f2f;">Unable to load formulas from this file.</p>'
             )
 
-        formulas = result['formulas']
+        formulas = result["formulas"]
         safe_path = html.escape(str(path))
 
         html_parts = [
             f'<div style="padding: 8px;"><strong>{safe_path}</strong>',
-            '<div style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">'
+            '<div style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">',
         ]
 
         for formula in formulas:
-            latex_preview = html.escape(
-                formula['latex'][:40] if formula['latex'] else '[error]'
-            )
-            formula_name = html.escape(formula['name'], quote=True)
-            latex_json = json.dumps(formula['latex']).replace('"', '&quot;')
+            latex_preview = html.escape(formula["latex"][:40] if formula["latex"] else "[error]")
+            formula_name = html.escape(formula["name"], quote=True)
+            latex_json = json.dumps(formula["latex"]).replace('"', "&quot;")
 
-            html_parts.append(f'''
+            html_parts.append(f"""
             <button style="text-align: left; padding: 6px; background: white; border: 1px solid #ddd; border-radius: 3px; cursor: pointer; font-size: 11px;"
                     onclick="window.insertFormula('{formula_name}', {latex_json})">
                 {html.escape(formula['name'])}: {latex_preview}...
             </button>
-            ''')
+            """)
 
-        html_parts.append('</div></div>')
+        html_parts.append("</div></div>")
 
-        response = HTMLResponse(''.join(html_parts))
+        response = HTMLResponse("".join(html_parts))
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
     except Exception as e:
