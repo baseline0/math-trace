@@ -2,10 +2,12 @@
 
 **Write publication-quality papers where every equation links back to code.**
 
-## Test Status
+## Status & Badges
 
-[![Unit Tests](https://github.com/anthropics/math-trace/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/anthropics/math-trace/actions)  
-**Status:** 16/16 tests passing ✅
+[![Tests](https://github.com/baseline0/math-trace/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/baseline0/math-trace/actions)
+[![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://docs.astral.sh/ruff/)
 
 Formula-to-code traceability for researchers who want reproducible mathematics. SymPy → Typst → PDF, with optional Lean formalization and Palomar registry integration.
 

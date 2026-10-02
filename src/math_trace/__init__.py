@@ -34,12 +34,27 @@ from .presentation_generator import (
     PresentationConfig,
     PresentationGenerator,
 )
+from .services import (
+    Formula,
+    FormulaExtractor,
+    PaperDownloader,
+    PaperMetadata,
+    PresentationBuilder,
+)
 
 __all__ = [
+    # Generators
     "SymPyToTypst",
     "TypstEnvironmentBuilder",
+    # Presentation
     "PresentationGenerator",
     "PresentationBackend",
     "MarpBackend",
     "PresentationConfig",
+    # Services
+    "PaperDownloader",
+    "FormulaExtractor",
+    "PresentationBuilder",
+    "PaperMetadata",
+    "Formula",
 ]

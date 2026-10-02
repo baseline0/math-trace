@@ -14,7 +14,7 @@ import pytest
 # Add examples to path
 sys.path.insert(0, str(Path(__file__).parent / '../examples/membrane-dynamics'))
 
-from model import FORMULAS, export_json
+from model import FORMULAS
 
 
 def test_formulas_defined():
@@ -73,7 +73,7 @@ def test_formula_metadata():
 
 def test_to_latex():
     """Verify LaTeX conversion works."""
-    for name, formula in FORMULAS.items():
+    for _name, formula in FORMULAS.items():
         latex = formula.to_latex()
 
         assert isinstance(latex, str)

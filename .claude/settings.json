@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.md$|\\\\.yaml$|\\\\.json$\")",
+      "Bash(grep -E \"\\\\.md$|MANIFEST\")",
+      "Bash(ruff check *)"
+    ]
+  }
+}

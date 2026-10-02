@@ -67,3 +67,28 @@ htmlcov/
 # Temporary
 *.tmp
 .scratch/
+
+# Developer-specific documentation (internal planning, status, notes)
+# Code-as-Docs policy: only README, CLAUDE, CONTRIBUTING, docs/adr/, and docs/deprecated/ are allowed
+.LANE_CLOSURES.md
+.STASHED_CANDIDATES.md
+AGMAI-READY.md
+EPIDEMIOLOGY-GOLDEN-PATH.md
+IMPLEMENTATION_COMPLETE_EPIDEMIOLOGY_R0.md
+LAUNCH_RECORD_EPIDEMIOLOGY_R0.md
+MEMBRANE-REFERENCE.md
+RELEASE_CHECKLIST.md
+TODO-PHASE4-REVISION-NOTES.md
+TODO.md
+
+# Developer-specific internal docs (not for PyPI release)
+docs/ARXIV-PLAN.md
+docs/FORMULA_SLIDES_MARKET_ASSESSMENT.md
+docs/POSITIONING.md
+docs/TYPST-GOTCHAS.md
+docs/TYPST-LINTING.md
+docs/equation-traceability-semantic-minimum.md
+
+# Local developer configuration
+.fleetconfig.yaml
+.claude/settings.local.json

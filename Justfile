@@ -135,6 +135,33 @@ install-typst:
         fi; \
     fi
 
+[group("release")]
+prep-release VERSION:
+    #!/usr/bin/env bash
+    set -e
+
+    # Verify working tree is clean
+    if ! git diff --quiet; then
+        echo "❌ Working tree has uncommitted changes. Commit first."
+        exit 1
+    fi
+
+    # Verify tests pass
+    echo "🧪 Running tests..."
+    uv run pytest -q
+
+    # Tag the release
+    echo "📌 Tagging release v{{VERSION}}..."
+    git tag -a "v{{VERSION}}" -m "Release v{{VERSION}}"
+
+    # Push tag
+    echo "🚀 Pushing tag..."
+    git push origin main --tags
+
+    echo "✅ Release v{{VERSION}} tagged and pushed"
+    echo "   Next: build wheel and upload to PyPI"
+    echo "   See: https://packaging.python.org/guides/publishing-package-distribution-releases-to-pypi/"
+
 [group("help")]
 help:
     @echo "🎓 math-trace: Formula-to-code traceability"
