@@ -179,8 +179,9 @@ class TestAPIEndpoints:
         )
 
         assert response.status_code == 200
-        data = response.json()
-        assert data["status"] == "success"
+        response_data = response.json()
+        assert response_data["status"] == "success"
+        data = response_data["data"]
         assert data["paper_id"] == TEST_PAPER_ID
         assert data["total_equations"] > 0
 
@@ -191,8 +192,9 @@ class TestAPIEndpoints:
         response = client.get(f"/api/arxiv/papers/{TEST_PAPER_ID}")
 
         assert response.status_code == 200
-        data = response.json()
-        assert data["status"] == "success"
+        response_data = response.json()
+        assert response_data["status"] == "success"
+        data = response_data["data"]
         assert data["paper_id"] == TEST_PAPER_ID
         assert len(data["equations"]) > 0
 

@@ -188,10 +188,9 @@ class FormulaExtractor:
         """
         formulas = FormulaExtractor.extract(pdf_path)
 
-        if use_claude:
-            # TODO: integrate Claude API for descriptions
-            # For now, use context as description
-            pass
+        # Note: use_claude parameter reserved for future enhancement
+        # (Claude API integration for auto-description generation)
+        # Currently all paths use context-based descriptions
 
         # Use surrounding context as description
         for formula in formulas:

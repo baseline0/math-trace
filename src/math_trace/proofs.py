@@ -142,20 +142,22 @@ class LeanFramework(ProofFramework):
             proof: Lean 4 proof code
 
         Returns:
-            URL of proof in Palomar registry
+            Local proof ID (format: palomar.internal/proof/{hash})
+
+        Note:
+            Full Palomar API integration is a future enhancement.
+            Currently returns a local hash-based identifier.
 
         Raises:
-            RuntimeError: If export fails (network, auth, etc.)
+            RuntimeError: If export fails (encoding errors, etc.)
         """
         try:
-            # TODO: Implement Palomar API integration
-            # For now, just save locally
             import hashlib
             proof_hash = hashlib.sha256(proof.encode()).hexdigest()[:8]
             return f"palomar.internal/proof/{proof_hash}"
 
         except Exception as e:
-            raise RuntimeError(f"Failed to export proof to registry: {e}")
+            raise RuntimeError(f"Failed to generate proof ID: {e}")
 
 
 class CoqFramework(ProofFramework):

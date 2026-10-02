@@ -96,7 +96,8 @@
       "Bash(python -c \"from math_trace.services import ExtractedEquation; print\\('✅ Import works'\\)\")",
       "Bash(git commit -m 'fix: update test_services.py import for renamed Formula class *)",
       "Bash(python -m py_compile src/math_trace/*.py)",
-      "Bash(python -m py_compile src/math_trace/server.py src/math_trace/responses.py)"
+      "Bash(python -m py_compile src/math_trace/server.py src/math_trace/responses.py)",
+      "Bash(python -m py_compile src/math_trace/utils.py src/math_trace/services.py src/math_trace/proofs.py)"
     ]
   }
 }

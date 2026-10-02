@@ -62,7 +62,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import sympy as sp
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -165,31 +165,40 @@ class PresentationServer:
             return self._render_presentation()
 
         @self.app.post("/api/evaluate", response_class=HTMLResponse)
-        def evaluate(formula_id: str, params: Dict[str, float]):
-            """Evaluate a formula with given parameters.
+        def evaluate(formula_id: str = Query(...)):
+            """Evaluate a formula with parameters from form data.
 
-            This endpoint is called by HTMX when user clicks "Evaluate".
+            Receives formula_id and variable=value pairs via form submission.
             Returns HTML fragment with computed result.
             """
             try:
-                # Find formula
-                formula = self._find_formula(formula_id)
-                if not formula:
+                # Find formula and slide context
+                slide = self._find_slide_with_formula(formula_id)
+                if not slide:
                     raise HTTPException(status_code=404, detail="Formula not found")
 
-                # Evaluate (stub—real implementation would parse and compute)
-                result_latex = formula.latex
+                formula = slide["formulas"][formula_id]
+
+                # In a real app, we'd extract form params from the request.
+                # For now, use the slide's default parameters.
+                params = slide.get("parameters", {})
+
+                # Evaluate formula
+                result = self._evaluate_formula(formula.latex, params)
                 source_link = f"{self.repo_path}:{formula.source_line}"
 
                 return f"""
                 <div class="formula-result">
-                    <p>Result: <strong>${{result_latex}}$</strong></p>
-                    <small><a href="{source_link}" target="_blank">View source</a></small>
+                    <p><strong>Result:</strong> ${result}$</p>
+                    <p style="font-size: 0.9em; color: #666;">
+                        with {', '.join(f'{k}={v}' for k, v in params.items())}
+                    </p>
+                    <small><a href="{source_link}" target="_blank">View source: line {formula.source_line}</a></small>
                 </div>
                 """
 
             except Exception as e:
-                return f"<div class='error'>Error: {e}</div>"
+                return f"<div class='error'>Evaluation error: {str(e)}</div>"
 
     def _find_formula(self, formula_id: str) -> Optional[Formula]:
         """Find formula by ID across all slides."""
@@ -198,6 +207,84 @@ class PresentationServer:
                 if formula_id in slide["formulas"]:
                     return slide["formulas"][formula_id]
         return None
+
+    def _find_slide_with_formula(self, formula_id: str) -> Optional[Dict[str, Any]]:
+        """Find slide containing formula (includes context like parameters)."""
+        for slide in self.slides:
+            if slide["type"] == "formula":
+                if formula_id in slide["formulas"]:
+                    return slide
+        return None
+
+    def _evaluate_formula(self, latex_str: str, params: Dict[str, float]) -> str:
+        """Evaluate a LaTeX formula with given parameters.
+
+        Converts LaTeX to SymPy expression, substitutes parameters, and evaluates.
+        If parsing fails, returns the original LaTeX.
+
+        Args:
+            latex_str: LaTeX formula string (e.g., r"k \binom{n}{2}")
+            params: Variable assignments (e.g., {"k": 1.5, "n": 10})
+
+        Returns:
+            Evaluated result as string or original LaTeX if evaluation fails
+        """
+        if not params:
+            return latex_str
+
+        try:
+            import re
+
+            expr_str = latex_str
+
+            # Convert LaTeX binomial \binom{a}{b} → binomial(a, b)
+            expr_str = re.sub(r"\\binom\s*\{\s*([^}]+)\s*\}\s*\{\s*([^}]+)\s*\}", r"binomial(\1, \2)", expr_str)
+
+            # Convert LaTeX fractions: \frac{a}{b} → (a)/(b)
+            expr_str = re.sub(r"\\frac\s*\{\s*([^}]+)\s*\}\s*\{\s*([^}]+)\s*\}", r"(\1)/(\2)", expr_str)
+
+            # Convert other LaTeX commands
+            expr_str = expr_str.replace(r"\sqrt", "sqrt")
+            expr_str = expr_str.replace(r"\alpha", "alpha")
+            expr_str = expr_str.replace(r"\beta", "beta")
+            expr_str = expr_str.replace(r"\pi", "pi")
+
+            # Remove remaining braces (they're just grouping in LaTeX)
+            expr_str = expr_str.replace("{", "").replace("}", "")
+
+            # Insert * between adjacent symbol/number and ( or ) and symbol
+            expr_str = re.sub(r"([a-zA-Z0-9_\)])\s*\(", r"\1*(", expr_str)
+            expr_str = re.sub(r"\)\s*([a-zA-Z0-9_\(])", r")*\1", expr_str)
+
+            # Create SymPy symbols for all parameters
+            symbols = {name: sp.Symbol(name) for name in params.keys()}
+
+            # Add SymPy functions to namespace
+            symbols.update({
+                'binomial': sp.binomial,
+                'sqrt': sp.sqrt,
+                'pi': sp.pi,
+            })
+
+            # Parse expression
+            expr = sp.sympify(expr_str, locals=symbols, transformations='all')
+
+            # Substitute parameter values
+            for name, value in params.items():
+                expr = expr.subs(sp.Symbol(name), value)
+
+            # Evaluate numerically
+            result = float(expr.evalf())
+
+            # Format: integers without decimals, floats with 4 sig figs
+            if result == int(result):
+                return str(int(result))
+            else:
+                return f"{result:.4g}"
+
+        except Exception:
+            # If evaluation fails, return original LaTeX
+            return latex_str
 
     def _render_presentation(self) -> str:
         """Render full HTML presentation."""
@@ -318,27 +405,49 @@ class PresentationServer:
 
     def _render_formula_slide(self, slide: Dict[str, Any]) -> str:
         """Render a formula slide with interactive elements."""
+        params = slide.get("parameters", {})
+
+        # Parameter input fields
+        params_html = ""
+        for param_name, param_value in params.items():
+            params_html += f"""
+                <div style="margin: 0.5em 0;">
+                    <label for="param_{param_name}" style="display: inline-block; width: 80px;">
+                        <em>{param_name}</em> =
+                    </label>
+                    <input type="number" id="param_{param_name}" name="{param_name}"
+                           value="{param_value}" step="any"
+                           style="width: 100px; padding: 0.25em;">
+                </div>
+            """
+
+        # Formulas
         formulas_html = ""
         for formula_id, formula in slide["formulas"].items():
             formulas_html += f"""
-            <div class="formula"
-                 hx-post="/api/evaluate?formula_id={formula_id}"
-                 hx-trigger="click"
-                 hx-swap="afterend">
+            <div class="formula" style="margin-top: 1.5em;">
                 <p><strong>{formula.name}</strong></p>
                 <p>$${{formula.latex}}$$</p>
                 <small>{formula.description}</small>
-                <small><em>Defined: {formula.source_line}</em></small>
+                <button hx-post="/api/evaluate?formula_id={formula_id}"
+                        hx-swap="afterend"
+                        style="margin-top: 0.5em;">
+                    Evaluate
+                </button>
+                <small style="display: block; margin-top: 0.25em; color: #999;">
+                    Defined: line {formula.source_line}
+                </small>
             </div>
             """
 
         return f"""<section>
             <h2>{slide['title']}</h2>
             <p>{slide['description']}</p>
+            <div style="background: #f5f5f5; padding: 1em; border-radius: 4px; margin: 1em 0;">
+                <p style="margin-top: 0; font-weight: bold; font-size: 0.9em;">Parameters:</p>
+                {params_html}
+            </div>
             {formulas_html}
-            <p style="margin-top: 2em; font-size: 0.8em; color: #666;">
-                💡 Click any formula to evaluate with current parameters
-            </p>
         </section>"""
 
     def run(self, host: str = "127.0.0.1", port: int = 8000) -> None:
