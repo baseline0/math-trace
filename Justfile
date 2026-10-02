@@ -80,6 +80,13 @@ test-model:
     cd examples/membrane-dynamics && uv run python model.py
 
 [group("verify")]
+e2e-test:
+    @echo "🧪 Running end-to-end arXiv pipeline test..."
+    @echo "   (downloads real paper, extracts equations, processes them)"
+    @echo ""
+    uv run pytest tests/e2e/test_arxiv_pipeline.py -v -s
+
+[group("verify")]
 typecheck:
     @echo "🔎 Type checking..."
     uv run mypy src/ tests/ --ignore-missing-imports --no-error-summary 2>&1 | grep -v "numpy" | grep -v "error:" || echo "✅ Type check passed"
@@ -306,6 +313,7 @@ help:
     @echo "  just test-all          — Run all tests (unit + integration)"
     @echo "  just test-formulas     — Test formula generation"
     @echo "  just test-model        — Test model definitions"
+    @echo "  just e2e-test          — End-to-end: download paper, extract, process"
     @echo "  just typecheck         — Type check code"
     @echo ""
     @echo "RELEASE:"
