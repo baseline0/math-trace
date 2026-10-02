@@ -21,6 +21,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .presentation_generator import MarpBackend, PresentationConfig
 from .arxiv_extractor import extract_arxiv_id, save_extracted_paper, load_extracted_paper
+from .formula_browser import app as formula_browser_app
 
 app = FastAPI(
     title="math-trace Slide Editor",
@@ -205,6 +206,7 @@ DASHBOARD_HTML = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>math-trace: Interactive Slide Editor</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoXAqLObVeqkrf3xrjsKMBLQhArt8z0KH0u0p4kjJLnp6E/QTtz" crossorigin="anonymous"></script>
     <style>
         * {
             margin: 0;
@@ -421,8 +423,31 @@ DASHBOARD_HTML = """
     </header>
 
     <div class="container">
-        <!-- Left: Editors -->
+        <!-- Left: Browser + Editors -->
         <div class="editor-panel">
+            <div class="editor-section" style="flex: 0 0 auto; padding: 12px; border-bottom: 1px solid #ddd;">
+                <h2 style="margin: 0 0 8px 0; font-size: 13px;">📚 Formula Browser</h2>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <button class="secondary"
+                            hx-get="/api/formulas/arxiv-papers"
+                            hx-target="#formula-browser-list"
+                            hx-swap="innerHTML"
+                            style="padding: 6px 12px; font-size: 12px;">
+                        📄 Cached Papers
+                    </button>
+                    <button class="secondary"
+                            hx-get="/api/formulas/local-models"
+                            hx-target="#formula-browser-list"
+                            hx-swap="innerHTML"
+                            style="padding: 6px 12px; font-size: 12px;">
+                        🐍 Local Models
+                    </button>
+                </div>
+                <div id="formula-browser-list" style="margin-top: 8px; max-height: 200px; overflow-y: auto; font-size: 12px; border: 1px solid #eee; border-radius: 4px; padding: 8px;">
+                    <p style="color: #999; margin: 0;">Click a button above to browse formulas</p>
+                </div>
+            </div>
+
             <div class="editor-section">
                 <h2>📐 Formulas (JSON)</h2>
                 <textarea id="formulas" spellcheck="false">{
@@ -468,6 +493,31 @@ theme: default
     </div>
 
     <script>
+        // Insert formula from browser into editor
+        window.insertFormula = function(name, latex) {
+            const currentText = document.getElementById('formulas').value.trim();
+            let formulas = {};
+
+            try {
+                formulas = JSON.parse(currentText);
+            } catch (e) {
+                formulas = {};
+            }
+
+            // Add or update formula
+            formulas[name] = {
+                latex: latex,
+                description: ''
+            };
+
+            // Update editor
+            document.getElementById('formulas').value = JSON.stringify(formulas, null, 2);
+            localStorage.setItem('formulas', document.getElementById('formulas').value);
+
+            // Auto-preview
+            previewSlide();
+        };
+
         // Load from localStorage
         window.addEventListener('load', () => {
             const saved_formulas = localStorage.getItem('formulas');
@@ -687,6 +737,122 @@ async def arxiv_get_paper(paper_id: str):
         return {"status": "error", "message": f"Paper not cached: {paper_id}"}
     except Exception as e:
         return {"status": "error", "message": f"Error loading paper: {str(e)}"}
+
+
+# ============================================================================
+# Formula Browser Endpoints (HTMX Integration)
+# ============================================================================
+
+
+@app.get("/api/formulas/arxiv-papers")
+async def browse_arxiv_papers(limit: int = 20):
+    """List cached arXiv papers as HTML fragment for HTMX."""
+    from .formula_browser import arxiv_papers
+    papers = arxiv_papers(limit=limit)
+
+    if not papers:
+        return HTMLResponse(
+            '<p style="color: #999;">No cached papers found. Use POST /api/arxiv/extract to download one.</p>'
+        )
+
+    html = '<div style="display: flex; flex-direction: column; gap: 6px;">'
+    for paper in papers:
+        html += f'''
+        <div style="padding: 8px; background: #f5f5f5; border-radius: 4px; cursor: pointer;"
+             hx-get="/api/formulas/arxiv/{paper['paper_id']}/equations"
+             hx-target="#formula-browser-equations"
+             hx-swap="innerHTML">
+            <div style="font-weight: 500; font-size: 12px;">{paper['title'][:50]}</div>
+            <div style="font-size: 11px; color: #666;">{paper['paper_id']} • {paper['total_equations']} eq • {paper['converted_equations']} ✅</div>
+        </div>
+        '''
+    html += '</div>'
+
+    return HTMLResponse(html)
+
+
+@app.get("/api/formulas/local-models")
+async def browse_local_models(pattern: str = "*/src/model.py", root: str = "."):
+    """Find local Python model files with FORMULAS dict (HTML for HTMX)."""
+    from .formula_browser import local_models
+    models = local_models(pattern=pattern, root=root)
+
+    if not models:
+        return HTMLResponse(
+            '<p style="color: #999;">No model.py files found matching pattern. Try exploring examples/*/src/model.py</p>'
+        )
+
+    html = '<div style="display: flex; flex-direction: column; gap: 6px;">'
+    for model in models:
+        html += f'''
+        <div style="padding: 8px; background: #f5f5f5; border-radius: 4px; cursor: pointer;"
+             hx-get="/api/formulas/local/{model['path']}/equations"
+             hx-target="#formula-browser-equations"
+             hx-swap="innerHTML">
+            <div style="font-weight: 500; font-size: 12px;">🐍 {model['path']}</div>
+            <div style="font-size: 11px; color: #666;">{model['formula_count']} formulas</div>
+        </div>
+        '''
+    html += '</div>'
+
+    return HTMLResponse(html)
+
+
+@app.get("/api/formulas/arxiv/{paper_id}/equations")
+async def get_arxiv_equations(paper_id: str):
+    """Get equations from cached arXiv paper (HTML for HTMX)."""
+    from .formula_browser import arxiv_equations
+    try:
+        result = arxiv_equations(paper_id)
+        equations = result['equations']
+
+        html = f'<div style="padding: 8px;"><strong>{result["title"][:40]}</strong><br>'
+        html += f'<span style="font-size: 11px; color: #666;">{result.get("authors", "")[:50]}</span><div style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">'
+
+        for eq in equations[:10]:  # Show first 10
+            status_icon = "✅" if eq.get('sympy_expr') else "⏳"
+            latex_preview = eq['latex'][:40].replace('{', '').replace('}', '')
+            html += f'''
+            <button style="text-align: left; padding: 6px; background: white; border: 1px solid #ddd; border-radius: 3px; cursor: pointer; font-size: 11px;"
+                    onclick="window.insertFormula('{eq['name'] if 'name' in eq else eq['index']}', {json.dumps(eq['latex']).replace('"', '&quot;')})">
+                {status_icon} {latex_preview}...
+            </button>
+            '''
+
+        if len(equations) > 10:
+            html += f'<p style="font-size: 11px; color: #999;">... and {len(equations)-10} more</p>'
+
+        html += '</div></div>'
+        return HTMLResponse(html)
+    except Exception as e:
+        return HTMLResponse(f'<p style="color: #d32f2f;">Error: {str(e)}</p>')
+
+
+@app.get("/api/formulas/local/{path:path}/equations")
+async def get_local_model_formulas(path: str):
+    """Extract formulas from local model.py file (HTML for HTMX)."""
+    from .formula_browser import local_model_formulas
+    try:
+        result = local_model_formulas(path)
+        if result.get('error'):
+            return HTMLResponse(f'<p style="color: #d32f2f;">Error: {result["error"]}</p>')
+
+        formulas = result['formulas']
+        html = f'<div style="padding: 8px;"><strong>{path}</strong><div style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">'
+
+        for formula in formulas:
+            latex_preview = formula['latex'][:40] if formula['latex'] else '[error]'
+            html += f'''
+            <button style="text-align: left; padding: 6px; background: white; border: 1px solid #ddd; border-radius: 3px; cursor: pointer; font-size: 11px;"
+                    onclick="window.insertFormula('{formula['name']}', {json.dumps(formula['latex']).replace('"', '&quot;')})">
+                {formula['name']}: {latex_preview}...
+            </button>
+            '''
+
+        html += '</div></div>'
+        return HTMLResponse(html)
+    except Exception as e:
+        return HTMLResponse(f'<p style="color: #d32f2f;">Error: {str(e)}</p>')
 
 
 if __name__ == "__main__":
