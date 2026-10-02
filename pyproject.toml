@@ -76,13 +76,20 @@ select = [
     "I",    # isort
     "N",    # pep8-naming
     "UP",   # pyupgrade
-    "B",    # flake8-bugbear
+    "B",    # flake8-bugbear (security-sensitive patterns)
     "C4",   # flake8-comprehensions
     "SIM",  # flake8-simplify
+    "S",    # flake8-bandit (security issues: hardcoded passwords, SQL injection, etc.)
+    "A",    # flake8-builtins (prevent shadowing builtins)
 ]
 ignore = [
     "E501",  # line too long (handled by formatter)
 ]
+
+[tool.ruff.lint.flake8-bandit]
+# Bandit security rules to catch common issues
+# S101: use of assert (often used in tests, so selectively ignored)
+skips = ["S101"]
 
 [tool.pyright]
 include = ["src"]

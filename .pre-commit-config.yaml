@@ -1,5 +1,43 @@
-
 repos:
+  # Security: detect secrets and sensitive files
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: detect-private-key
+        stages: [commit]
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+        stages: [commit]
+      - id: check-ast
+        stages: [commit]
+      - id: check-toml
+        stages: [commit]
+      - id: trailing-whitespace
+        stages: [commit]
+      - id: end-of-file-fixer
+        stages: [commit]
+      - id: check-case-conflict
+        stages: [commit]
+      - id: mixed-line-ending
+        stages: [commit]
+
+  # Prevent common PyPI distribution issues
+  - repo: local
+    hooks:
+      - id: check-no-env-in-dist
+        name: Check no .env files in dist
+        entry: bash -c 'if [ -d dist ]; then find dist -name ".env*" -exec echo "❌ Found {} in dist/" \; -exec false \; ; fi'
+        language: system
+        stages: [commit]
+        pass_filenames: false
+      - id: prevent-direct-secrets
+        name: Prevent .env and secrets in src
+        entry: bash -c 'find src tests -name ".env*" -o -name "*.key" -o -name "*.pem" | grep -q . && { echo "❌ Found secrets in src/tests"; exit 1; } || exit 0'
+        language: system
+        stages: [commit]
+        pass_filenames: false
+
+  # Fleet governance
   - repo: https://github.com/baseline0/fleet-base
     rev: v1.0.0
     hooks:
