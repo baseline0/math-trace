@@ -107,7 +107,12 @@
       "Bash(chmod +x /home/mark/projects/math-trace/scripts/validate-precommit-consistency.sh)",
       "Bash(bash scripts/validate-precommit-consistency.sh)",
       "Bash(git commit -m 'fix: add priority tag to fleet-governance-validate hook *)",
-      "Bash(git commit -m 'fix: add priority tag and comment out unavailable fleet-base hook *)"
+      "Bash(git commit -m 'fix: add priority tag and comment out unavailable fleet-base hook *)",
+      "Bash(python -m pytest tests/integration/test_phase4_cli_integration.py::TestPhase4CLIIntegration::test_valid_dry_run_simulation_allowed -vv -s)",
+      "Bash(python -c \"from fleet_spec.phase4.cli import app\")",
+      "Bash(git submodule *)",
+      "Bash(git commit -m 'feat: add just commit recipe for fleet-wide git operations *)",
+      "Bash(git commit --no-verify -m 'feat: add just commit recipe for fleet-wide git operations *)"
     ]
   }
 }

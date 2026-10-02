@@ -12,10 +12,15 @@ from __future__ import annotations
 import html
 import json
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 
-from .arxiv_extractor import extract_arxiv_id, load_extracted_paper, save_extracted_paper
+from .arxiv_extractor import (
+    download_and_extract_equations,
+    extract_arxiv_id,
+    load_extracted_paper,
+    save_extracted_paper,
+)
 from .logging import get_logger
 from .responses import ApiResponse
 
@@ -37,6 +42,113 @@ app = FastAPI(
 async def health():
     """Health check endpoint."""
     return {"status": "ok", "version": "0.1.0"}
+
+
+@app.post("/api/fetch-paper")
+async def fetch_paper(url: str):
+    """Fetch arXiv paper and extract formulas.
+
+    Args:
+        url: arXiv URL or paper ID (e.g., "2609.21904" or "https://arxiv.org/abs/2609.21904")
+
+    Returns:
+        {"status": "success", "paper_id": "...", "count": 42}
+    """
+    try:
+        # Extract paper ID from URL or use directly
+        paper_id = extract_arxiv_id(url)
+        logger.info(f"Fetching paper {paper_id}")
+
+        # Download and extract equations
+        tar_path, equations = download_and_extract_equations(paper_id)
+        logger.info(f"Extracted {len(equations)} equations from {paper_id}")
+
+        # Save to cache
+        save_extracted_paper(paper_id)
+
+        return {
+            "status": "success",
+            "paper_id": paper_id,
+            "count": len(equations),
+        }
+    except Exception as e:
+        logger.error(f"Error fetching paper: {e}")
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@app.get("/api/formulas")
+async def get_formulas(paper_id: str):
+    """Get extracted formulas for a paper.
+
+    Args:
+        paper_id: arXiv paper ID
+
+    Returns:
+        {"status": "success", "formulas": [{"id": "eq1", "name": "...", "latex": "..."}]}
+    """
+    try:
+        data = load_extracted_paper(paper_id)
+        if not data:
+            raise HTTPException(status_code=404, detail=f"No formulas found for {paper_id}")
+
+        # Convert to frontend format
+        formulas = []
+        for i, eq in enumerate(data.get("equations", [])):
+            formulas.append(
+                {
+                    "id": f"eq{i}",
+                    "name": eq.get("context", "Formula")[:50],
+                    "latex": eq.get("latex", ""),
+                    "description": eq.get("context", ""),
+                    "source_line": i,
+                    "source_file": "arxiv",
+                }
+            )
+
+        return {
+            "status": "success",
+            "formulas": formulas,
+        }
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=f"Formulas not found for {paper_id}") from e
+    except Exception as e:
+        logger.error(f"Error loading formulas: {e}")
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@app.get("/api/preview/{paper_id}/{formula_id}")
+async def get_preview(paper_id: str, formula_id: str):
+    """Get MathJax preview for a formula.
+
+    Args:
+        paper_id: arXiv paper ID
+        formula_id: formula ID (e.g., "eq0")
+
+    Returns:
+        {"status": "success", "latex": "x^2 + y^2"}
+    """
+    try:
+        data = load_extracted_paper(paper_id)
+        if not data:
+            raise HTTPException(status_code=404, detail=f"Paper {paper_id} not found")
+
+        # Parse formula ID
+        idx = int(formula_id[2:]) if formula_id.startswith("eq") else int(formula_id)
+        equations = data.get("equations", [])
+
+        if idx >= len(equations):
+            raise HTTPException(status_code=404, detail=f"Formula {formula_id} not found")
+
+        eq = equations[idx]
+        return {
+            "status": "success",
+            "latex": eq.get("latex", ""),
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail="Invalid formula ID") from e
+    except Exception as e:
+        logger.error(f"Error getting preview: {e}")
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # ============================================================================
@@ -288,12 +400,34 @@ DASHBOARD_HTML = """
             showMessage('Extracting formulas...', 'loading');
 
             try {
-                // TODO: Call /api/fetch-paper endpoint
-                showMessage('Endpoint not yet implemented (Phase 3)', 'error');
-                currentFormulas = [];
+                // Fetch paper and extract formulas
+                const fetchResp = await fetch('/api/fetch-paper?url=' + encodeURIComponent(url), {
+                    method: 'POST'
+                });
+                if (!fetchResp.ok) {
+                    const err = await fetchResp.json();
+                    throw new Error(err.detail || 'Failed to fetch paper');
+                }
+                const fetchData = await fetchResp.json();
+                const paperId = fetchData.paper_id;
+                document.getElementById('paper-name').innerText = paperId;
+
+                // Load formulas
+                const formResp = await fetch('/api/formulas?paper_id=' + encodeURIComponent(paperId));
+                if (!formResp.ok) {
+                    throw new Error('Failed to load formulas');
+                }
+                const formData = await formResp.json();
+                currentFormulas = formData.formulas;
+                currentIndex = 0;
+
+                showMessage(`✓ Extracted ${currentFormulas.length} formulas`, 'success');
+                setTimeout(() => { document.getElementById('message').innerHTML = ''; }, 2000);
                 updatePreview();
             } catch (error) {
                 showMessage(`Error: ${error.message}`, 'error');
+                currentFormulas = [];
+                updatePreview();
             } finally {
                 document.getElementById('fetch-btn').disabled = false;
             }
