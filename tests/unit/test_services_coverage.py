@@ -4,19 +4,11 @@ Additional coverage tests for services.py to reach 80% target.
 Focuses on error cases and edge conditions in paper ingestion pipeline.
 """
 
-import json
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
-
-from math_trace.services import (
-    FormulaExtractor,
-    PaperDownloader,
-    PaperMetadata,
-    PresentationBuilder,
-)
+from math_trace.services import FormulaExtractor, PaperDownloader
 
 
 class TestPaperDownloaderErrorHandling:
@@ -74,8 +66,8 @@ class TestPaperDownloaderErrorHandling:
                 formulas = extractor.extract(str(pdf_path))
                 # Either empty list or exception is acceptable
                 assert formulas == [] or formulas is None
-            except Exception:
-                # PDF corruption errors are acceptable
+            except Exception:  # noqa: S110
+                # PDF corruption errors are acceptable—test validates graceful failure
                 pass
         finally:
             pdf_path.unlink(missing_ok=True)
@@ -86,8 +78,6 @@ class TestPresentationBuilderValidation:
 
     def test_filter_duplicate_formulas(self):
         """Handle duplicate formulas in extraction."""
-        extractor = FormulaExtractor()
-
         formulas = [
             {"name": "eq1", "latex": "x + y"},
             {"name": "eq1", "latex": "x + y"},  # Duplicate
@@ -99,8 +89,6 @@ class TestPresentationBuilderValidation:
 
     def test_validate_formula_structure(self):
         """Validate extracted formula structure."""
-        extractor = FormulaExtractor()
-
         formula = {
             "name": "test",
             "latex": "x^2 + y^2 = z^2",

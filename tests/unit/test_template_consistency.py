@@ -9,12 +9,11 @@ Validates:
 """
 
 import json
-from pathlib import Path
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
-
 
 TEMPLATE_DIR = Path(__file__).parent.parent.parent / "templates"
 TEMPLATES = ["simple-physics", "biochemistry", "quantum-systems", "epidemiology", "control-systems", "thermodynamics", "gnns"]
@@ -85,8 +84,8 @@ class TestFormulaJSON:
         if not model_path.exists():
             pytest.skip(f"{template}: model.py not found")
 
-        # Run model.py
-        result = subprocess.run(
+        # Run model.py (safe: model_path is from controlled template directory)
+        result = subprocess.run(  # noqa: S603
             [sys.executable, str(model_path)],
             cwd=str(template_path),
             capture_output=True,
