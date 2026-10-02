@@ -1,0 +1,38 @@
+# Presentation Configuration Schema
+#
+# Each presentation is defined by:
+# - title, format, and backend choice
+# - metadata (author, date, affiliation)
+# - paper citation (URL, DOI)
+# - slide structure with formulas, figures, and speaker notes
+
+title: "String: presentation title"
+format: "talk | course-notes | formula-reference"
+backend: "marp | reveal | beamer"
+
+metadata:
+  author: "Author name"
+  date: "2026-01-15"
+  affiliation: "Institution"
+  keywords: ["keyword1", "keyword2"]
+
+paper_url: "https://arxiv.org/abs/XXXX.XXXXX"
+paper_doi: "10.XXXX/xxxxx"
+
+slides:
+  - title: "Slide 1: Title"
+    text: "Optional text content (markdown)"
+    formulas: ["formula_name1", "formula_name2"]
+    figure: "path/to/figure.png (optional)"
+    notes: "Speaker notes (optional)"
+
+  - title: "Slide 2: Results"
+    text: "## Section heading\n\nBullet points...\n- Item 1\n- Item 2"
+    formulas: []
+    figure: "generated/figures/result.png"
+    notes: "Explain the implication of these results"
+
+  - title: "Slide 3: Conclusion"
+    text: "Wrap up main contributions"
+    formulas: []
+    notes: "20 seconds to close"

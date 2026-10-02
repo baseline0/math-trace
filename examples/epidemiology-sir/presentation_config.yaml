@@ -1,0 +1,118 @@
+title: "Compartmental Epidemiological Models: The SIR Framework"
+format: talk
+backend: marp
+
+metadata:
+  author: "Based on Barz, Santos, & Sasse (2026)"
+  date: "2026"
+  affiliation: "Research presentation"
+  keywords: ["epidemiology", "SIR model", "disease dynamics", "mathematical modeling"]
+
+paper_url: "https://arxiv.org/abs/2609.21904"
+paper_doi: "10.48550/arXiv.2609.21904"
+
+slides:
+  - title: "Compartmental Models in Epidemiology"
+    text: |
+      ## Population-level disease dynamics
+
+      Compartmental models divide populations into distinct states:
+      - **S** (Susceptible): Can contract disease
+      - **I** (Infected): Currently infectious
+      - **R** (Recovered/Removed): Immune or deceased
+
+      Transitions between compartments depend on disease parameters.
+    notes: "Introduce the basic framework of epidemiological modeling"
+
+  - title: "The SIR Model: Continuous Formulation"
+    text: |
+      ### Differential equations describing disease dynamics
+
+      Each compartment changes according to transmission and recovery rates.
+    formulas: ["dS_dt", "dI_dt", "dR_dt"]
+    notes: "These three coupled ODEs form the complete SIR model. β is transmission, γ is recovery rate."
+
+  - title: "Transmission Dynamics"
+    text: |
+      ### How disease spreads through the population
+
+      The force of infection depends on:
+      - **β**: transmission rate per contact
+      - **Contact frequency** between S and I individuals
+      - **Population size** (for density-dependent transmission)
+    notes: |
+      Note the -β·S·I term: it's proportional to both susceptible and infected populations.
+      This represents bilinear contact dynamics.
+
+  - title: "Recovery Dynamics"
+    text: |
+      ### Removal from the infectious pool
+
+      Infected individuals recover at rate γ:
+      - γ = 1 / average infectious period
+      - For COVID-19: γ ≈ 1/10 (day⁻¹) → ~10 day infectious period
+      - For measles: γ ≈ 1/12 (day⁻¹) → ~12 day infectious period
+    notes: "The recovery rate is often the most reliable parameter to estimate from data."
+
+  - title: "Reproduction Number R₀"
+    text: |
+      ### How many people does one infected person infect?
+
+      **R₀ = β / γ**
+
+      - R₀ > 1: epidemic grows (exponential phase)
+      - R₀ = 1: endemic equilibrium (herd immunity)
+      - R₀ < 1: disease dies out
+    formulas: ["R_0"]
+    notes: "R₀ is the most important single number for understanding epidemic potential"
+
+  - title: "Model Assumptions"
+    text: |
+      The SIR model assumes:
+      - **Homogeneous mixing**: all individuals equally likely to contact each other
+      - **No demographics**: no births/deaths (valid for short timescales)
+      - **No latency**: infected individuals are immediately infectious
+      - **Permanent immunity**: recovered individuals cannot be reinfected
+    notes: |
+      These assumptions limit the model's applicability. Extensions add
+      latency (SEIR), vital dynamics (SIRS), age structure, and spatial heterogeneity.
+
+  - title: "Numerical Simulation"
+    text: "### Example: COVID-19 trajectory"
+    figure: "generated/figures/sir_trajectory.png"
+    notes: "This simulation shows the classic epidemic curve: initial exponential growth, peak, then decline as susceptible population depletes."
+
+  - title: "Comparing Scenarios"
+    text: |
+      ### Effect of transmission rate on outbreak severity
+
+      Higher β → sharper peak, faster burnout
+      Lower β → slower growth, prolonged epidemic
+    figure: "generated/figures/r0_comparison.png"
+    notes: "This is why public health interventions (masks, distancing) focus on reducing β."
+
+  - title: "Key Takeaways"
+    text: |
+      ✅ SIR model captures essential disease dynamics with three ODEs
+
+      ✅ R₀ = β/γ determines epidemic trajectory
+
+      ✅ Model predictions inform policy (e.g., vaccination targets based on R₀)
+
+      ✅ Extensions handle real-world complexity (latency, immunity waning, spatial spread)
+    notes: "The beauty of the SIR model is its simplicity: it explains outbreak dynamics with minimal parameters."
+
+  - title: "Further Reading"
+    text: |
+      **Reference paper:**
+      - Barz, Liani et al. (2026) "Compartmental Epidemiological Models"
+      - arXiv:2609.21904
+
+      **Classic references:**
+      - Kermack & McKendrick (1927) - Original derivation
+      - Anderson & May (1991) - Modern textbook treatment
+
+      **Python implementation:**
+      - See `model.py` for SymPy formulas
+      - See `simulate.py` for numerical integration
+    notes: "All formulas in this presentation are directly linked to model.py for reproducibility."

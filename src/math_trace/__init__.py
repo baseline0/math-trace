@@ -28,8 +28,18 @@ __author__ = "Mark Alexiuk"
 __license__ = "MIT"
 
 from .generators import SymPyToTypst, TypstEnvironmentBuilder
+from .presentation_generator import (
+    MarpBackend,
+    PresentationBackend,
+    PresentationConfig,
+    PresentationGenerator,
+)
 
 __all__ = [
     "SymPyToTypst",
     "TypstEnvironmentBuilder",
+    "PresentationGenerator",
+    "PresentationBackend",
+    "MarpBackend",
+    "PresentationConfig",
 ]
