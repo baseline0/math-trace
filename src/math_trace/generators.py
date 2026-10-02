@@ -47,34 +47,56 @@ class SymPyToTypst:
             i += 1
         return '', len(s)
 
-    def _replace_binom(self, latex: str) -> str:
-        """Replace \\binom{n}{k} with binom(n, k), handling nested braces."""
+    def _replace_macro(self, latex: str, macro: str, replacement: str) -> str:
+        """Replace LaTeX macro with Typst equivalent, handling nested braces.
+
+        Args:
+            latex: LaTeX string
+            macro: Macro name (e.g., 'binom', 'frac', 'sqrt')
+            replacement: Replacement template (e.g., 'binom({0}, {1})', '({0})/({1})')
+                        Use {0}, {1}, etc. for positional placeholders
+
+        Returns:
+            Updated string
+        """
         result = []
+        pattern = '\\' + macro
         i = 0
+
         while i < len(latex):
-            if latex[i:i+6] == r'\binom':
-                i += 6
+            if latex[i:i+len(pattern)] == pattern:
+                i += len(pattern)
                 # Skip optional whitespace
                 while i < len(latex) and latex[i] in ' \t':
                     i += 1
-                # Extract first arg
-                if i < len(latex) and latex[i] == '{':
-                    arg1, i = self._extract_brace_content(latex, i)
+
+                # Extract arguments (one or more)
+                args = []
+                while i < len(latex) and latex[i] == '{':
+                    arg, i = self._extract_brace_content(latex, i)
+                    args.append(arg)
                     # Skip optional whitespace
                     while i < len(latex) and latex[i] in ' \t':
                         i += 1
-                    # Extract second arg
-                    if i < len(latex) and latex[i] == '{':
-                        arg2, i = self._extract_brace_content(latex, i)
-                        result.append(f'binom({arg1}, {arg2})')
-                    else:
-                        result.append(r'\binom')
+
+                if args:
+                    # Replace with template if we got all needed args
+                    try:
+                        result.append(replacement.format(*args))
+                    except IndexError:
+                        # Fallback if template has wrong number of placeholders
+                        result.append(pattern)
                 else:
-                    result.append(r'\binom')
+                    result.append(pattern)
             else:
                 result.append(latex[i])
                 i += 1
+
         return ''.join(result)
+
+    def _replace_binom(self, latex: str) -> str:
+        """Replace \\binom{n}{k} with binom(n, k), handling nested braces."""
+        return self._replace_macro(latex, 'binom', 'binom({0}, {1})')
 
     def convert(self, expr: sp.Expr) -> str:
         """
@@ -98,8 +120,7 @@ class SymPyToTypst:
         """
         Convert LaTeX string to Typst notation.
 
-        This is a simple regex-based converter for common patterns.
-        More complex conversions may require external tools like tex2typst.
+        This converter handles common LaTeX macros and symbols with brace-aware replacement.
 
         Args:
             latex: LaTeX string
@@ -109,36 +130,140 @@ class SymPyToTypst:
         """
         typst = latex
 
-        # Common substitutions (order matters for nested patterns)
-        # \binom{n}{k} → binom(n, k); handles nested braces like n_{a}
+        # Macro replacements (order matters for nested patterns)
+        # Use brace-aware replacement for macros with arguments
         typst = self._replace_binom(typst)
+        typst = self._replace_macro(typst, 'frac', '({0})/({1})')
+        typst = self._replace_macro(typst, 'sqrt', 'sqrt({0})')
 
-        # \frac{a}{b} → (a)/(b) or a/b
-        typst = re.sub(r'\\frac\{([^}]+)\}\{([^}]+)\}', r'(\1)/(\2)', typst)
+        # Function names: remove backslash and convert to lowercase (Typst uses plain text)
+        # e.g., \sin, \cos, \log → sin, cos, log
+        trig_functions = [
+            'sin', 'cos', 'tan', 'cot', 'sec', 'csc',
+            'arcsin', 'arccos', 'arctan',
+            'sinh', 'cosh', 'tanh',
+            'log', 'ln', 'exp',
+        ]
+        for func in trig_functions:
+            typst = typst.replace('\\' + func, func)
 
         # Parentheses
         typst = re.sub(r'\\left\(', '(', typst)
         typst = re.sub(r'\\right\)', ')', typst)
 
-        # Greek letters (simplified)
-        typst = typst.replace(r'\alpha', 'α')
-        typst = typst.replace(r'\beta', 'β')
-        typst = typst.replace(r'\gamma', 'γ')
-        typst = typst.replace(r'\delta', 'δ')
-        typst = typst.replace(r'\epsilon', 'ε')
-        typst = typst.replace(r'\lambda', 'λ')
-        typst = typst.replace(r'\mu', 'μ')
-        typst = typst.replace(r'\pi', 'π')
+        # Greek letters (comprehensive set)
+        greek_map = {
+            r'\alpha': 'α',
+            r'\beta': 'β',
+            r'\gamma': 'γ',
+            r'\delta': 'δ',
+            r'\epsilon': 'ε',
+            r'\zeta': 'ζ',
+            r'\eta': 'η',
+            r'\theta': 'θ',
+            r'\iota': 'ι',
+            r'\kappa': 'κ',
+            r'\lambda': 'λ',
+            r'\mu': 'μ',
+            r'\nu': 'ν',
+            r'\xi': 'ξ',
+            r'\omicron': 'ο',
+            r'\pi': 'π',
+            r'\rho': 'ρ',
+            r'\sigma': 'σ',
+            r'\tau': 'τ',
+            r'\upsilon': 'υ',
+            r'\phi': 'φ',
+            r'\chi': 'χ',
+            r'\psi': 'ψ',
+            r'\omega': 'ω',
+        }
+        for latex_char, typst_char in greek_map.items():
+            typst = typst.replace(latex_char, typst_char)
 
         # Operators
         typst = typst.replace(r'\cdot', '·')
         typst = typst.replace(r'\times', '×')
         typst = typst.replace(r'\div', '÷')
 
-        # Powers and subscripts are already preserved in SymPy LaTeX output
-        # (^ for superscript, _ for subscript)
+        # Arrows
+        typst = typst.replace(r'\rightarrow', '->')
+        typst = typst.replace(r'\leftarrow', '<-')
+        typst = typst.replace(r'\leftrightarrow', '<->')
+
+        # Quote multi-letter identifiers that aren't already quoted or subscripted
+        # This prevents Typst from interpreting ES as E*S
+        # Do this AFTER all LaTeX command replacements
+        typst = self._quote_identifiers(typst)
 
         return typst
+
+    def _quote_identifiers(self, typst: str) -> str:
+        """Quote multi-letter identifiers and subscripts in Typst math mode.
+
+        Converts multi-letter bare identifiers and multi-letter subscripts to quoted form.
+        E.g., ES → "ES", k_{cat} → "k"_{"cat"}, but leaves E, S, E_0 unchanged.
+        """
+        result = []
+        i = 0
+        while i < len(typst):
+            # Check if we're at the start of an identifier
+            if typst[i].isalpha():
+                # Collect the base identifier
+                ident_start = i
+                while i < len(typst) and typst[i].isalpha():
+                    i += 1
+                ident = typst[ident_start:i]
+
+                # Check if there's a subscript
+                if i < len(typst) and typst[i] == '_':
+                    # Found subscript
+                    i += 1  # skip the underscore
+                    if i < len(typst) and typst[i] == '{':
+                        # Extract subscript content
+                        i += 1
+                        subscript_content_start = i
+                        depth = 1
+                        while i < len(typst) and depth > 0:
+                            if typst[i] == '{':
+                                depth += 1
+                            elif typst[i] == '}':
+                                depth -= 1
+                            i += 1
+                        subscript_content = typst[subscript_content_start:i-1]
+
+                        # Quote base if multi-letter
+                        if len(ident) > 1:
+                            result.append(f'"{ident}"')
+                        else:
+                            result.append(ident)
+                        result.append('_')
+                        result.append('{')
+
+                        # Quote subscript if it's multi-letter text (not a number)
+                        if subscript_content.isalpha() and len(subscript_content) > 1:
+                            result.append(f'"{subscript_content}"')
+                        else:
+                            result.append(subscript_content)
+
+                        result.append('}')
+                    else:
+                        # Single character subscript
+                        result.append(ident)
+                        result.append('_')
+                        if i < len(typst):
+                            result.append(typst[i])
+                            i += 1
+                elif len(ident) > 1:
+                    # Multi-letter identifier without subscript
+                    result.append(f'"{ident}"')
+                else:
+                    # Single letter
+                    result.append(ident)
+            else:
+                result.append(typst[i])
+                i += 1
+        return ''.join(result)
 
     def binomial_to_readable(self, n: sp.Symbol, k: int) -> str:
         """

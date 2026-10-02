@@ -1,0 +1,27 @@
+{
+  "restoring_force": {
+    "latex": "- k x",
+    "description": "Hooke's law: restoring force proportional to displacement",
+    "source_line": 18
+  },
+  "equation_of_motion": {
+    "latex": "0 = - k x",
+    "description": "Newton's second law for harmonic oscillator",
+    "source_line": 22
+  },
+  "angular_frequency": {
+    "latex": "\\omega = \\sqrt{\\frac{k}{m}}",
+    "description": "Angular frequency of oscillation",
+    "source_line": 26
+  },
+  "general_solution": {
+    "latex": "x = A \\cos{\\left(\\omega t + \\phi \\right)}",
+    "description": "General solution: oscillation with amplitude A and phase \u03c6",
+    "source_line": 30
+  },
+  "total_energy": {
+    "latex": "E = \\frac{A^{2} k}{2}",
+    "description": "Total mechanical energy (constant)",
+    "source_line": 34
+  }
+}

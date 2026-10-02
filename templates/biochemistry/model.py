@@ -32,7 +32,7 @@ def export_formulas() -> dict:
             "source_line": 23,
         },
         "enzyme_mechanism": {
-            "latex": sp.latex(sp.Symbol('E') + sp.Symbol('S') + sp.Symbol('\\rightarrow') + sp.Symbol('ES') + sp.Symbol('\\rightarrow') + sp.Symbol('E') + sp.Symbol('P')),
+            "latex": r"E + S \rightarrow ES \rightarrow E + P",
             "description": "Three-step enzyme mechanism (binding → catalysis → release)",
             "source_line": 27,
         },

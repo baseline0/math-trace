@@ -13,7 +13,15 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-import re
+
+# Import the proper converter from math-trace library
+try:
+    from math_trace.generators import SymPyToTypst
+except ImportError:
+    # Fallback: add parent directories to path for development
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'src'))
+    from math_trace.generators import SymPyToTypst
 
 
 def generate_formulas() -> bool:
@@ -30,19 +38,16 @@ def generate_formulas() -> bool:
         print("❌ model.py did not generate biochemistry_equations.json")
         return False
 
-    # 2. Convert LaTeX → Typst (simple regex-based approach)
+    # 2. Convert LaTeX → Typst using math-trace library
     with open('biochemistry_equations.json') as f:
         data = json.load(f)
 
+    converter = SymPyToTypst()
     typst_lines = []
     for name, info in data.items():
         latex_str = info['latex']
-        # Simple LaTeX to Typst conversion
-        typst_str = latex_str
-        typst_str = re.sub(r'\\frac\{([^}]+)\}\{([^}]+)\}', r'(\\1)/(\\2)', typst_str)
-        typst_str = re.sub(r'\\left\(', '(', typst_str)
-        typst_str = re.sub(r'\\right\)', ')', typst_str)
-        typst_str = re.sub(r'\\rightarrow', '->', typst_str)
+        # Use the proper converter (handles rightarrow conversion)
+        typst_str = converter._latex_to_typst(latex_str)
 
         comment = f"// {info['description']} (from model.py:{info['source_line']})"
         definition = f"#let {name} = $ {typst_str} $"
