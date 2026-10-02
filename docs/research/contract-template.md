@@ -1,8 +1,8 @@
-# math-trace: AGMAI Outreach Contract
+# math-trace: Partnership Contract Template
 
-**Target Audience**: AGMAI, academic researchers, AI companies auditing mathematical claims  
+**Target Audience**: Academic researchers, AI companies, institutions auditing mathematical claims  
 **Version**: 1.0 (Sep 22, 2026)  
-**Purpose**: Define scope & guarantees for v0.9.0-rc1 → v1.0.0 releases
+**Purpose**: Template for partnership & evaluation contracts; customize with partner name and terms
 
 ---
 

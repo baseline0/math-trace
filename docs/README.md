@@ -40,9 +40,11 @@ Read these only if investigating historical decisions or release notes.
 
 ---
 
-## AGMAI-outreach-contract.md
+---
 
-Contract document for AGMAI partnership discussions. Defines guarantees, scope, and pricing.
+## research/contract-template.md
+
+Generic partnership contract template. Customize with partner organization name and specific terms before use.
 
 ---
 

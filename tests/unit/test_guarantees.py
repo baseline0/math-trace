@@ -1,5 +1,5 @@
 """
-Tests validating AGMAI-READY guarantees.
+Tests validating core guarantees and claims about math-trace.
 
 Each test verifies a specific claim about math-trace's capabilities and API.
 These tests ensure that all guaranteed features work as documented.
