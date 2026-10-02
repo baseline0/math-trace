@@ -124,6 +124,64 @@ setup:
     @echo "   cd examples/membrane-dynamics"
     @echo "   just paper"
 
+[group("docker")]
+docker-up profile="" *args:
+    @if [ -z "{{profile}}" ]; then \
+        docker compose up -d {{args}}; \
+        echo "✅ Started math-trace on http://localhost:8000"; \
+    else \
+        docker compose --profile {{profile}} up -d {{args}}; \
+        echo "✅ Started with profile: {{profile}}"; \
+    fi
+
+[group("docker")]
+docker-down:
+    docker compose down
+    @echo "✅ Services stopped"
+
+[group("docker")]
+docker-rebuild:
+    docker compose build --no-cache
+    @echo "✅ Images rebuilt"
+
+[group("docker")]
+docker-restart profile="":
+    @just docker-down
+    @just docker-rebuild
+    @just docker-up {{profile}}
+    @echo "✅ Full restart complete"
+
+[group("docker")]
+docker-logs service="math-trace":
+    docker compose logs -f {{service}}
+
+[group("docker")]
+docker-exec service="math-trace" *cmd:
+    docker compose exec {{service}} {{cmd}}
+
+[group("docker")]
+docker-status:
+    docker compose ps
+
+[group("docker")]
+docker-clean:
+    docker compose down -v
+    @echo "✅ Cleaned (volumes removed)"
+
+[group("docker")]
+docker-prune:
+    docker system prune -f
+    @echo "✅ Pruned unused resources"
+
+[group("docker")]
+docker-dev-up:
+    @just docker-up dev
+    @echo "📡 Ollama available at http://localhost:11434"
+
+[group("docker")]
+docker-ollama-pull model="mistral":
+    docker compose exec ollama ollama pull {{model}}
+
 [group("setup")]
 install-typst:
     @echo "📦 Installing Typst..."
@@ -222,7 +280,15 @@ publish-release:
 help:
     @echo "🎓 math-trace: Formula-to-code traceability"
     @echo ""
-    @echo "FIRST TIME?"
+    @echo "DOCKER (Quick Deploy):"
+    @echo "  just docker-up              — Start FastAPI + formula browser (http://localhost:8000)"
+    @echo "  just docker-dev-up          — Start with Ollama for batch processing"
+    @echo "  just docker-logs            — View live logs"
+    @echo "  just docker-restart         — Full restart (down → rebuild → up)"
+    @echo "  just docker-down            — Stop services"
+    @echo "  just docker-clean           — Stop and remove all data"
+    @echo ""
+    @echo "FIRST TIME (Local)?"
     @echo "  just setup — One-command installation (Python, uv, Typst)"
     @echo ""
     @echo "BUILD:"
