@@ -82,7 +82,14 @@
       "Bash(docker compose *)",
       "Bash(python -c \"import latex2sympy2; print\\(latex2sympy2.__version__\\)\")",
       "Bash(pip show *)",
-      "Bash(curl -s http://localhost:8000/api/health)"
+      "Bash(curl -s http://localhost:8000/api/health)",
+      "Bash(curl -s http://localhost:8000/)",
+      "Bash(curl -s 'http://localhost:8000/api/formulas/arxiv-papers')",
+      "Bash(curl -s 'http://localhost:8000/api/formulas/local-models')",
+      "Bash(just e2e-test *)",
+      "Bash(curl -s -X POST 'http://localhost:8000/api/arxiv/extract' -H 'Content-Type: application/json' -d '{\"arxiv_id\":\"2301.13848\"}')",
+      "Bash(curl -s 'http://localhost:8000/api/arxiv/extract?paper_url_or_id=2301.13848')",
+      "Bash(curl -s http://localhost:8000/api/arxiv/papers)"
     ]
   }
 }
