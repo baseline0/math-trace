@@ -82,10 +82,10 @@ jobs:
       - name: Check required files in complete templates
         run: |
           # Only check templates that have model.py (complete implementations)
-          TEMPLATES=$(find templates -maxdepth 1 -type d ! -name templates ! -name ".*" -exec test -f {}/model.py \; -print)
+          TEMPLATES=$(find templates -maxdepth 1 -type d ! -name templates ! -name ".*" -exec test -f {}/src/model.py \; -print)
           for template in $TEMPLATES; do
             echo "Checking $template..."
-            [ -f "$template/model.py" ] || { echo "Missing: model.py"; exit 1; }
+            [ -f "$template/src/model.py" ] || { echo "Missing: src/model.py"; exit 1; }
             [ -f "$template/simulate.py" ] || { echo "Missing: simulate.py"; exit 1; }
             [ -f "$template/build_paper.py" ] || { echo "Missing: build_paper.py"; exit 1; }
             [ -f "$template/main.typ" ] || { echo "Missing: main.typ"; exit 1; }
@@ -116,7 +116,7 @@ jobs:
 
       - name: Check Python syntax for ${{ matrix.template }}
         run: |
-          python -m py_compile templates/${{ matrix.template }}/model.py
+          python -m py_compile templates/${{ matrix.template }}/src/model.py
           python -m py_compile templates/${{ matrix.template }}/simulate.py
           python -m py_compile templates/${{ matrix.template }}/build_paper.py
           echo "✅ Python syntax valid"
