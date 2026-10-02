@@ -58,6 +58,8 @@ server.run(port=8000)
 
 from __future__ import annotations
 
+import html
+import logging
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -67,6 +69,9 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from math_trace.formula import Formula
+from math_trace.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class PresentationServer:
@@ -171,10 +176,20 @@ class PresentationServer:
             Receives formula_id and variable=value pairs via form submission.
             Returns HTML fragment with computed result.
             """
+            # Validate formula_id
+            if not formula_id or not isinstance(formula_id, str):
+                logger.warning("Invalid formula_id: missing or wrong type")
+                raise HTTPException(status_code=400, detail="Invalid formula_id")
+
+            if len(formula_id) > 256:
+                logger.warning(f"Invalid formula_id: too long ({len(formula_id)} chars)")
+                raise HTTPException(status_code=400, detail="Invalid formula_id")
+
             try:
                 # Find formula and slide context
                 slide = self._find_slide_with_formula(formula_id)
                 if not slide:
+                    logger.debug(f"Formula not found: {formula_id}")
                     raise HTTPException(status_code=404, detail="Formula not found")
 
                 formula = slide["formulas"][formula_id]
@@ -185,20 +200,39 @@ class PresentationServer:
 
                 # Evaluate formula
                 result = self._evaluate_formula(formula.latex, params)
-                source_link = f"{self.repo_path}:{formula.source_line}"
+                source_link = html.escape(str(self.repo_path), quote=True) + f":{formula.source_line}"
 
-                return f"""
-                <div class="formula-result">
-                    <p><strong>Result:</strong> ${result}$</p>
-                    <p style="font-size: 0.9em; color: #666;">
-                        with {', '.join(f'{k}={v}' for k, v in params.items())}
-                    </p>
-                    <small><a href="{source_link}" target="_blank">View source: line {formula.source_line}</a></small>
-                </div>
-                """
+                # Build safe HTML response (result already validated in _evaluate_formula)
+                params_html = ", ".join(
+                    f"{html.escape(str(k))}={html.escape(str(v))}"
+                    for k, v in params.items()
+                )
 
+                response = HTMLResponse(
+                    f"""
+                    <div class="formula-result">
+                        <p><strong>Result:</strong> ${result}$</p>
+                        <p style="font-size: 0.9em; color: #666;">
+                            with {params_html}
+                        </p>
+                        <small><a href="{source_link}" target="_blank">View source: line {formula.source_line}</a></small>
+                    </div>
+                    """
+                )
+                # Security headers
+                response.headers["X-Content-Type-Options"] = "nosniff"
+                response.headers["X-Frame-Options"] = "SAMEORIGIN"
+                response.headers["X-XSS-Protection"] = "1; mode=block"
+                return response
+
+            except HTTPException:
+                raise
             except Exception as e:
-                return f"<div class='error'>Evaluation error: {str(e)}</div>"
+                logger.error(f"Evaluation error: {e}")
+                return HTMLResponse(
+                    "<div class='error'>Unable to evaluate formula. Please try again.</div>",
+                    status_code=500,
+                )
 
     def _find_formula(self, formula_id: str) -> Optional[Formula]:
         """Find formula by ID across all slides."""
@@ -229,7 +263,25 @@ class PresentationServer:
         Returns:
             Evaluated result as string or original LaTeX if evaluation fails
         """
-        if not params:
+        # Validate inputs
+        if not latex_str or not isinstance(latex_str, str):
+            return "(invalid formula)"
+
+        if not params or not isinstance(params, dict):
+            return latex_str
+
+        # Validate parameter types and ranges
+        try:
+            for key, value in params.items():
+                if not isinstance(value, (int, float)):
+                    logger.warning(f"Invalid parameter type for {key}: expected number, got {type(value)}")
+                    raise ValueError(f"Parameter {key} must be a number")
+                # Sanity check: prevent extremely large values
+                if not (-1e10 < value < 1e10):
+                    logger.warning(f"Parameter {key}={value} out of reasonable range")
+                    raise ValueError(f"Parameter {key} out of reasonable range")
+        except (ValueError, TypeError) as e:
+            logger.debug(f"Parameter validation failed: {e}")
             return latex_str
 
         try:
@@ -305,7 +357,17 @@ class PresentationServer:
 
     def _render_presentation(self) -> str:
         """Render full HTML presentation."""
-        slides_html = "\n".join(self._render_slide(s) for s in self.slides)
+        MAX_SLIDES = 1000
+        slides_to_render = self.slides
+
+        if len(self.slides) > MAX_SLIDES:
+            logger.warning(
+                f"Presentation has {len(self.slides)} slides, "
+                f"truncating to {MAX_SLIDES}"
+            )
+            slides_to_render = self.slides[:MAX_SLIDES]
+
+        slides_html = "\n".join(self._render_slide(s) for s in slides_to_render)
 
         return f"""<!DOCTYPE html>
 <html lang="en">
@@ -411,12 +473,22 @@ class PresentationServer:
 
     def _render_text_slide(self, slide: Dict[str, Any]) -> str:
         """Render a text slide."""
-        notes = f"<aside class='notes'>{slide['speaker_notes']}</aside>" if slide["speaker_notes"] else ""
-        bg = f"data-background='{slide['background']}'" if slide["background"] else ""
+        safe_title = html.escape(slide.get("title", ""))
+        safe_notes = html.escape(slide.get("speaker_notes", "")) if slide.get("speaker_notes") else ""
+        notes = f"<aside class='notes'>{safe_notes}</aside>" if safe_notes else ""
+
+        # Background is URL, escape carefully
+        bg_value = slide.get("background", "")
+        safe_bg = html.escape(bg_value, quote=True) if bg_value else ""
+        bg = f"data-background='{safe_bg}'" if safe_bg else ""
+
+        # Content is user-provided HTML, but should already be trusted from add_slide calls
+        # If we want to escape it too: content = html.escape(slide.get("content", ""))
+        content = slide.get("content", "")
 
         return f"""<section {bg}>
-            <h2>{slide['title']}</h2>
-            <div>{slide['content']}</div>
+            <h2>{safe_title}</h2>
+            <div>{content}</div>
             {notes}
         </section>"""
 
@@ -424,29 +496,36 @@ class PresentationServer:
         """Render a formula slide with interactive elements."""
         params = slide.get("parameters", {})
 
-        # Parameter input fields
+        # Parameter input fields (with HTML escaping)
         params_html = ""
         for param_name, param_value in params.items():
+            safe_param_name = html.escape(str(param_name), quote=True)
+            safe_param_value = html.escape(str(param_value), quote=True)
             params_html += f"""
                 <div style="margin: 0.5em 0;">
-                    <label for="param_{param_name}" style="display: inline-block; width: 80px;">
-                        <em>{param_name}</em> =
+                    <label for="param_{safe_param_name}" style="display: inline-block; width: 80px;">
+                        <em>{safe_param_name}</em> =
                     </label>
-                    <input type="number" id="param_{param_name}" name="{param_name}"
-                           value="{param_value}" step="any"
+                    <input type="number" id="param_{safe_param_name}" name="{safe_param_name}"
+                           value="{safe_param_value}" step="any"
                            style="width: 100px; padding: 0.25em;">
                 </div>
             """
 
-        # Formulas
+        # Formulas (with HTML escaping for metadata, LaTeX for math)
         formulas_html = ""
         for formula_id, formula in slide["formulas"].items():
+            safe_formula_id = html.escape(str(formula_id), quote=True)
+            safe_name = html.escape(formula.name)
+            safe_latex = html.escape(formula.latex)  # LaTeX is rendered by MathJax, so escape it
+            safe_description = html.escape(formula.description)
+
             formulas_html += f"""
             <div class="formula" style="margin-top: 1.5em;">
-                <p><strong>{formula.name}</strong></p>
-                <p>$${{formula.latex}}$$</p>
-                <small>{formula.description}</small>
-                <button hx-post="/api/evaluate?formula_id={formula_id}"
+                <p><strong>{safe_name}</strong></p>
+                <p>${{safe_latex}}$</p>
+                <small>{safe_description}</small>
+                <button hx-post="/api/evaluate?formula_id={safe_formula_id}"
                         hx-swap="afterend"
                         style="margin-top: 0.5em;">
                     Evaluate
@@ -457,9 +536,12 @@ class PresentationServer:
             </div>
             """
 
+        safe_title = html.escape(slide.get("title", ""))
+        safe_description = html.escape(slide.get("description", ""))
+
         return f"""<section>
-            <h2>{slide['title']}</h2>
-            <p>{slide['description']}</p>
+            <h2>{safe_title}</h2>
+            <p>{safe_description}</p>
             <div style="background: #f5f5f5; padding: 1em; border-radius: 4px; margin: 1em 0;">
                 <p style="margin-top: 0; font-weight: bold; font-size: 0.9em;">Parameters:</p>
                 {params_html}

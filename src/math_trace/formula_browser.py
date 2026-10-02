@@ -6,6 +6,7 @@ Provides unified interface for formula discovery.
 
 from __future__ import annotations
 
+import html
 import json
 import logging
 import re
@@ -45,18 +46,34 @@ def arxiv_papers(limit: int = typer.Option(20, help="Max papers to return")) -> 
 
         try:
             metadata = json.loads(metadata_path.read_text())
-        except (json.JSONDecodeError, IOError) as e:
+
+            # Validate metadata structure
+            if not isinstance(metadata, dict):
+                logger.warning(f"Invalid metadata format for {paper_dir.name}: expected dict")
+                continue
+            if 'paper_id' not in metadata:
+                logger.warning(f"Missing 'paper_id' in metadata for {paper_dir.name}")
+                continue
+        except (json.JSONDecodeError, IOError, ValueError) as e:
             logger.error(f"Failed to read metadata for {paper_dir.name}: {e}")
             continue
 
         equations_path = paper_dir / "equations.jsonl"
 
-        # Count equations
+        # Count equations (with limit to prevent DoS)
+        MAX_EQUATIONS = 10000
         eq_count = 0
         converted_count = 0
         if equations_path.exists():
             try:
                 for line in equations_path.read_text().strip().split('\n'):
+                    if eq_count >= MAX_EQUATIONS:
+                        logger.warning(
+                            f"Paper {paper_dir.name} has >{MAX_EQUATIONS} equations, "
+                            f"truncating"
+                        )
+                        break
+
                     if line:
                         eq_count += 1
                         try:
@@ -68,10 +85,11 @@ def arxiv_papers(limit: int = typer.Option(20, help="Max papers to return")) -> 
             except IOError as e:
                 logger.error(f"Failed to read equations for {paper_dir.name}: {e}")
 
+        # HTML escape metadata for safe output
         papers.append({
             'paper_id': paper_dir.name,
-            'title': metadata.get('title', 'Unknown'),
-            'authors': metadata.get('authors', 'Unknown')[:50],
+            'title': html.escape(metadata.get('title', 'Unknown')),
+            'authors': html.escape(str(metadata.get('authors', 'Unknown'))[:50]),
             'total_equations': eq_count,
             'converted_equations': converted_count,
         })
@@ -84,11 +102,25 @@ def local_models(pattern: str = "*/src/model.py", root: str = ".") -> list[dict]
 
     Returns: [{path, formula_count, formulas: [{name, latex}, ...]}, ...]
     """
+    # Validate glob pattern (whitelist safe patterns)
+    SAFE_PATTERNS = ["*/src/model.py", "model.py", "**/model.py", "**/src/model.py"]
+    if pattern not in SAFE_PATTERNS:
+        logger.warning(f"Unsafe pattern '{pattern}', using default")
+        pattern = SAFE_PATTERNS[0]
+
     root_path = Path(root).resolve()
     models = []
 
     try:
         model_paths = list(root_path.glob(pattern))
+
+        # Limit results to prevent DoS
+        MAX_MODELS = 1000
+        if len(model_paths) > MAX_MODELS:
+            logger.warning(
+                f"Pattern returned {len(model_paths)} files, truncating to {MAX_MODELS}"
+            )
+            model_paths = model_paths[:MAX_MODELS]
     except (ValueError, OSError) as e:
         logger.error(f"Invalid glob pattern '{pattern}': {e}")
         return []
@@ -110,6 +142,14 @@ def local_models(pattern: str = "*/src/model.py", root: str = ".") -> list[dict]
         if not formula_names:
             # Try alternate format
             formula_names = re.findall(r'"(\w+)":\s*Formula\(', content)
+
+        # Limit formulas per file
+        MAX_FORMULAS_PER_FILE = 500
+        if len(formula_names) > MAX_FORMULAS_PER_FILE:
+            logger.warning(
+                f"File {model_path} has >{MAX_FORMULAS_PER_FILE} formulas, truncating"
+            )
+            formula_names = formula_names[:MAX_FORMULAS_PER_FILE]
 
         if formula_names:
             models.append({
@@ -199,9 +239,25 @@ def local_model_formulas(
             }
 
         formulas = []
+        MAX_FORMULAS_PER_FILE = 500
         for name, formula_obj in module.FORMULAS.items():
+            if len(formulas) >= MAX_FORMULAS_PER_FILE:
+                logger.warning(
+                    f"File {model_path} has >{MAX_FORMULAS_PER_FILE} formulas, truncating"
+                )
+                break
+
             try:
                 latex = formula_obj.to_latex()
+
+                # Validate LaTeX size
+                MAX_LATEX_SIZE = 10000
+                if len(latex) > MAX_LATEX_SIZE:
+                    logger.warning(
+                        f"Formula '{name}' LaTeX too large ({len(latex)} chars), skipping"
+                    )
+                    continue
+
                 formulas.append({
                     'name': name,
                     'latex': latex,
@@ -211,7 +267,7 @@ def local_model_formulas(
                 logger.warning(f"Failed to extract LaTeX for formula '{name}': {e}")
                 formulas.append({
                     'name': name,
-                    'latex': f"[Error: {type(e).__name__}: {e}]",
+                    'latex': "[Error: unable to extract LaTeX]",
                     'description': '',
                 })
 

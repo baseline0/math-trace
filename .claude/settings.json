@@ -97,7 +97,13 @@
       "Bash(git commit -m 'fix: update test_services.py import for renamed Formula class *)",
       "Bash(python -m py_compile src/math_trace/*.py)",
       "Bash(python -m py_compile src/math_trace/server.py src/math_trace/responses.py)",
-      "Bash(python -m py_compile src/math_trace/utils.py src/math_trace/services.py src/math_trace/proofs.py)"
+      "Bash(python -m py_compile src/math_trace/utils.py src/math_trace/services.py src/math_trace/proofs.py)",
+      "Bash(python -m pytest tests/ -v --tb=short)",
+      "Bash(python -m pytest tests/unit -q)",
+      "Bash(python -c \"import sys; print\\('\\\\n'.join\\(sys.path\\)\\)\")",
+      "Bash(python -m pytest tests/unit tests/e2e -q --tb=line)",
+      "Bash(chmod +x /home/mark/projects/math-trace/scripts/regenerate-autogen.sh)",
+      "Bash(pre-commit --version)"
     ]
   }
 }
