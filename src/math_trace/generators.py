@@ -5,8 +5,9 @@ This module provides utilities for converting symbolic mathematics
 (SymPy expressions) to publication-ready formats (LaTeX, Typst).
 """
 
+from __future__ import annotations
+
 import re
-from typing import Dict, Tuple
 
 import sympy as sp
 
@@ -16,7 +17,7 @@ class SymPyToTypst:
 
     def __init__(self) -> None:
         """Initialize the converter."""
-        self.latex_to_typst_map: Dict[str, str] = {
+        self.latex_to_typst_map: dict[str, str] = {
             r'\frac': 'frac',  # Typst uses frac() function
             r'\left(': '(',
             r'\right)': ')',
@@ -27,7 +28,7 @@ class SymPyToTypst:
             r'\gamma': 'gamma',
         }
 
-    def _extract_brace_content(self, s: str, start: int) -> Tuple[str, int]:
+    def _extract_brace_content(self, s: str, start: int) -> tuple[str, int]:
         """Extract balanced brace content starting from position start.
 
         Returns tuple of (content, end_position) where end_position is after closing brace.
@@ -47,7 +48,7 @@ class SymPyToTypst:
             i += 1
         return '', len(s)
 
-    def _replace_macro(self, latex: str, macro: str, replacement: str) -> str:
+    def _replace_macro(self, latex: str, macro: str, replacement: str) -> str:  # noqa: C901
         """Replace LaTeX macro with Typst equivalent, handling nested braces.
 
         Args:
@@ -198,7 +199,7 @@ class SymPyToTypst:
 
         return typst
 
-    def _quote_identifiers(self, typst: str) -> str:
+    def _quote_identifiers(self, typst: str) -> str:  # noqa: C901
         """Quote multi-letter identifiers and subscripts in Typst math mode.
 
         Converts multi-letter bare identifiers and multi-letter subscripts to quoted form.
