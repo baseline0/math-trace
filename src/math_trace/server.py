@@ -20,6 +20,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from .presentation_generator import MarpBackend, PresentationConfig
+from .arxiv_extractor import extract_arxiv_id, save_extracted_paper, load_extracted_paper
 
 app = FastAPI(
     title="math-trace Slide Editor",
@@ -625,6 +626,67 @@ async def dashboard():
 async def root():
     """Redirect root to dashboard."""
     return DASHBOARD_HTML
+
+
+# ============================================================================
+# arXiv Integration Endpoints
+# ============================================================================
+
+
+@app.post("/api/arxiv/extract")
+async def arxiv_extract(paper_url_or_id: str):
+    """Extract equations from arXiv paper.
+
+    Takes arXiv URL or ID (e.g., "2301.13848" or "https://arxiv.org/abs/2301.13848")
+    Downloads source, extracts equations, saves to cache.
+
+    Returns: Extracted paper with equations ready for manual/automated conversion.
+    """
+    try:
+        # Validate and normalize ID
+        paper_id = extract_arxiv_id(paper_url_or_id)
+
+        # Extract and save
+        paper_dir = save_extracted_paper(paper_id)
+
+        # Load and return
+        paper_data = load_extracted_paper(paper_id)
+
+        return {
+            "status": "success",
+            "paper_id": paper_id,
+            "title": paper_data["title"],
+            "authors": paper_data["authors"],
+            "total_equations": paper_data["total_equations"],
+            "equations": paper_data["equations"],
+            "cache_path": str(paper_dir),
+            "message": f"Extracted {paper_data['total_equations']} equations. Ready for conversion task dispatch."
+        }
+
+    except ValueError as e:
+        return {"status": "error", "message": f"Invalid arXiv ID: {str(e)}"}
+    except Exception as e:
+        return {"status": "error", "message": f"Extraction failed: {str(e)}"}
+
+
+@app.get("/api/arxiv/papers/{paper_id}")
+async def arxiv_get_paper(paper_id: str):
+    """Get cached extracted paper."""
+    try:
+        paper_data = load_extracted_paper(paper_id)
+        return {
+            "status": "success",
+            "paper_id": paper_id,
+            "title": paper_data["title"],
+            "authors": paper_data["authors"],
+            "extraction_timestamp": paper_data.get("extraction_timestamp"),
+            "total_equations": len(paper_data["equations"]),
+            "equations": paper_data["equations"],
+        }
+    except FileNotFoundError:
+        return {"status": "error", "message": f"Paper not cached: {paper_id}"}
+    except Exception as e:
+        return {"status": "error", "message": f"Error loading paper: {str(e)}"}
 
 
 if __name__ == "__main__":
