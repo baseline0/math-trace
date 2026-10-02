@@ -58,17 +58,7 @@ def arxiv_papers(limit: int = typer.Option(20, help="Max papers to return")) -> 
     return papers
 
 
-@app.command()
-def local_models(
-    pattern: str = typer.Option(
-        "*/src/model.py",
-        help="Glob pattern for model files"
-    ),
-    root: str = typer.Option(
-        ".",
-        help="Root directory to search"
-    ),
-) -> list[dict]:
+def local_models(pattern: str = "*/src/model.py", root: str = ".") -> list[dict]:
     """Find Python files with FORMULAS dict in local filesystem.
 
     Returns: [{path, formula_count, formulas: [{name, latex}, ...]}, ...]
@@ -103,6 +93,15 @@ def local_models(
             continue
 
     return sorted(models, key=lambda m: m['path'])
+
+
+@app.command()
+def list_local_models(
+    pattern: str = typer.Option("*/src/model.py", help="Glob pattern for model files"),
+    root: str = typer.Option(".", help="Root directory to search"),
+) -> list[dict]:
+    """List Python files with FORMULAS dict (Typer CLI wrapper)."""
+    return local_models(pattern=pattern, root=root)
 
 
 @app.command()
