@@ -13,5 +13,5 @@ python = ">=3.13"
 packages = ["numpy", "scipy>=1.18", "matplotlib>=3.8"]
 
 [scenarios]
+["DC Motor Control"] = "Intermediate (REFERENCE CONTRACT): realistic motor parameters, PID tuning, deterministic baseline"
 ["Mass-Spring-Damper"] = "Beginner: analytical solution, ζ effect"
-["DC Motor Control"] = "Intermediate: realistic motor parameters, PID tuning"
