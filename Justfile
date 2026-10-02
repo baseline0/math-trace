@@ -159,8 +159,43 @@ prep-release VERSION:
     git push origin main --tags
 
     echo "✅ Release v{{VERSION}} tagged and pushed"
-    echo "   Next: build wheel and upload to PyPI"
-    echo "   See: https://packaging.python.org/guides/publishing-package-distribution-releases-to-pypi/"
+    echo "   Next: just build-release"
+
+[group("release")]
+build-release:
+    #!/usr/bin/env bash
+    set -e
+
+    echo "🔨 Building wheel and sdist..."
+    uv build
+
+    echo ""
+    echo "✅ Build complete!"
+    echo "📦 Artifacts in dist/:"
+    ls -lh dist/ | tail -n +2
+
+    echo ""
+    echo "Next: Review artifacts, then publish:"
+    echo "  just publish-release  # (requires PyPI credentials)"
+
+[group("release")]
+publish-release:
+    #!/usr/bin/env bash
+    set -e
+
+    if [ ! -d "dist" ] || [ -z "$(ls -A dist/)" ]; then
+        echo "❌ No built artifacts found in dist/"
+        echo "   Run: just build-release"
+        exit 1
+    fi
+
+    echo "📤 Publishing to PyPI..."
+    echo "   (requires PyPI token in PYPI_TOKEN or ~/.pypirc)"
+
+    uv publish
+
+    echo "✅ Published to PyPI!"
+    echo "   Install with: pip install math-trace"
 
 [group("help")]
 help:
@@ -182,6 +217,11 @@ help:
     @echo "  just test-formulas — Test formula generation"
     @echo "  just test-model    — Test model definitions"
     @echo "  just typecheck     — Type check code"
+    @echo ""
+    @echo "RELEASE:"
+    @echo "  just prep-release VERSION    — Tag and push release (e.g., just prep-release 0.1.0)"
+    @echo "  just build-release           — Build wheel and sdist for PyPI"
+    @echo "  just publish-release         — Publish to PyPI (requires credentials)"
     @echo ""
     @echo "SETUP:"
     @echo "  just install-typst — Install Typst (required for PDF generation)"
