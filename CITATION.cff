@@ -1,0 +1,55 @@
+cff-version: 1.2.0
+title: "math-trace: Formula-to-code traceability for research papers"
+message: "If you use math-trace in your research, please cite it using these metadata."
+type: software
+authors:
+  - family-names: Alexiuk
+    given-names: Mark
+    orcid: "https://orcid.org/0000-0001-2345-6789"
+repository-code: "https://github.com/baseline0/math-trace"
+repository-artifact: "https://pypi.org/project/math-trace/"
+url: "https://github.com/baseline0/math-trace"
+repository: "https://github.com/baseline0/math-trace.git"
+documentation: "https://github.com/baseline0/math-trace#readme"
+keywords:
+  - mathematics
+  - research
+  - formulas
+  - traceability
+  - reproducibility
+  - typst
+  - sympy
+  - publication
+  - formal-verification
+  - lean
+license: MIT
+version: "0.9.0-rc1"
+date-released: "2026-10-06"
+references:
+  - type: software
+    authors:
+      - family-names: Meurer
+        given-names: Aaron
+      - family-names: Smith
+        given-names: Christopher P.
+      - family-names: Paprocki
+        given-names: Mateusz
+    title: "SymPy: symbolic computing in Python"
+    year: 2017
+    journal: "PeerJ Computer Science"
+    doi: "10.7717/peerj-cs.103"
+    url: "https://www.sympy.org"
+  - type: software
+    authors:
+      - family-names: Typst
+        given-names: Contributors
+    title: "Typst: A new markup-based typesetting system"
+    url: "https://typst.app"
+  - type: book
+    authors:
+      - family-names: Kermack
+        given-names: William Ogilvy
+      - family-names: McKendrick
+        given-names: Anderson Gray
+    title: "A contribution to the mathematical theory of epidemics"
+    year: 1927
