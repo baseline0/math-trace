@@ -334,6 +334,14 @@ validate-precommit:
     @echo "🔍 Validating pre-commit consistency across fleet..."
     bash scripts/validate-precommit-consistency.sh
 
+[group("maintain")]
+generate-changelog:
+    @echo "📝 Generating CHANGELOG from conventional commits..."
+    @git log --oneline --all --grep="^feat\|^fix\|^docs\|^refactor\|^chore" --format="%h %s" > /tmp/changelog.tmp && \
+    echo "# Changelog\n\nGenerated from conventional commits. See git log for full history.\n" | cat - /tmp/changelog.tmp > CHANGELOG.md && \
+    rm /tmp/changelog.tmp
+    @echo "✅ CHANGELOG.md generated"
+
 [group("help")]
 help:
     @echo "🎓 math-trace: Formula-to-code traceability"
