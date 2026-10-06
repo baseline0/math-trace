@@ -124,4 +124,5 @@ dev = [
     "pyright>=1.1.300",
     "httpx>=0.24.0",
     "pre-commit>=4.6.2",
+    "commitmate>=1.1.0",
 ]

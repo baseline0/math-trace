@@ -358,6 +358,19 @@ wheels = [
 ]
 
 [[package]]
+name = "commitmate"
+version = "1.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+    { name = "rich" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/78/35/8c5df8218ae844bfb32064f04a3befa7b3d78711b7b7f39617c77f211f6b/commitmate-1.1.0.tar.gz", hash = "sha256:141c1c112e3b44159d08f5956fcf06dfd13363143ef5041d32bcd9fa824489e8", size = 11859, upload-time = "2026-08-15T05:20:28.269Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a9/c5/b54a888eb23cd8c8e0ed819f187ce4da705d5962ad7de7ef785af7b4f4da/commitmate-1.1.0-py3-none-any.whl", hash = "sha256:6ef45fc15d6641b4bbf705528aff53b7d44f945f792ef84b6f65bfd1bc12865a", size = 12940, upload-time = "2026-08-15T05:20:27.166Z" },
+]
+
+[[package]]
 name = "contourpy"
 version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1075,6 +1088,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "commitmate" },
     { name = "httpx" },
     { name = "mypy" },
     { name = "pre-commit" },
@@ -1104,6 +1118,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "commitmate", specifier = ">=1.1.0" },
     { name = "httpx", specifier = ">=0.24.0" },
     { name = "mypy", specifier = ">=2.3.1" },
     { name = "pre-commit", specifier = ">=4.6.2" },
