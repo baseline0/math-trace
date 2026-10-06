@@ -8,12 +8,12 @@ References:
 - Franklin, G. F., et al. (2010). Feedback Control of Dynamic Systems.
 """
 
-import numpy as np
 import json
-from typing import Tuple, Dict, Any, Optional, Callable
-from scipy.integrate import odeint
-from scipy.linalg import eig
+from collections.abc import Callable
+from typing import Any
 
+import numpy as np
+from scipy.linalg import eig
 
 # ============================================================================
 # Equation 1: State-Space Representation
@@ -22,6 +22,7 @@ from scipy.linalg import eig
 # y = C·x + D·u
 #
 # Code Reference: state_space_dynamics()
+
 
 class LinearSystem:
     """Linear time-invariant system in state-space form."""
@@ -91,6 +92,7 @@ def state_space_dynamics(x: np.ndarray, t: float, A: np.ndarray, B: np.ndarray, 
 #
 # Code Reference: PIDController class
 
+
 class PIDController:
     """PID (Proportional-Integral-Derivative) controller."""
 
@@ -152,6 +154,7 @@ class PIDController:
 #
 # Code Reference: steady_state_error()
 
+
 def steady_state_error(K_p: float, step_magnitude: float = 1.0) -> float:
     """
     Steady-state error for proportional controller with step input.
@@ -178,7 +181,8 @@ def steady_state_error(K_p: float, step_magnitude: float = 1.0) -> float:
 #
 # Code Reference: second_order_response()
 
-def second_order_response(omega_n: float, zeta: float) -> Dict[str, float]:
+
+def second_order_response(omega_n: float, zeta: float) -> dict[str, float]:
     """
     Transient response metrics for 2nd order system.
 
@@ -200,7 +204,7 @@ def second_order_response(omega_n: float, zeta: float) -> Dict[str, float]:
         settling_time = 4 / (zeta * omega_n)
     else:  # Overdamped or critically damped
         rise_time = (1 / omega_n) * np.log(2 / (2 * zeta - 1))
-        peak_time = float('inf')
+        peak_time = float("inf")
         overshoot = 0.0
         settling_time = 4 / (zeta * omega_n)
 
@@ -221,13 +225,14 @@ def second_order_response(omega_n: float, zeta: float) -> Dict[str, float]:
 #
 # Code Reference: LinearSystem.is_stable()
 
+
 def simulate_feedback_system(
     system: LinearSystem,
     controller: PIDController,
     t_sim: float,
     dt: float,
-    x0: Optional[np.ndarray] = None,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    x0: np.ndarray | None = None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Simulate closed-loop system with feedback controller.
 
@@ -255,20 +260,20 @@ def simulate_feedback_system(
 
     for i in range(1, num_steps):
         # Measure output
-        y[i-1] = float(system.output(x[i-1], u[i-1]))
+        y[i - 1] = float(system.output(x[i - 1], u[i - 1]))
 
         # Compute control signal
-        u[i] = controller.update(y[i-1], dt)
+        u[i] = controller.update(y[i - 1], dt)
 
         # Update state
-        x[i] = x[i-1] + dt * (system.A @ x[i-1] + system.B * u[i])
+        x[i] = x[i - 1] + dt * (system.A @ x[i - 1] + system.B * u[i])
 
     y[-1] = float(system.output(x[-1], u[-1]))
 
     return t, x, y, u
 
 
-def export_equation_metadata() -> Dict[str, Any]:
+def export_equation_metadata() -> dict[str, Any]:
     """Auto-generate equations.json for paper.typ."""
     return {
         "state_space": {

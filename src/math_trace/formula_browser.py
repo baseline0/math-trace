@@ -66,9 +66,7 @@ def arxiv_papers(limit: int = typer.Option(20, help="Max papers to return")) -> 
             try:
                 for line in equations_path.read_text().strip().split("\n"):
                     if eq_count >= MAX_EQUATIONS:
-                        logger.warning(
-                            f"Paper {paper_dir.name} has >{MAX_EQUATIONS} equations, " f"truncating"
-                        )
+                        logger.warning(f"Paper {paper_dir.name} has >{MAX_EQUATIONS} equations, truncating")
                         break
 
                     if line:
@@ -239,9 +237,7 @@ def local_model_formulas(
         MAX_FORMULAS_PER_FILE = 500
         for name, formula_obj in module.FORMULAS.items():
             if len(formulas) >= MAX_FORMULAS_PER_FILE:
-                logger.warning(
-                    f"File {model_path} has >{MAX_FORMULAS_PER_FILE} formulas, truncating"
-                )
+                logger.warning(f"File {model_path} has >{MAX_FORMULAS_PER_FILE} formulas, truncating")
                 break
 
             try:
@@ -250,9 +246,7 @@ def local_model_formulas(
                 # Validate LaTeX size
                 MAX_LATEX_SIZE = 10000
                 if len(latex) > MAX_LATEX_SIZE:
-                    logger.warning(
-                        f"Formula '{name}' LaTeX too large ({len(latex)} chars), skipping"
-                    )
+                    logger.warning(f"Formula '{name}' LaTeX too large ({len(latex)} chars), skipping")
                     continue
 
                 formulas.append(

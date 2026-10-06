@@ -8,10 +8,10 @@ References:
 - Kittel & Kroemer (1980). Thermal Physics.
 """
 
-import numpy as np
 import json
-from typing import Dict, Any, Tuple
+from typing import Any
 
+import numpy as np
 
 # ============================================================================
 # Equation 1: Ideal Gas Law
@@ -19,6 +19,7 @@ from typing import Dict, Any, Tuple
 # PV = nRT  (or: PV = NkT for N particles, k = Boltzmann constant)
 #
 # Code Reference: ideal_gas_pressure(), ideal_gas_volume()
+
 
 def ideal_gas_pressure(n: float, V: float, T: float, R: float = 8.314) -> float:
     """
@@ -56,6 +57,7 @@ def ideal_gas_temperature(n: float, P: float, V: float, R: float = 8.314) -> flo
 #
 # Code Reference: internal_energy()
 
+
 def internal_energy(n: float, T: float, C_v: float) -> float:
     """
     Internal energy of ideal gas.
@@ -84,6 +86,7 @@ def internal_energy(n: float, T: float, C_v: float) -> float:
 # dU = δQ - δW  (or: dU = δQ - P·dV)
 #
 # Code Reference: first_law()
+
 
 def first_law(dQ: float, dW: float) -> float:
     """
@@ -118,6 +121,7 @@ def work_done_isobaric(P: float, dV: float) -> float:
 #
 # Code Reference: entropy()
 
+
 def entropy(n: float, T: float, V: float, C_v: float, R: float = 8.314, S_0: float = 0.0) -> float:
     """
     Entropy of ideal gas.
@@ -148,6 +152,7 @@ def entropy(n: float, T: float, V: float, C_v: float, R: float = 8.314, S_0: flo
 # η_Carnot = 1 - (T_cold / T_hot)
 #
 # Code Reference: carnot_efficiency()
+
 
 def carnot_efficiency(T_hot: float, T_cold: float) -> float:
     """
@@ -205,6 +210,7 @@ def carnot_cycle_cold_heat(Q_hot: float, T_hot: float, T_cold: float) -> float:
 # Observable: Heat Capacity
 # ============================================================================
 
+
 def heat_capacity_constant_volume(n: float, f: int = 5) -> float:
     """
     Heat capacity at constant volume.
@@ -232,7 +238,7 @@ def heat_capacity_constant_pressure(n: float, f: int = 5) -> float:
     return ((f + 2) / 2) * n * R
 
 
-def export_equation_metadata() -> Dict[str, Any]:
+def export_equation_metadata() -> dict[str, Any]:
     """Auto-generate equations.json for paper.typ."""
     return {
         "ideal_gas_law": {

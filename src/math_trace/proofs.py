@@ -153,6 +153,7 @@ class LeanFramework(ProofFramework):
         """
         try:
             import hashlib
+
             proof_hash = hashlib.sha256(proof.encode()).hexdigest()[:8]
             return f"palomar.internal/proof/{proof_hash}"
 
@@ -212,5 +213,6 @@ class CoqFramework(ProofFramework):
         """
         # Placeholder implementation
         import hashlib
+
         proof_hash = hashlib.sha256(proof.encode()).hexdigest()[:8]
         return f"coq-registry.org/proof/{proof_hash}"

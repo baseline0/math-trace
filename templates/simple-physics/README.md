@@ -38,7 +38,7 @@ Define your own physics equations:
 
 ```python
 def export_formulas() -> dict:
-    x, t, m = sp.symbols('x t m', real=True)
+    x, t, m = sp.symbols("x t m", real=True)
 
     formulas = {
         "my_equation": {

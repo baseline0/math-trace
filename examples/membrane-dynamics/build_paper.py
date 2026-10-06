@@ -13,6 +13,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from src.math_trace.generators import SymPyToTypst
 
@@ -22,32 +23,32 @@ def generate_formulas() -> bool:
     print("📐 Generating Typst formulas...")
 
     # 1. Run src/model.py to get JSON
-    result = subprocess.run([sys.executable, 'src/model.py'], capture_output=True, text=True)
+    result = subprocess.run([sys.executable, "src/model.py"], capture_output=True, text=True)
     if result.returncode != 0:
         print(f"❌ model.py failed:\n{result.stderr}")
         return False
 
-    if not Path('membrane_equations.json').exists():
+    if not Path("membrane_equations.json").exists():
         print("❌ model.py did not generate membrane_equations.json")
         return False
 
     # 2. Convert LaTeX → Typst (simple regex-based approach)
-    with open('membrane_equations.json') as f:
+    with open("membrane_equations.json") as f:
         data = json.load(f)
 
     converter = SymPyToTypst()
     typst_lines = []
     for name, info in data.items():
-        latex_str = info['latex']
+        latex_str = info["latex"]
         typst_str = converter._latex_to_typst(latex_str)
 
         comment = f"// {info['description']} (from model.py:{info['source_line']})"
         definition = f"#let {name} = $ {typst_str} $"
         typst_lines.append(f"{comment}\n{definition}")
 
-    output = Path('generated/formulas.typ')
+    output = Path("generated/formulas.typ")
     output.parent.mkdir(exist_ok=True)
-    output.write_text('\n\n'.join(typst_lines))
+    output.write_text("\n\n".join(typst_lines))
     print(f"✅ Generated {output}")
     return True
 
@@ -58,9 +59,10 @@ def generate_figures() -> bool:
 
     try:
         sys.path.insert(0, str(Path(__file__).parent / "src"))
-        from simulate import simulate
         import matplotlib
-        matplotlib.use('Agg')  # Non-interactive backend
+        from simulate import simulate
+
+        matplotlib.use("Agg")  # Non-interactive backend
         import matplotlib.pyplot as plt
     except ImportError as e:
         print(f"❌ Missing dependency: {e}")
@@ -71,16 +73,16 @@ def generate_figures() -> bool:
 
     # Generate figure
     plt.figure(figsize=(8, 5))
-    plt.plot(ts, na_traj, linewidth=2, color='#1f77b4')
-    plt.xlabel('Time', fontsize=12)
-    plt.ylabel(r'$n_a$', fontsize=12)
-    plt.title(r'Stochastic trajectory of $2a \to b$', fontsize=14)
-    plt.grid(alpha=0.3, linestyle='--')
+    plt.plot(ts, na_traj, linewidth=2, color="#1f77b4")
+    plt.xlabel("Time", fontsize=12)
+    plt.ylabel(r"$n_a$", fontsize=12)
+    plt.title(r"Stochastic trajectory of $2a \to b$", fontsize=14)
+    plt.grid(alpha=0.3, linestyle="--")
     plt.tight_layout()
 
-    fig_path = Path('generated/figures/simulation.png')
+    fig_path = Path("generated/figures/simulation.png")
     fig_path.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(fig_path, dpi=300, bbox_inches='tight')
+    plt.savefig(fig_path, dpi=300, bbox_inches="tight")
     print(f"✅ Generated {fig_path}")
     plt.close()
     return True
@@ -90,16 +92,12 @@ def build_pdf() -> bool:
     """Compile Typst document to PDF."""
     print("📝 Building Typst document...")
 
-    if not Path('main.typ').exists():
+    if not Path("main.typ").exists():
         print("❌ main.typ not found")
         return False
 
     # Check if typst is available
-    check_typst = subprocess.run(
-        ['which', 'typst'],
-        capture_output=True,
-        text=True
-    )
+    check_typst = subprocess.run(["which", "typst"], capture_output=True, text=True)
 
     if check_typst.returncode != 0:
         print("⚠️  Typst not found. To generate PDF:")
@@ -108,15 +106,11 @@ def build_pdf() -> bool:
         print("   (Typst file is ready at: main.typ)")
         return True  # Not a hard failure—formulas are ready
 
-    result = subprocess.run(
-        ['typst', 'compile', 'main.typ'],
-        capture_output=True,
-        text=True
-    )
+    result = subprocess.run(["typst", "compile", "main.typ"], capture_output=True, text=True)
 
     if result.returncode == 0:
-        if Path('main.pdf').exists():
-            print(f"✅ Generated main.pdf")
+        if Path("main.pdf").exists():
+            print("✅ Generated main.pdf")
             return True
         else:
             print("❌ Typst compiled but main.pdf not found")
@@ -131,22 +125,22 @@ def main() -> bool:
     print("🚀 Building membrane computing paper...\n")
 
     steps = [
-        ('Formulas', generate_formulas),
-        ('Figures', generate_figures),
-        ('PDF', build_pdf),
+        ("Formulas", generate_formulas),
+        ("Figures", generate_figures),
+        ("PDF", build_pdf),
     ]
 
     pdf_generated = True
     for name, step in steps:
         if not step():
-            if name == 'PDF':
+            if name == "PDF":
                 pdf_generated = False
                 # Don't fail on missing Typst—formulas are still useful
             else:
                 print(f"\n❌ Failed at step: {name}")
                 return False
 
-    if pdf_generated and Path('main.pdf').exists():
+    if pdf_generated and Path("main.pdf").exists():
         print("\n✅ Paper built successfully: main.pdf")
     else:
         print("\n✅ Formulas and figures ready!")
@@ -155,6 +149,6 @@ def main() -> bool:
     return True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     success = main()
     sys.exit(0 if success else 1)

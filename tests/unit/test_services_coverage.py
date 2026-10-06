@@ -66,7 +66,7 @@ class TestPaperDownloaderErrorHandling:
                 formulas = extractor.extract(str(pdf_path))
                 # Either empty list or exception is acceptable
                 assert formulas == [] or formulas is None
-            except Exception:  # noqa: S110
+            except Exception:
                 # PDF corruption errors are acceptable—test validates graceful failure
                 pass
         finally:
@@ -89,14 +89,8 @@ class TestPresentationBuilderValidation:
 
     def test_validate_formula_structure(self):
         """Validate extracted formula structure."""
-        formula = {
-            "name": "test",
-            "latex": "x^2 + y^2 = z^2",
-            "source": "test.pdf"
-        }
+        formula = {"name": "test", "latex": "x^2 + y^2 = z^2", "source": "test.pdf"}
 
         # Should be valid formula structure
         assert "name" in formula
         assert "latex" in formula
-
-

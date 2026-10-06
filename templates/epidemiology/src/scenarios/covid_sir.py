@@ -10,18 +10,17 @@ Parameters from:
 """
 
 import numpy as np
-from typing import Dict, Tuple
+
 from ..model import (
-    basic_reproduction_number,
-    propagate_sir,
-    check_population_conservation,
-    sir_equilibrium,
     attack_rate,
+    check_population_conservation,
     peak_infections,
+    propagate_sir,
+    sir_equilibrium,
 )
 
 
-def covid_parameters() -> Dict[str, float]:
+def covid_parameters() -> dict[str, float]:
     """
     COVID-19 epidemiological parameters (per day).
 
@@ -50,7 +49,7 @@ def simulate_covid_wave(
     population: float = 1e7,  # 10 million population
     initial_infected: float = 100,  # 100 infected at t=0
     days_to_simulate: float = 365,
-) -> Dict:
+) -> dict:
     """
     Simulate first COVID-19 wave using SIR model.
 
@@ -74,14 +73,7 @@ def simulate_covid_wave(
     R0_init = 0.0
 
     # Propagate
-    t, solution = propagate_sir(
-        S0, I0, R0_init,
-        t_max=days_to_simulate,
-        dt=0.1,
-        beta=beta,
-        gamma=gamma,
-        N=1.0
-    )
+    t, solution = propagate_sir(S0, I0, R0_init, t_max=days_to_simulate, dt=0.1, beta=beta, gamma=gamma, N=1.0)
 
     # Denormalize to actual population
     S = solution[:, 0] * population
@@ -119,7 +111,7 @@ def compute_intervention_effect(
     gamma: float,
     intervention_reductions: list,  # [30%, 50%, 70%] etc.
     days_to_simulate: float = 365,
-) -> Dict:
+) -> dict:
     """
     Simulate effect of social distancing/vaccination.
 
@@ -134,10 +126,7 @@ def compute_intervention_effect(
     """
     S0, I0, R0 = 0.999, 0.001, 0.0  # 0.1% infected initially
 
-    results = {
-        "baseline": {},
-        "interventions": {}
-    }
+    results = {"baseline": {}, "interventions": {}}
 
     # Baseline (no intervention)
     t, sol = propagate_sir(S0, I0, R0, days_to_simulate, 0.1, beta_baseline, gamma)
@@ -151,7 +140,7 @@ def compute_intervention_effect(
         beta_reduced = beta_baseline * (1 - reduction)
         t, sol = propagate_sir(S0, I0, R0, days_to_simulate, 0.1, beta_reduced, gamma)
 
-        results["interventions"][f"{int(reduction*100)}%_reduction"] = {
+        results["interventions"][f"{int(reduction * 100)}%_reduction"] = {
             "t": t,
             "I": sol[:, 1],
             "peak_I": np.max(sol[:, 1]),
@@ -176,7 +165,7 @@ if __name__ == "__main__":
     print(f"  Occurs at day {result['peak_time_days']:.1f}")
     print(f"  Peak hospitalizations: {result['hospitalized_peak']:,.0f}")
     print()
-    print(f"Attack Rate: {result['attack_rate']*100:.1f}% of population")
+    print(f"Attack Rate: {result['attack_rate'] * 100:.1f}% of population")
     print(f"  = {result['attack_rate'] * result['population']:,.0f} total infected")
     print()
     print(f"Population Conservation Error: {result['conservation_error']:.2e}")
@@ -192,13 +181,13 @@ if __name__ == "__main__":
         intervention_reductions=[0.30, 0.50, 0.70],  # 30%, 50%, 70% reduction
     )
 
-    print(f"\nBaseline (no intervention):")
-    print(f"  Peak infections: {interventions['baseline']['peak_I']*100:.1f}% of population")
+    print("\nBaseline (no intervention):")
+    print(f"  Peak infections: {interventions['baseline']['peak_I'] * 100:.1f}% of population")
 
     for key, val in interventions["interventions"].items():
         print(f"\n{key} transmission reduction:")
-        print(f"  Peak infections: {val['peak_I']*100:.1f}% of population")
-        print(f"  Peak reduction: {val['peak_reduction']*100:.0f}%")
-        print(f"  Attack rate: {val['attack_rate']*100:.1f}%")
+        print(f"  Peak infections: {val['peak_I'] * 100:.1f}% of population")
+        print(f"  Peak reduction: {val['peak_reduction'] * 100:.0f}%")
+        print(f"  Attack rate: {val['attack_rate'] * 100:.1f}%")
 
     print("\n✅ COVID-19 scenario complete")

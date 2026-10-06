@@ -5,7 +5,6 @@ Based on mass-action kinetics with rate r = k * n_a * (n_a - 1) / 2.
 """
 
 import numpy as np
-from typing import Tuple
 
 
 def simulate(
@@ -15,7 +14,7 @@ def simulate(
     steps: int = 200,
     dt: float = 0.1,
     seed: int | None = None,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Simulate rule 2a → b under stochastic mass-action kinetics.
 
@@ -61,7 +60,7 @@ def simulate(
     return np.array(times), np.array(na_traj)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     ts, na = simulate(steps=200, seed=42)
     print(f"✅ Simulation complete: {len(ts)} time steps")
     print(f"   Initial n_a: {na[0]}")

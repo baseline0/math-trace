@@ -35,11 +35,10 @@ Control system theory: Ogata (2010), Franklin et al. (2010)
 """
 
 import numpy as np
-import pytest
+
 from ..scenarios.dc_motor import (
     dc_motor_system,
     simulate_speed_control,
-    estimate_settling_time,
 )
 
 
@@ -60,8 +59,7 @@ class TestStability:
         pole_real = np.real(poles[0])
 
         # Assert pole location
-        assert np.isclose(pole_real, -10.0, atol=1e-6), \
-            f"Expected pole at -10.0 rad/s, got {pole_real:.6f}"
+        assert np.isclose(pole_real, -10.0, atol=1e-6), f"Expected pole at -10.0 rad/s, got {pole_real:.6f}"
 
     def test_system_is_stable(self):
         """
@@ -87,15 +85,14 @@ class TestSettlingTime:
         - 10.0s if settling not observed within horizon (indicating tuning needs adjustment for faster convergence).
         """
         result = simulate_speed_control(target_speed=100.0)
-        settling_time = result['settling_time']
+        settling_time = result["settling_time"]
 
         # Settling time must be positive and within simulation horizon
         assert settling_time > 0.0, "Settling time must be positive"
         assert settling_time <= 10.0, "Settling time must be within 10s simulation horizon"
 
         # Permissive bounds: 0.01-10.0 sec
-        assert 0.01 <= settling_time <= 10.0, \
-            f"Settling time {settling_time:.2f} sec outside expected range"
+        assert 0.01 <= settling_time <= 10.0, f"Settling time {settling_time:.2f} sec outside expected range"
 
     def test_settling_time_definition(self):
         """
@@ -110,10 +107,10 @@ class TestSettlingTime:
         2. settling_time == 10s (didn't settle in time horizon)
         """
         result = simulate_speed_control(target_speed=100.0)
-        t = result['t']
-        y = result['speed']
-        setpoint = result['target_speed']
-        settling_time = result['settling_time']
+        t = result["t"]
+        y = result["speed"]
+        setpoint = result["target_speed"]
+        settling_time = result["settling_time"]
         tolerance = 0.02
         threshold = tolerance * setpoint
 
@@ -124,13 +121,13 @@ class TestSettlingTime:
         # Either system settled (error in band) or didn't settle (at t_sim end)
         if settling_time < 9.99:
             # System settled before end; error should be in band
-            assert error_at_settle <= threshold + 1e-6, \
-                f"At t={settling_time:.2f}s, error={error_at_settle:.3f} exceeds 2% threshold {threshold:.3f}"
+            assert (
+                error_at_settle <= threshold + 1e-6
+            ), f"At t={settling_time:.2f}s, error={error_at_settle:.3f} exceeds 2% threshold {threshold:.3f}"
         else:
             # System didn't settle within simulation; settling_time = t[-1]
             # This is acceptable for this tuning; error will be above threshold
-            assert settling_time >= 9.99, \
-                "If not settled, settling_time should be close to simulation end"
+            assert settling_time >= 9.99, "If not settled, settling_time should be close to simulation end"
 
     def test_settling_time_not_observed_within_horizon(self):
         """
@@ -143,20 +140,20 @@ class TestSettlingTime:
         Final error will exceed 2% threshold, confirming tuning is conservative.
         """
         result = simulate_speed_control(target_speed=100.0)
-        t = result['t']
-        y = result['speed']
-        setpoint = result['target_speed']
-        settling_time = result['settling_time']
+        t = result["t"]
+        y = result["speed"]
+        setpoint = result["target_speed"]
+        settling_time = result["settling_time"]
         threshold = 0.02 * setpoint  # 2.0 rad/s for target=100.0
 
         # Settling time should equal or nearly equal simulation end
-        assert settling_time >= 9.99, \
-            f"Expected settling_time near simulation end (≥9.99s), got {settling_time:.2f}s"
+        assert settling_time >= 9.99, f"Expected settling_time near simulation end (≥9.99s), got {settling_time:.2f}s"
 
         # Final error should exceed 2% band
         final_error = np.abs(y[-1] - setpoint)
-        assert final_error > threshold, \
-            f"Expected final error > {threshold:.3f} rad/s (unsettled), got {final_error:.3f} rad/s"
+        assert (
+            final_error > threshold
+        ), f"Expected final error > {threshold:.3f} rad/s (unsettled), got {final_error:.3f} rad/s"
 
 
 class TestOvershoot:
@@ -170,14 +167,13 @@ class TestOvershoot:
         For first-order DC motor with default gains, expects minimal overshoot (< 10%).
         """
         result = simulate_speed_control(target_speed=100.0)
-        peak_overshoot = result['peak_overshoot']
+        peak_overshoot = result["peak_overshoot"]
 
         # Overshoot must be non-negative
         assert peak_overshoot >= 0.0, "Peak overshoot must be non-negative"
 
         # For default gains on first-order system, expect overshoot < 20%
-        assert peak_overshoot <= 20.0, \
-            f"Peak overshoot {peak_overshoot:.1f} rad/s exceeds 20 rad/s"
+        assert peak_overshoot <= 20.0, f"Peak overshoot {peak_overshoot:.1f} rad/s exceeds 20 rad/s"
 
     def test_overshoot_percentage_calculation(self):
         """
@@ -187,17 +183,18 @@ class TestOvershoot:
         If peak_response ≤ setpoint, then overshoot_percent = 0.
         """
         result = simulate_speed_control(target_speed=100.0)
-        y = result['speed']
-        setpoint = result['target_speed']
-        reported_overshoot = result['peak_overshoot']
+        y = result["speed"]
+        setpoint = result["target_speed"]
+        reported_overshoot = result["peak_overshoot"]
 
         # Calculate expected overshoot from raw data
         peak = np.max(y)
         expected_overshoot = max(0.0, peak - setpoint)
 
         # Should match reported value
-        assert np.isclose(reported_overshoot, expected_overshoot, atol=1e-6), \
-            f"Reported overshoot {reported_overshoot:.3f} doesn't match calculated {expected_overshoot:.3f}"
+        assert np.isclose(
+            reported_overshoot, expected_overshoot, atol=1e-6
+        ), f"Reported overshoot {reported_overshoot:.3f} doesn't match calculated {expected_overshoot:.3f}"
 
 
 class TestTerminalTrackingError:
@@ -216,14 +213,13 @@ class TestTerminalTrackingError:
         asymptotic steady-state error (mathematical limit as t→∞).
         """
         result = simulate_speed_control(target_speed=100.0)
-        fte = result['steady_state_error']  # metric name unchanged for backward compat; interpretation corrected
+        fte = result["steady_state_error"]  # metric name unchanged for backward compat; interpretation corrected
 
         # Terminal error must be non-negative
         assert fte >= 0.0, "Terminal tracking error must be non-negative"
 
         # Terminal error should be less than setpoint (error can't exceed target)
-        assert fte <= result['target_speed'], \
-            f"Terminal error {fte:.3f} exceeds target speed {result['target_speed']}"
+        assert fte <= result["target_speed"], f"Terminal error {fte:.3f} exceeds target speed {result['target_speed']}"
 
     def test_terminal_tracking_error_matches_final_error(self):
         """
@@ -233,16 +229,17 @@ class TestTerminalTrackingError:
         This is a finite-horizon measurement, not an asymptotic limit.
         """
         result = simulate_speed_control(target_speed=100.0)
-        y = result['speed']
-        error = result['error']
-        setpoint = result['target_speed']
-        reported_fte = result['steady_state_error']  # metric name unchanged
+        y = result["speed"]
+        error = result["error"]
+        setpoint = result["target_speed"]
+        reported_fte = result["steady_state_error"]  # metric name unchanged
 
         # Calculate terminal error from raw error array
         expected_fte = np.abs(error[-1])
 
-        assert np.isclose(reported_fte, expected_fte, atol=1e-6), \
-            f"Reported terminal error {reported_fte:.6f} doesn't match final error {expected_fte:.6f}"
+        assert np.isclose(
+            reported_fte, expected_fte, atol=1e-6
+        ), f"Reported terminal error {reported_fte:.6f} doesn't match final error {expected_fte:.6f}"
 
     def test_terminal_error_vs_asymptotic_distinction(self):
         """
@@ -256,19 +253,21 @@ class TestTerminalTrackingError:
         at t=10s, not a convergence value.
         """
         result = simulate_speed_control(target_speed=100.0)
-        y = result['speed']
-        t = result['t']
-        setpoint = result['target_speed']
+        y = result["speed"]
+        t = result["t"]
+        setpoint = result["target_speed"]
         final_error = np.abs(y[-1] - setpoint)
 
         # Terminal error should equal reported value
-        reported_error = result['steady_state_error']
-        assert np.isclose(final_error, reported_error, atol=1e-6), \
-            f"Terminal error at t={t[-1]:.2f}s is {final_error:.3f}, not {reported_error:.3f}"
+        reported_error = result["steady_state_error"]
+        assert np.isclose(
+            final_error, reported_error, atol=1e-6
+        ), f"Terminal error at t={t[-1]:.2f}s is {final_error:.3f}, not {reported_error:.3f}"
 
         # Affirm this is finite-horizon, not asymptotic
-        assert t[-1] == 9.99, \
-            f"Simulation horizon is {t[-1]:.2f}s; terminal error is snapshot at this instant, not asymptotic value"
+        assert (
+            t[-1] == 9.99
+        ), f"Simulation horizon is {t[-1]:.2f}s; terminal error is snapshot at this instant, not asymptotic value"
 
 
 class TestDeterminism:
@@ -287,29 +286,23 @@ class TestDeterminism:
             results.append(result)
 
         # Compare Run 2 vs Run 1
-        max_speed_diff_1v2 = np.max(np.abs(results[1]['speed'] - results[0]['speed']))
-        max_error_diff_1v2 = np.max(np.abs(results[1]['error'] - results[0]['error']))
-        max_voltage_diff_1v2 = np.max(np.abs(results[1]['voltage'] - results[0]['voltage']))
+        max_speed_diff_1v2 = np.max(np.abs(results[1]["speed"] - results[0]["speed"]))
+        max_error_diff_1v2 = np.max(np.abs(results[1]["error"] - results[0]["error"]))
+        max_voltage_diff_1v2 = np.max(np.abs(results[1]["voltage"] - results[0]["voltage"]))
 
         # Compare Run 3 vs Run 1
-        max_speed_diff_1v3 = np.max(np.abs(results[2]['speed'] - results[0]['speed']))
-        max_error_diff_1v3 = np.max(np.abs(results[2]['error'] - results[0]['error']))
-        max_voltage_diff_1v3 = np.max(np.abs(results[2]['voltage'] - results[0]['voltage']))
+        max_speed_diff_1v3 = np.max(np.abs(results[2]["speed"] - results[0]["speed"]))
+        max_error_diff_1v3 = np.max(np.abs(results[2]["error"] - results[0]["error"]))
+        max_voltage_diff_1v3 = np.max(np.abs(results[2]["voltage"] - results[0]["voltage"]))
 
         # All differences should be machine epsilon (< 1e-15)
-        assert max_speed_diff_1v2 < 1e-14, \
-            f"Run 2 vs Run 1 speed diff: {max_speed_diff_1v2:.2e}"
-        assert max_error_diff_1v2 < 1e-14, \
-            f"Run 2 vs Run 1 error diff: {max_error_diff_1v2:.2e}"
-        assert max_voltage_diff_1v2 < 1e-14, \
-            f"Run 2 vs Run 1 voltage diff: {max_voltage_diff_1v2:.2e}"
+        assert max_speed_diff_1v2 < 1e-14, f"Run 2 vs Run 1 speed diff: {max_speed_diff_1v2:.2e}"
+        assert max_error_diff_1v2 < 1e-14, f"Run 2 vs Run 1 error diff: {max_error_diff_1v2:.2e}"
+        assert max_voltage_diff_1v2 < 1e-14, f"Run 2 vs Run 1 voltage diff: {max_voltage_diff_1v2:.2e}"
 
-        assert max_speed_diff_1v3 < 1e-14, \
-            f"Run 3 vs Run 1 speed diff: {max_speed_diff_1v3:.2e}"
-        assert max_error_diff_1v3 < 1e-14, \
-            f"Run 3 vs Run 1 error diff: {max_error_diff_1v3:.2e}"
-        assert max_voltage_diff_1v3 < 1e-14, \
-            f"Run 3 vs Run 1 voltage diff: {max_voltage_diff_1v3:.2e}"
+        assert max_speed_diff_1v3 < 1e-14, f"Run 3 vs Run 1 speed diff: {max_speed_diff_1v3:.2e}"
+        assert max_error_diff_1v3 < 1e-14, f"Run 3 vs Run 1 error diff: {max_error_diff_1v3:.2e}"
+        assert max_voltage_diff_1v3 < 1e-14, f"Run 3 vs Run 1 voltage diff: {max_voltage_diff_1v3:.2e}"
 
     def test_scalar_metrics_reproducible(self):
         """
@@ -325,16 +318,13 @@ class TestDeterminism:
 
         # Compare scalar metrics (note: 'steady_state_error' is actually terminal tracking error at t=10s)
         for i in range(1, 3):
-            st_diff = abs(results[i]['settling_time'] - results[0]['settling_time'])
-            os_diff = abs(results[i]['peak_overshoot'] - results[0]['peak_overshoot'])
-            fte_diff = abs(results[i]['steady_state_error'] - results[0]['steady_state_error'])
+            st_diff = abs(results[i]["settling_time"] - results[0]["settling_time"])
+            os_diff = abs(results[i]["peak_overshoot"] - results[0]["peak_overshoot"])
+            fte_diff = abs(results[i]["steady_state_error"] - results[0]["steady_state_error"])
 
-            assert st_diff < 1e-14, \
-                f"Run {i+1} vs Run 1: settling_time diff = {st_diff:.2e}"
-            assert os_diff < 1e-14, \
-                f"Run {i+1} vs Run 1: peak_overshoot diff = {os_diff:.2e}"
-            assert fte_diff < 1e-14, \
-                f"Run {i+1} vs Run 1: terminal_tracking_error diff = {fte_diff:.2e}"
+            assert st_diff < 1e-14, f"Run {i + 1} vs Run 1: settling_time diff = {st_diff:.2e}"
+            assert os_diff < 1e-14, f"Run {i + 1} vs Run 1: peak_overshoot diff = {os_diff:.2e}"
+            assert fte_diff < 1e-14, f"Run {i + 1} vs Run 1: terminal_tracking_error diff = {fte_diff:.2e}"
 
 
 class TestStepResponse:
@@ -350,14 +340,16 @@ class TestStepResponse:
 
         # With t_sim=10.0 and dt=0.01, expect 1000 steps
         expected_steps = 1000
-        assert len(result['speed']) == expected_steps, \
-            f"Expected {expected_steps} speed samples, got {len(result['speed'])}"
-        assert len(result['error']) == expected_steps, \
-            f"Expected {expected_steps} error samples, got {len(result['error'])}"
-        assert len(result['voltage']) == expected_steps, \
-            f"Expected {expected_steps} voltage samples, got {len(result['voltage'])}"
-        assert len(result['t']) == expected_steps, \
-            f"Expected {expected_steps} time samples, got {len(result['t'])}"
+        assert (
+            len(result["speed"]) == expected_steps
+        ), f"Expected {expected_steps} speed samples, got {len(result['speed'])}"
+        assert (
+            len(result["error"]) == expected_steps
+        ), f"Expected {expected_steps} error samples, got {len(result['error'])}"
+        assert (
+            len(result["voltage"]) == expected_steps
+        ), f"Expected {expected_steps} voltage samples, got {len(result['voltage'])}"
+        assert len(result["t"]) == expected_steps, f"Expected {expected_steps} time samples, got {len(result['t'])}"
 
     def test_step_response_consistency(self):
         """
@@ -373,15 +365,13 @@ class TestStepResponse:
 
         # Compare time arrays
         for i in range(1, 3):
-            t_diff = np.max(np.abs(results[i]['t'] - results[0]['t']))
-            assert t_diff < 1e-14, \
-                f"Run {i+1} vs Run 1: time array diff = {t_diff:.2e}"
+            t_diff = np.max(np.abs(results[i]["t"] - results[0]["t"]))
+            assert t_diff < 1e-14, f"Run {i + 1} vs Run 1: time array diff = {t_diff:.2e}"
 
         # Compare speed arrays
         for i in range(1, 3):
-            speed_diff = np.max(np.abs(results[i]['speed'] - results[0]['speed']))
-            assert speed_diff < 1e-14, \
-                f"Run {i+1} vs Run 1: speed array diff = {speed_diff:.2e}"
+            speed_diff = np.max(np.abs(results[i]["speed"] - results[0]["speed"]))
+            assert speed_diff < 1e-14, f"Run {i + 1} vs Run 1: speed array diff = {speed_diff:.2e}"
 
     def test_closed_loop_response_bounds(self):
         """
@@ -392,7 +382,7 @@ class TestStepResponse:
         due to integral action accumulation.
         """
         result = simulate_speed_control(target_speed=100.0)
-        y = result['speed']
+        y = result["speed"]
 
         # Speed should be non-negative
         assert np.all(y >= -1e-10), "Speed must be non-negative"

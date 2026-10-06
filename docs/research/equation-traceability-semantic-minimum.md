@@ -1,8 +1,8 @@
 # Equation Traceability: Semantic Minimum Standard
 
-**Date**: 2026-09-30  
-**Evidence Base**: Epidemiology reference contract (MATH-TRACE-REFERENCE-HARDENING-001) + Quantum harmonic oscillator reference contract (MATH-TRACE-QUANTUM-SYSTEMS-REFERENCE-CONTRACT-001)  
-**Status**: DESIGN REFERENCE (no shared framework authorized yet)  
+**Date**: 2026-09-30
+**Evidence Base**: Epidemiology reference contract (MATH-TRACE-REFERENCE-HARDENING-001) + Quantum harmonic oscillator reference contract (MATH-TRACE-QUANTUM-SYSTEMS-REFERENCE-CONTRACT-001)
+**Status**: DESIGN REFERENCE (no shared framework authorized yet)
 
 ---
 
@@ -292,7 +292,7 @@ This document identifies a semantic minimum observed across two validated refere
 
 ---
 
-**Document Status**: REFERENCE (no framework changes authorized)  
-**Next Review**: After third domain reference contract is complete  
-**Audience**: Math-trace contributors, portfolio-ops governance  
-**Last Updated**: 2026-09-30  
+**Document Status**: REFERENCE (no framework changes authorized)
+**Next Review**: After third domain reference contract is complete
+**Audience**: Math-trace contributors, portfolio-ops governance
+**Last Updated**: 2026-09-30

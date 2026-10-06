@@ -1,12 +1,11 @@
 """Quantum systems model definitions and equation generation."""
 
-import json
-import sys
-from pathlib import Path
 import importlib.util
+import json
+from pathlib import Path
 
 # Load formula.py directly without triggering __init__.py
-formula_path = Path(__file__).parent.parent.parent.parent / 'src' / 'math_trace' / 'formula.py'
+formula_path = Path(__file__).parent.parent.parent.parent / "src" / "math_trace" / "formula.py"
 spec = importlib.util.spec_from_file_location("formula", formula_path)
 formula_mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(formula_mod)

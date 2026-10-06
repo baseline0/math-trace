@@ -12,12 +12,16 @@ Analytical reference: Griffiths, Ch. 2.3
 """
 
 import numpy as np
-from typing import Tuple
+
 from ..model import (
-    solve_tise_fdm, propagate_ssfm, normalize_wavefunction,
-    expectation_value, total_energy, probability_density,
-    harmonic_potential, position_operator, momentum_operator,
-    kinetic_energy_operator, potential_energy_operator,
+    expectation_value,
+    harmonic_potential,
+    momentum_operator,
+    normalize_wavefunction,
+    position_operator,
+    propagate_ssfm,
+    solve_tise_fdm,
+    total_energy,
 )
 
 
@@ -76,9 +80,7 @@ def compute_quantum_harmonic_oscillator(
     V = lambda xg: harmonic_potential(xg, omega=omega)
 
     # Solve TISE
-    energies, eigenstates = solve_tise_fdm(
-        x, V, num_eigenstates=num_eigenstates, hbar=hbar, mass=mass
-    )
+    energies, eigenstates = solve_tise_fdm(x, V, num_eigenstates=num_eigenstates, hbar=hbar, mass=mass)
 
     # Analytical energies
     energies_analytical = analytical_harmonic_eigenvalues(num_eigenstates - 1, omega=omega, hbar=hbar)
@@ -126,19 +128,14 @@ def evolve_ground_state_oscillator(
     # Initial state: Ground state (Gaussian)
     # ψ_0(x) = (π^{-1/4}) exp(-x²/2) (with ℏ=m=ω=1)
     sigma = np.sqrt(hbar / (mass * omega))  # Ground state width
-    psi_0 = np.pi**(-0.25) * np.exp(-x**2 / (2 * sigma**2))
+    psi_0 = np.pi ** (-0.25) * np.exp(-(x**2) / (2 * sigma**2))
     psi_0 = normalize_wavefunction(psi_0, x)
 
     # Propagate
-    times, psi_t = propagate_ssfm(
-        psi_0, x, t_max, dt, V, hbar=hbar, mass=mass
-    )
+    times, psi_t = propagate_ssfm(psi_0, x, t_max, dt, V, hbar=hbar, mass=mass)
 
     # Monitor energy
-    energies = np.array([
-        total_energy(psi_t[:, i], x, V, mass=mass)
-        for i in range(psi_t.shape[1])
-    ])
+    energies = np.array([total_energy(psi_t[:, i], x, V, mass=mass) for i in range(psi_t.shape[1])])
 
     energy_error = np.abs(energies - energies[0]) / np.abs(energies[0])
 

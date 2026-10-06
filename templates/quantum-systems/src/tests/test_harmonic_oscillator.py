@@ -9,17 +9,17 @@ Validates:
 5. Uncertainty principle Delta_x * Delta_p >= hbar/2
 """
 
-import pytest
 import numpy as np
-from typing import Tuple
+import pytest
 from scipy.integrate import trapezoid
+
+from ..model import probability_density
 from ..scenarios.harmonic_oscillator import (
-    compute_quantum_harmonic_oscillator,
-    evolve_ground_state_oscillator,
     analytical_harmonic_eigenvalues,
     analytical_harmonic_period,
+    compute_quantum_harmonic_oscillator,
+    evolve_ground_state_oscillator,
 )
-from ..model import normalize_wavefunction, probability_density
 
 
 class TestHarmonicEigenvalues:
@@ -33,9 +33,7 @@ class TestHarmonicEigenvalues:
         With hbar = omega = 1: E_n = n + 0.5
         Expected: [0.5, 1.5, 2.5, 3.5, 4.5]
         """
-        result = compute_quantum_harmonic_oscillator(
-            x_min=-6, x_max=6, num_points=512, omega=1.0, num_eigenstates=5
-        )
+        result = compute_quantum_harmonic_oscillator(x_min=-6, x_max=6, num_points=512, omega=1.0, num_eigenstates=5)
 
         # Check relative error < 0.1% for each level
         for i, err in enumerate(result["error"]):
@@ -70,11 +68,7 @@ class TestEnergyConservation:
         Evolve ground state for 10 periods.
         Energy should remain constant: |Delta_E/E_0| < 1e-6
         """
-        result = evolve_ground_state_oscillator(
-            x_min=-5, x_max=5, num_points=512,
-            t_max=10.0, dt=0.01,
-            omega=1.0
-        )
+        result = evolve_ground_state_oscillator(x_min=-5, x_max=5, num_points=512, t_max=10.0, dt=0.01, omega=1.0)
 
         # Maximum relative energy error
         max_error = np.max(result["energy_error"])
@@ -114,8 +108,7 @@ class TestNormalization:
             prob = probability_density(psi)
             norm = trapezoid(prob, x)
 
-            assert np.isclose(norm, 1.0, atol=1e-6), \
-                f"Eigenstate {i}: norm {norm:.8f}, expected 1.0"
+            assert np.isclose(norm, 1.0, atol=1e-6), f"Eigenstate {i}: norm {norm:.8f}, expected 1.0"
 
     def test_time_evolved_state_normalization(self):
         """Time-evolved state should remain normalized."""
@@ -124,13 +117,12 @@ class TestNormalization:
         psi_t = result["psi_t"]
 
         # Check normalization at several time points
-        for t_idx in [0, len(result["times"])//2, -1]:
+        for t_idx in [0, len(result["times"]) // 2, -1]:
             psi = psi_t[:, t_idx]
             prob = probability_density(psi)
             norm = trapezoid(prob, x)
 
-            assert np.isclose(norm, 1.0, atol=1e-6), \
-                f"Time index {t_idx}: norm {norm:.8f}"
+            assert np.isclose(norm, 1.0, atol=1e-6), f"Time index {t_idx}: norm {norm:.8f}"
 
 
 class TestExpectationValues:
@@ -149,8 +141,7 @@ class TestExpectationValues:
             psi = eigenstates[:, i]
             exp_x = trapezoid(np.conj(psi) * x * psi, x).real
 
-            assert np.abs(exp_x) < 1e-6, \
-                f"Eigenstate {i}: <x> = {exp_x:.2e}, expected 0"
+            assert np.abs(exp_x) < 1e-6, f"Eigenstate {i}: <x> = {exp_x:.2e}, expected 0"
 
     def test_expectation_p_is_zero_real_wavefunction(self):
         """
@@ -170,8 +161,7 @@ class TestExpectationValues:
 
             exp_p = trapezoid(np.conj(psi) * momentum_action, x).real
 
-            assert np.abs(exp_p) < 1e-6, \
-                f"Eigenstate {i}: <p> = {exp_p:.2e}, expected 0"
+            assert np.abs(exp_p) < 1e-6, f"Eigenstate {i}: <p> = {exp_p:.2e}, expected 0"
 
 
 class TestAnalyticalFormulas:
@@ -216,9 +206,7 @@ class TestUncertaintyPrinciple:
         For harmonic oscillator ground state with hbar=m=omega=1:
         Verify position variance is nonzero and consistent with energy.
         """
-        result = compute_quantum_harmonic_oscillator(
-            x_min=-6, x_max=6, num_points=512, omega=1.0, num_eigenstates=1
-        )
+        result = compute_quantum_harmonic_oscillator(x_min=-6, x_max=6, num_points=512, omega=1.0, num_eigenstates=1)
 
         x = result["x"]
         psi_0 = result["eigenstates"][:, 0]
@@ -236,9 +224,7 @@ class TestUncertaintyPrinciple:
         """
         Excited states of harmonic oscillator have larger position variance.
         """
-        result = compute_quantum_harmonic_oscillator(
-            x_min=-8, x_max=8, num_points=512, omega=1.0, num_eigenstates=3
-        )
+        result = compute_quantum_harmonic_oscillator(x_min=-8, x_max=8, num_points=512, omega=1.0, num_eigenstates=3)
 
         x = result["x"]
         eigenstates = result["eigenstates"]
@@ -252,8 +238,7 @@ class TestUncertaintyPrinciple:
             variances.append(var_x)
 
         # Variance should increase with quantum number n
-        assert variances[0] < variances[1] < variances[2], \
-            f"Variances not increasing: {variances}"
+        assert variances[0] < variances[1] < variances[2], f"Variances not increasing: {variances}"
 
 
 class TestContractMapping:

@@ -12,10 +12,6 @@ Or to sync to autogen/mod.just for reference:
     python scripts/regenerate-autogen.py --export-module
 """
 
-import re
-import sys
-from pathlib import Path
-
 
 def load_cli_commands():
     """Load CLI commands from math_trace.cli or similar."""
@@ -62,20 +58,22 @@ def generate_recipes_block():
                 sig_parts.append(arg)
 
         sig = f"{cmd['name']} {' '.join(sig_parts)}:"
-        lines.append("[group(\"cli\")]")
+        lines.append('[group("cli")]')
         lines.append(f'[doc("{cmd["doc"]}")]')
         lines.append(sig)
         lines.append(
             '    uv run python -c "from math_trace.cli import app; app()" '
-            f"{cmd['name']} " + " ".join(f"{{{{arg}}}}" for arg in cmd["args"])
+            f"{cmd['name']} " + " ".join("{{arg}}" for arg in cmd["args"])
         )
         lines.append("")
 
-    lines.extend([
-        "# " + "=" * 76,
-        "# END AUTO-GENERATED SECTION",
-        "# " + "=" * 76,
-    ])
+    lines.extend(
+        [
+            "# " + "=" * 76,
+            "# END AUTO-GENERATED SECTION",
+            "# " + "=" * 76,
+        ]
+    )
 
     return "\n".join(lines)
 

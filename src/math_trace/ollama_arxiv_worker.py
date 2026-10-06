@@ -76,10 +76,10 @@ def process_paper(paper_id: str, cache_dir: Path = None) -> dict:
 
         if result["conversion_status"] == "converted":
             converted += 1
-            print(f"  [{i+1}/{len(equations)}] ✅ {eq['latex'][:50]}")
+            print(f"  [{i + 1}/{len(equations)}] ✅ {eq['latex'][:50]}")
         else:
             failed += 1
-            print(f"  [{i+1}/{len(equations)}] ❌ {eq['latex'][:50]}")
+            print(f"  [{i + 1}/{len(equations)}] ❌ {eq['latex'][:50]}")
 
     # Save back
     with open(equations_path, "w") as f:
@@ -104,7 +104,7 @@ def process_paper(paper_id: str, cache_dir: Path = None) -> dict:
         "converted": converted,
         "failed": failed,
         "success_rate": converted / len(equations) if equations else 0,
-        "message": f"Converted {converted}/{len(equations)} equations ({100*converted/len(equations):.0%})",
+        "message": f"Converted {converted}/{len(equations)} equations ({100 * converted / len(equations):.0%})",
     }
 
 

@@ -9,9 +9,7 @@ import pytest
 
 def pytest_configure(config):
     """Apply unit marker to all tests in this directory."""
-    config.addinivalue_line(
-        "markers", "unit: deterministic test with no external dependencies"
-    )
+    config.addinivalue_line("markers", "unit: deterministic test with no external dependencies")
 
 
 @pytest.fixture(scope="session", autouse=True)

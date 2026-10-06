@@ -126,7 +126,7 @@ class TestMonotonicity:
         prev_rate = 0
         for n in range(2, 20):
             current_rate = k * n * (n - 1) / 2
-            assert current_rate > prev_rate, f"Rate not increasing: r({n-1}) >= r({n})"
+            assert current_rate > prev_rate, f"Rate not increasing: r({n - 1}) >= r({n})"
             prev_rate = current_rate
 
     def test_rate_differences_linear_in_k(self) -> None:

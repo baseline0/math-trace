@@ -94,9 +94,7 @@ class TestMetadataSchemaAPI:
 
         required_fields = ["name", "description", "source_line"]
         for field_name in required_fields:
-            assert hasattr(
-                rate_formula, field_name
-            ), f"Formula missing documented field: {field_name}"
+            assert hasattr(rate_formula, field_name), f"Formula missing documented field: {field_name}"
 
     def test_formula_name_is_string(self):
         """Guarantee: Equation name is human-readable string."""
@@ -175,8 +173,9 @@ class TestSupportedPythonVersions:
         import sys as sys_module
 
         # Current runtime should be 3.11+
-        assert (
-            sys_module.version_info >= (3, 11)
+        assert sys_module.version_info >= (
+            3,
+            11,
         ), f"Requires Python 3.11+, have {sys_module.version_info.major}.{sys_module.version_info.minor}"
 
 

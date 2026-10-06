@@ -86,9 +86,7 @@ def fetch_paper_metadata(paper_id: str) -> dict:
     }
 
 
-def download_and_extract_equations(
-    paper_id: str, max_equations: int = 50
-) -> tuple[str, list[Equation]]:
+def download_and_extract_equations(paper_id: str, max_equations: int = 50) -> tuple[str, list[Equation]]:
     """Download arXiv source and extract equations.
 
     Returns: (tex_content, list of Equation objects)

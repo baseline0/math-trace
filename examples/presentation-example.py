@@ -24,7 +24,6 @@ python presentation-example.py
 - **Export:** Print to PDF from browser
 """
 
-import sympy as sp
 from math_trace.formula import Formula
 from math_trace.presentation_server import PresentationServer
 

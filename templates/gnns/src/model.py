@@ -9,10 +9,10 @@ References:
 - Gilmer et al. (2017): Neural Message Passing for Quantum Chemistry
 """
 
-import numpy as np
 import json
-from typing import Tuple, Dict, Any, List
+from typing import Any
 
+import numpy as np
 
 # ============================================================================
 # Equation 1: Message Aggregation (Graph Convolution)
@@ -22,11 +22,8 @@ from typing import Tuple, Dict, Any, List
 #
 # Code Reference: message_aggregate()
 
-def message_aggregate(
-    node_features: np.ndarray,
-    adjacency: np.ndarray,
-    aggregation: str = "sum"
-) -> np.ndarray:
+
+def message_aggregate(node_features: np.ndarray, adjacency: np.ndarray, aggregation: str = "sum") -> np.ndarray:
     """
     Aggregate messages from neighbors.
 
@@ -62,13 +59,14 @@ def message_aggregate(
 #
 # Code Reference: node_update()
 
+
 def node_update(
     node_features: np.ndarray,
     messages: np.ndarray,
     W_self: np.ndarray,
     W_neigh: np.ndarray,
     bias: np.ndarray,
-    activation: str = "relu"
+    activation: str = "relu",
 ) -> np.ndarray:
     """
     Update node embeddings using aggregated messages.
@@ -107,10 +105,8 @@ def node_update(
 #
 # Code Reference: attention_weights()
 
-def attention_weights(
-    attention_logits: np.ndarray,
-    mask: np.ndarray = None
-) -> np.ndarray:
+
+def attention_weights(attention_logits: np.ndarray, mask: np.ndarray = None) -> np.ndarray:
     """
     Compute attention weights via softmax.
 
@@ -145,12 +141,13 @@ def attention_weights(
 #
 # Code Reference: graph_attention_layer()
 
+
 def graph_attention_layer(
     node_features: np.ndarray,
     adjacency: np.ndarray,
     W: np.ndarray,
     a: np.ndarray,
-    activation: str = "relu"
+    activation: str = "relu",
 ) -> np.ndarray:
     """
     Single graph attention layer.
@@ -198,10 +195,8 @@ def graph_attention_layer(
 #
 # Code Reference: classification_loss()
 
-def classification_loss(
-    predictions: np.ndarray,
-    labels: np.ndarray
-) -> float:
+
+def classification_loss(predictions: np.ndarray, labels: np.ndarray) -> float:
     """
     Cross-entropy loss for node classification.
 
@@ -223,11 +218,7 @@ def classification_loss(
     return loss
 
 
-def graph_accuracy(
-    predictions: np.ndarray,
-    labels: np.ndarray,
-    mask: np.ndarray = None
-) -> float:
+def graph_accuracy(predictions: np.ndarray, labels: np.ndarray, mask: np.ndarray = None) -> float:
     """
     Accuracy for node classification.
 
@@ -256,7 +247,7 @@ def graph_accuracy(
     return np.mean(pred_labels == true_labels)
 
 
-def export_equation_metadata() -> Dict[str, Any]:
+def export_equation_metadata() -> dict[str, Any]:
     """Auto-generate equations.json for paper.typ."""
     return {
         "message_aggregation": {

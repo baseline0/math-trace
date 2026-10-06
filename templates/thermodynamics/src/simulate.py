@@ -2,12 +2,9 @@
 
 import numpy as np
 from model import (
+    carnot_efficiency,
     ideal_gas_pressure,
     ideal_gas_volume,
-    internal_energy,
-    carnot_efficiency,
-    entropy,
-    heat_capacity_constant_volume,
 )
 
 

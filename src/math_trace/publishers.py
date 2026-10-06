@@ -104,15 +104,11 @@ class TypstPublisher(Publisher):
                 timeout=30,
             )
             if result.returncode != 0:
-                raise RuntimeError(
-                    f"Typst compilation failed: {result.stderr.decode()}"
-                )
+                raise RuntimeError(f"Typst compilation failed: {result.stderr.decode()}")
             return result.stdout
 
         except FileNotFoundError:
-            raise RuntimeError(
-                "Typst compiler not found. Install with: cargo install typst-cli"
-            )
+            raise RuntimeError("Typst compiler not found. Install with: cargo install typst-cli")
 
 
 class LatexPublisher(Publisher):
@@ -154,9 +150,7 @@ class LatexPublisher(Publisher):
             )
 
             if result.returncode != 0:
-                raise RuntimeError(
-                    f"pdflatex compilation failed: {result.stderr.decode()}"
-                )
+                raise RuntimeError(f"pdflatex compilation failed: {result.stderr.decode()}")
 
             # Return generated PDF
             pdf_path = Path("/tmp") / source_file.stem / ".pdf"
@@ -166,6 +160,4 @@ class LatexPublisher(Publisher):
             return pdf_path.read_bytes()
 
         except FileNotFoundError:
-            raise RuntimeError(
-                "pdflatex not found. Install with: apt-get install texlive-latex-base"
-            )
+            raise RuntimeError("pdflatex not found. Install with: apt-get install texlive-latex-base")

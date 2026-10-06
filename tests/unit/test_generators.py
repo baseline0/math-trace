@@ -292,7 +292,7 @@ class TestSymPyToTypstComplexExpressions:
         converter = SymPyToTypst()
 
         # dS/dt = -β * S * I / N (epidemiological notation: S=susceptible, I=infected, N=population)
-        beta, S, I, N = sp.symbols("beta S I N")  # noqa: N806, E741
+        beta, S, I, N = sp.symbols("beta S I N")
         expr = -beta * S * I / N
         result = converter.convert(expr)
 

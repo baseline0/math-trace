@@ -12,14 +12,14 @@ Scenario: COVID-like baseline
   - Initial: S₀ = 999,900, I₀ = 100, R₀ = 0
 """
 
+import json
+from pathlib import Path
+
 import numpy as np
 from scipy.integrate import odeint
-from pathlib import Path
-from typing import Tuple, Dict
-import json
-
 
 # === PARAMETERS ===
+
 
 class Parameters:
     """SIR model parameters with units and domains."""
@@ -45,6 +45,7 @@ class Parameters:
 
 
 # === SIR DIFFERENTIAL EQUATIONS ===
+
 
 def sir_model(y: np.ndarray, t: float, params: Parameters) -> np.ndarray:
     """
@@ -90,7 +91,8 @@ def sir_model(y: np.ndarray, t: float, params: Parameters) -> np.ndarray:
 
 # === SCENARIOS ===
 
-def covid_baseline() -> Tuple[np.ndarray, Parameters]:
+
+def covid_baseline() -> tuple[np.ndarray, Parameters]:
     """
     COVID-like scenario with R₀ ≈ 2.
 
@@ -107,7 +109,7 @@ def covid_baseline() -> Tuple[np.ndarray, Parameters]:
 
     # Initial conditions
     I0 = 100  # Start with 100 infected
-    R0 = 0    # No recovered yet
+    R0 = 0  # No recovered yet
     S0 = N - I0 - R0  # Susceptible
     y0 = np.array([S0, I0, R0])
 
@@ -121,7 +123,7 @@ def covid_baseline() -> Tuple[np.ndarray, Parameters]:
     return t, S, I, R, params
 
 
-def measles_scenario() -> Tuple[np.ndarray, Parameters]:
+def measles_scenario() -> tuple[np.ndarray, Parameters]:
     """
     Measles scenario with R₀ ≈ 15 (highly contagious).
 
@@ -129,7 +131,7 @@ def measles_scenario() -> Tuple[np.ndarray, Parameters]:
         (times, S, I, R), parameters
     """
     R0_target = 15.0  # Measles is very contagious
-    gamma = 1/7  # 7-day infectious period (approximate)
+    gamma = 1 / 7  # 7-day infectious period (approximate)
     beta = R0_target * gamma
     N = 1_000_000
 
@@ -149,7 +151,8 @@ def measles_scenario() -> Tuple[np.ndarray, Parameters]:
 
 # === ANALYSIS FUNCTIONS ===
 
-def compute_peak_infection(I: np.ndarray, t: np.ndarray) -> Tuple[float, float]:
+
+def compute_peak_infection(I: np.ndarray, t: np.ndarray) -> tuple[float, float]:
     """Find time and magnitude of peak infections."""
     peak_idx = np.argmax(I)
     peak_time = t[peak_idx]
@@ -162,36 +165,35 @@ def compute_attack_rate(R: np.ndarray) -> float:
     return R[-1] / R[-1] + 1e-10  # Avoid division by zero
 
 
-def generate_report(t: np.ndarray, S: np.ndarray, I: np.ndarray,
-                   R: np.ndarray, params: Parameters) -> Dict:
+def generate_report(t: np.ndarray, S: np.ndarray, I: np.ndarray, R: np.ndarray, params: Parameters) -> dict:
     """Generate quantitative report for scenario."""
     N = params.N
     peak_time, peak_count = compute_peak_infection(I, t)
 
     return {
-        'parameters': {
-            'R0': params.R0,
-            'beta': params.beta,
-            'gamma': params.gamma,
-            'N': N,
-            'infectious_period': 1 / params.gamma,
+        "parameters": {
+            "R0": params.R0,
+            "beta": params.beta,
+            "gamma": params.gamma,
+            "N": N,
+            "infectious_period": 1 / params.gamma,
         },
-        'initial_conditions': {
-            'S0': S[0],
-            'I0': I[0],
-            'R0': R[0],
+        "initial_conditions": {
+            "S0": S[0],
+            "I0": I[0],
+            "R0": R[0],
         },
-        'key_outcomes': {
-            'peak_infection_day': peak_time,
-            'peak_infection_count': int(peak_count),
-            'peak_infection_percentage': 100 * peak_count / N,
-            'final_attack_rate': int(R[-1]),
-            'final_attack_rate_percentage': 100 * R[-1] / N,
+        "key_outcomes": {
+            "peak_infection_day": peak_time,
+            "peak_infection_count": int(peak_count),
+            "peak_infection_percentage": 100 * peak_count / N,
+            "final_attack_rate": int(R[-1]),
+            "final_attack_rate_percentage": 100 * R[-1] / N,
         },
     }
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Run COVID scenario
     print("=== COVID-like Scenario (R₀=2) ===")
     t, S, I, R, params = covid_baseline()
@@ -199,15 +201,15 @@ if __name__ == '__main__':
 
     report = generate_report(t, S, I, R, params)
     print("\nKey outcomes:")
-    for key, val in report['key_outcomes'].items():
+    for key, val in report["key_outcomes"].items():
         if isinstance(val, float):
             print(f"  {key}: {val:.1f}")
         else:
             print(f"  {key}: {val}")
 
     # Save report
-    output_path = Path(__file__).parent / 'generated' / 'covid_scenario.json'
+    output_path = Path(__file__).parent / "generated" / "covid_scenario.json"
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         json.dump(report, f, indent=2)
     print(f"\n✅ Report saved to {output_path}")

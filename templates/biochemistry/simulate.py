@@ -58,11 +58,11 @@ def simulate_enzyme_kinetics(
     return S, v_measured
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Run default simulation
     S, v = simulate_enzyme_kinetics(Vmax=100.0, Km=5.0, steps=100, S_max=50.0, seed=42)
 
-    print(f"✅ Simulated Michaelis-Menten kinetics")
+    print("✅ Simulated Michaelis-Menten kinetics")
     print(f"   Substrate range: [{S[0]:.2f}, {S[-1]:.2f}] mM")
     print(f"   Velocity range: [{v.min():.2f}, {v.max():.2f}] μmol/min")
     print(f"   Data points: {len(S)}")

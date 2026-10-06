@@ -72,9 +72,9 @@ Include code snippet showing how formulas are defined:
 def export_formulas():
     k = sp.Symbol('k', positive=True)
     n_a = sp.Symbol('n_a', positive=True, integer=True)
-    
+
     rate_law = k * sp.binomial(n_a, 2)
-    
+
     return {
         "rate": {
             "latex": sp.latex(rate_law),

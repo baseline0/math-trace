@@ -16,31 +16,32 @@ Exit codes:
   2 = Warnings found (experimental checks only)
 """
 
+import os
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
-import re
-import os
 
 # ============================================================================
 # Issue model: unified representation of all linting findings
 # ============================================================================
 
+
 @dataclass
 class Issue:
     """A linting issue found in a .typ file."""
+
     path: str
-    line: Optional[int] = None
+    line: int | None = None
     level: str = "error"  # "error" or "warning"
     message: str = ""
-    suggestion: Optional[str] = None
-    doc_section: Optional[str] = None  # e.g. "§1" or "Block comment collision"
+    suggestion: str | None = None
+    doc_section: str | None = None  # e.g. "§1" or "Block comment collision"
 
     def format_for_ci(self) -> str:
         """Format as GitHub Actions annotation (::error file=...)."""
-        parts = [f"::error" if self.level == "error" else f"::warning"]
+        parts = ["::error" if self.level == "error" else "::warning"]
         if self.line:
             parts.append(f"file={self.path},line={self.line}")
         else:
@@ -75,9 +76,11 @@ class Issue:
 # Regex-based checks: data-driven registry
 # ============================================================================
 
+
 @dataclass
 class RegexCheck:
     """Define a regex-based linting check."""
+
     name: str
     pattern: re.Pattern
     level: str  # "error" or "warning"
@@ -97,10 +100,10 @@ class RegexCheck:
 REGEX_CHECKS: list[RegexCheck] = [
     RegexCheck(
         name="risky_bold_comment",
-        pattern=re.compile(r'\*[^*\n]*?(?<!\\)/\*'),  # * ... /* (not escaped) on same line
+        pattern=re.compile(r"\*[^*\n]*?(?<!\\)/\*"),  # * ... /* (not escaped) on same line
         level="warning",
         message="Possible '/*' inside bold text (Typst interprets as block comment start)",
-        suggestion="Use backslash: \\/* or use strong(\"...\") instead",
+        suggestion='Use backslash: \\/* or use strong("...") instead',
         doc_section="§1 (Block comment collision)",
     ),
     # Example: to add a new check for Windows paths in includes:
@@ -118,6 +121,7 @@ REGEX_CHECKS: list[RegexCheck] = [
 # ============================================================================
 # Core checks (always run)
 # ============================================================================
+
 
 def check_typst_compile(paths: list[Path]) -> list[Issue]:
     """
@@ -150,11 +154,11 @@ def _enrich_compile_issue(path: Path, stderr: str) -> Issue:
     Maps common error patterns to TYPST-GOTCHAS.md sections.
     """
     # Extract line number if present
-    line_match = re.search(r':(\d+):', stderr)
+    line_match = re.search(r":(\d+):", stderr)
     line_num = int(line_match.group(1)) if line_match else None
 
     # Default message: first non-empty line of error
-    error_lines = [l for l in stderr.split('\n') if l.strip()]
+    error_lines = [l for l in stderr.split("\n") if l.strip()]
     error_msg = error_lines[0] if error_lines else "Compilation failed"
 
     doc_section = "Typst compilation"
@@ -197,7 +201,7 @@ def check_includes_exist(paths: list[Path]) -> list[Issue]:
     issues = []
 
     for path in paths:
-        content = path.read_text(encoding='utf-8', errors='ignore')
+        content = path.read_text(encoding="utf-8", errors="ignore")
 
         # Find all #include statements
         include_pattern = r'#include\s+"([^"]+)"'
@@ -210,16 +214,18 @@ def check_includes_exist(paths: list[Path]) -> list[Issue]:
 
             if not resolved.exists():
                 # Find line number
-                line_num = content[:match.start()].count('\n') + 1
+                line_num = content[: match.start()].count("\n") + 1
 
-                issues.append(Issue(
-                    path=str(path),
-                    line=line_num,
-                    level="error",
-                    message=f"#include file not found: {include_path}",
-                    suggestion=f"Create {include_path} or fix the path (use forward slashes)",
-                    doc_section="§4 (Missing #include files)"
-                ))
+                issues.append(
+                    Issue(
+                        path=str(path),
+                        line=line_num,
+                        level="error",
+                        message=f"#include file not found: {include_path}",
+                        suggestion=f"Create {include_path} or fix the path (use forward slashes)",
+                        doc_section="§4 (Missing #include files)",
+                    )
+                )
 
     return issues
 
@@ -227,6 +233,7 @@ def check_includes_exist(paths: list[Path]) -> list[Issue]:
 # ============================================================================
 # Experimental checks (opt-in via MATH_TRACE_TYPST_STRICT)
 # ============================================================================
+
 
 def run_regex_checks(paths: list[Path]) -> list[Issue]:
     """
@@ -236,24 +243,26 @@ def run_regex_checks(paths: list[Path]) -> list[Issue]:
     """
     issues = []
     for path in paths:
-        content = path.read_text(encoding='utf-8', errors='ignore')
+        content = path.read_text(encoding="utf-8", errors="ignore")
         lines = content.splitlines()
 
         for check in REGEX_CHECKS:
             for match in check.pattern.finditer(content):
-                line_no = content[:match.start()].count('\n') + 1
+                line_no = content[: match.start()].count("\n") + 1
 
                 # Get the line content for context (optional)
                 line_content = lines[line_no - 1] if line_no <= len(lines) else ""
 
-                issues.append(Issue(
-                    path=str(path),
-                    line=line_no,
-                    level=check.level,
-                    message=check.message,
-                    suggestion=check.suggestion,
-                    doc_section=check.doc_section,
-                ))
+                issues.append(
+                    Issue(
+                        path=str(path),
+                        line=line_no,
+                        level=check.level,
+                        message=check.message,
+                        suggestion=check.suggestion,
+                        doc_section=check.doc_section,
+                    )
+                )
     return issues
 
 
@@ -271,20 +280,22 @@ def check_comment_balance(paths: list[Path]) -> list[Issue]:
     issues = []
 
     for path in paths:
-        content = path.read_text(encoding='utf-8', errors='ignore')
+        content = path.read_text(encoding="utf-8", errors="ignore")
 
         # Count /* and */ outside code blocks
-        open_count = _count_outside_code_blocks(content, '/*')
-        close_count = _count_outside_code_blocks(content, '*/')
+        open_count = _count_outside_code_blocks(content, "/*")
+        close_count = _count_outside_code_blocks(content, "*/")
 
         if open_count != close_count:
-            issues.append(Issue(
-                path=str(path),
-                level="warning",
-                message=f"Unbalanced block comments: {open_count} opening /*, {close_count} closing */",
-                suggestion="Check for unclosed /* ... */ blocks (outside of ``` code blocks)",
-                doc_section="§1 (Block comment collision)"
-            ))
+            issues.append(
+                Issue(
+                    path=str(path),
+                    level="warning",
+                    message=f"Unbalanced block comments: {open_count} opening /*, {close_count} closing */",
+                    suggestion="Check for unclosed /* ... */ blocks (outside of ``` code blocks)",
+                    doc_section="§1 (Block comment collision)",
+                )
+            )
 
     return issues
 
@@ -300,7 +311,7 @@ def _count_outside_code_blocks(text: str, marker: str) -> int:
     in_code_block = False
     for line in text.splitlines():
         stripped = line.strip()
-        if stripped.startswith('```'):
+        if stripped.startswith("```"):
             in_code_block = not in_code_block
             continue
         if not in_code_block:
@@ -312,21 +323,22 @@ def _count_outside_code_blocks(text: str, marker: str) -> int:
 # Main orchestration
 # ============================================================================
 
-def find_typ_files(paths: Optional[list[str]] = None) -> list[Path]:
+
+def find_typ_files(paths: list[str] | None = None) -> list[Path]:
     """
     Find all .typ files to check.
 
     If paths provided, check those; otherwise, find all .typ files in repo.
     """
     if paths:
-        return [Path(p) for p in paths if p.endswith('.typ')]
+        return [Path(p) for p in paths if p.endswith(".typ")]
 
     # Recursively find all .typ files, excluding .git and build dirs
-    root = Path('.')
-    excluded = {'.git', '__pycache__', 'build', 'dist', '.venv', 'venv'}
+    root = Path(".")
+    excluded = {".git", "__pycache__", "build", "dist", ".venv", "venv"}
 
     typ_files = []
-    for p in root.rglob('*.typ'):
+    for p in root.rglob("*.typ"):
         if not any(exc in p.parts for exc in excluded):
             typ_files.append(p)
 
@@ -354,7 +366,7 @@ def main():
     all_issues.extend(check_includes_exist(typ_files))
 
     # Experimental checks (opt-in via MATH_TRACE_TYPST_STRICT)
-    if os.environ.get('MATH_TRACE_TYPST_STRICT'):
+    if os.environ.get("MATH_TRACE_TYPST_STRICT"):
         all_issues.extend(run_regex_checks(typ_files))
         all_issues.extend(check_comment_balance(typ_files))
 
@@ -374,7 +386,7 @@ def main():
         print(issue.format_for_terminal())
 
     # Also emit GitHub Actions annotations if in CI
-    if os.environ.get('GITHUB_ACTIONS'):
+    if os.environ.get("GITHUB_ACTIONS"):
         for issue in all_issues:
             print(issue.format_for_ci())
 
@@ -390,5 +402,5 @@ def main():
         return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

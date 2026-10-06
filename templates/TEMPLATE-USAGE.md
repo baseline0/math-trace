@@ -65,11 +65,11 @@ Replace harmonic oscillator formulas with your domain:
 ```python
 def export_formulas() -> dict:
     # Your domain here: optics, photonics, waves, etc.
-    theta, n1, n2 = sp.symbols('theta n_1 n_2', real=True)
-    
+    theta, n1, n2 = sp.symbols("theta n_1 n_2", real=True)
+
     formulas = {
         "snells_law": {
-            "latex": sp.latex(sp.Eq(n1 * sp.sin(theta), n2 * sp.sin(sp.Symbol('theta_t')))),
+            "latex": sp.latex(sp.Eq(n1 * sp.sin(theta), n2 * sp.sin(sp.Symbol("theta_t")))),
             "description": "Snell's law of refraction",
             "source_line": 18,
         },
@@ -121,11 +121,11 @@ Edit `simulate.py` to generate multiple figures:
 ```python
 def generate_figures() -> bool:
     # Generate multiple figures
-    fig_path_1 = Path('generated/figures/measurement.png')
-    fig_path_2 = Path('generated/figures/analysis.png')
-    
+    fig_path_1 = Path("generated/figures/measurement.png")
+    fig_path_2 = Path("generated/figures/analysis.png")
+
     # ... generate both ...
-    
+
     return True
 ```
 
@@ -162,9 +162,9 @@ Use pandas + seaborn for complex plots:
 import pandas as pd
 import seaborn as sns
 
-df = pd.read_csv('experimental_data.csv')
-sns.pairplot(df, hue='treatment')
-plt.savefig('generated/figures/correlations.png')
+df = pd.read_csv("experimental_data.csv")
+sns.pairplot(df, hue="treatment")
+plt.savefig("generated/figures/correlations.png")
 ```
 
 ## Publishing Your Paper

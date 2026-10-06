@@ -25,7 +25,7 @@ Before pushing to PyPI, verify the following:
   - `requires-python`: minimum Python version
   - `dependencies`: all runtime dependencies listed
   - `license`: MIT, Apache-2.0, or other OSI-approved license
-  
+
 - [ ] **LICENSE file exists:** `/home/mark/projects/math-trace/LICENSE` (MIT)
 
 - [ ] **README.md well-formed:**
@@ -41,7 +41,7 @@ Before pushing to PyPI, verify the following:
   - SQL injection risks
   - Insecure randomness
   - Use of `assert` in production code
-  
+
 - [ ] **No obvious bugs:** Ruff rule `B` (bugbear) detects:
   - Mutable defaults in function arguments
   - Unintended equality comparisons

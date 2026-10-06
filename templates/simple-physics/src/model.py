@@ -5,14 +5,14 @@ Export key formulas to JSON for Typst rendering.
 Edit this file to add your own equations.
 """
 
-import json
-import sys
-import sympy as sp
-from pathlib import Path
 import importlib.util
+import json
+from pathlib import Path
+
+import sympy as sp
 
 # Load formula.py directly without triggering __init__.py
-formula_path = Path(__file__).parent.parent.parent.parent / 'src' / 'math_trace' / 'formula.py'
+formula_path = Path(__file__).parent.parent.parent.parent / "src" / "math_trace" / "formula.py"
 spec = importlib.util.spec_from_file_location("formula", formula_path)
 formula_mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(formula_mod)
@@ -24,7 +24,7 @@ def export_formulas() -> dict[str, Formula]:
     """Define physics formulas with full metadata."""
 
     # Define symbols
-    x, t, m, k, omega, A, phi = sp.symbols('x t m k omega A phi', real=True)
+    x, t, m, k, omega, A, phi = sp.symbols("x t m k omega A phi", real=True)
 
     formulas = {
         "restoring_force": Formula(
@@ -65,7 +65,7 @@ def export_formulas() -> dict[str, Formula]:
         ),
         "total_energy": Formula(
             name="total_energy",
-            latex=sp.latex(sp.Eq(sp.Symbol('E'), sp.Rational(1, 2) * k * A**2)),
+            latex=sp.latex(sp.Eq(sp.Symbol("E"), sp.Rational(1, 2) * k * A**2)),
             description="Total mechanical energy (constant)",
             source_line=52,
             assumptions="no dissipation",
@@ -77,13 +77,13 @@ def export_formulas() -> dict[str, Formula]:
     return formulas
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     formulas = export_formulas()
 
     # Export JSON (without verification metadata)
     json_data = {name: formula_to_json_dict(f) for name, f in formulas.items()}
 
-    output_file = Path(__file__).parent.parent / 'physics_equations.json'
-    with open(output_file, 'w') as f:
+    output_file = Path(__file__).parent.parent / "physics_equations.json"
+    with open(output_file, "w") as f:
         json.dump(json_data, f, indent=2)
     print(f"✅ Exported {len(formulas)} formulas to physics_equations.json")

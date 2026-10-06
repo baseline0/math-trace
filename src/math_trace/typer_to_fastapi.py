@@ -62,7 +62,7 @@ class TyperToFastAPI:
             f"    {docstring.split(chr(10))[0]}",
             '    """',
             "    try:",
-            f'        result = {command_name}({", ".join(p.split(":")[0].strip() for p in params.split(", ") if p)})',
+            f"        result = {command_name}({', '.join(p.split(':')[0].strip() for p in params.split(', ') if p)})",
             '        return {"status": "success", "data": result}',
             "    except Exception as e:",
             '        return {"status": "error", "message": str(e)}',

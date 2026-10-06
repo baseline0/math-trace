@@ -5,15 +5,16 @@ Explore PVT relations and thermodynamic properties.
 """
 
 import numpy as np
-from typing import Dict
+
 from ..model import (
-    ideal_gas_pressure, ideal_gas_temperature,
-    internal_energy, entropy, carnot_efficiency,
-    heat_capacity_constant_volume, heat_capacity_constant_pressure
+    carnot_efficiency,
+    entropy,
+    ideal_gas_pressure,
+    internal_energy,
 )
 
 
-def explore_ideal_gas_properties() -> Dict:
+def explore_ideal_gas_properties() -> dict:
     """
     Simulate ideal gas behavior at various conditions.
 
@@ -52,7 +53,7 @@ def explore_ideal_gas_properties() -> Dict:
     return results
 
 
-def explore_carnot_cycle(T_hot: float = 300, T_cold: float = 100) -> Dict:
+def explore_carnot_cycle(T_hot: float = 300, T_cold: float = 100) -> dict:
     """
     Analyze Carnot cycle efficiency.
 

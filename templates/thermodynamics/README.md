@@ -20,5 +20,5 @@ python -m src.scenarios.ideal_gas
 
 ---
 
-**Status**: Phase 1 foundation complete  
+**Status**: Phase 1 foundation complete
 **References**: Callen (1985), Kittel & Kroemer (1980)

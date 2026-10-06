@@ -44,9 +44,7 @@ class TestPreviewEndpoint:
 
     def test_preview_rejects_non_dict_formulas(self):
         """Preview returns error when formulas is not a dict."""
-        response = client.post(
-            "/api/preview", json={"formulas": "not a dict", "config": {"title": "Test"}}
-        )
+        response = client.post("/api/preview", json={"formulas": "not a dict", "config": {"title": "Test"}})
         # Should reject with validation error (422) or return error status
         assert response.status_code in [200, 422]
         if response.status_code == 200:
@@ -55,9 +53,7 @@ class TestPreviewEndpoint:
 
     def test_preview_uses_default_config_when_missing(self):
         """Preview uses default config if not provided."""
-        response = client.post(
-            "/api/preview", json={"formulas": {"x": {"latex": "x"}}, "backend": "marp"}
-        )
+        response = client.post("/api/preview", json={"formulas": {"x": {"latex": "x"}}, "backend": "marp"})
         assert response.status_code == 200
         data = response.json()
         # Should not crash due to missing config
@@ -74,8 +70,7 @@ class TestPreviewEndpoint:
             assert "is not valid JSON" not in data["message"]
             # Should hint at the actual problem
             assert any(
-                word in data["message"].lower()
-                for word in ["formula", "config", "empty", "invalid", "required"]
+                word in data["message"].lower() for word in ["formula", "config", "empty", "invalid", "required"]
             )
 
     def test_preview_with_special_characters_in_formulas(self):
@@ -182,9 +177,7 @@ class TestExportEndpoint:
 
     def test_export_rejects_empty_formulas(self):
         """Export returns error for empty formulas."""
-        response = client.post(
-            "/api/export", json={"formulas": {}, "config": {"title": "Test"}, "format": "markdown"}
-        )
+        response = client.post("/api/export", json={"formulas": {}, "config": {"title": "Test"}, "format": "markdown"})
         # Should reject with error status code
         assert response.status_code >= 400
 
@@ -239,8 +232,4 @@ class TestDashboardUI:
         response = client.get("/")
         assert response.status_code == 200
         # Should have fallback logic
-        assert (
-            "JSON" in response.text
-            or "fallback" in response.text
-            or "JSON fallback" in response.text
-        )
+        assert "JSON" in response.text or "fallback" in response.text or "JSON fallback" in response.text

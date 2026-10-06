@@ -25,10 +25,10 @@ python -m src.scenarios.dc_motor
   - Reference scenario documentation: `src/scenarios/dc_motor.py`
   - Contract tests: `src/tests/test_dc_motor_contract.py` (6 contract categories, 14 behavioral tests with explicit finite-horizon semantics)
   - Baseline metrics: `baseline_metrics.json` (captured performance data with full parameterization; finite-horizon interpretation: settling_time status + terminal_tracking_error, not asymptotic steady-state)
-  
+
 - **Mass-Spring-Damper**: Fundamental 2nd order system; ζ effects on response
 
 ---
 
-**Status**: Phase 1 foundation complete; DC Motor reference contract hardened  
+**Status**: Phase 1 foundation complete; DC Motor reference contract hardened
 **References**: Ogata (2010), Franklin et al. (2010)

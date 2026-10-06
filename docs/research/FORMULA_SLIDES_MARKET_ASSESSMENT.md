@@ -1,7 +1,7 @@
 # Formula-Driven Slides: Market Assessment & Honest Positioning
 
-**Document Date:** 2026-09-19  
-**Status:** Evaluating viability for PyPI publication  
+**Document Date:** 2026-09-19
+**Status:** Evaluating viability for PyPI publication
 **Author:** Mark Alexiuk
 
 ---
@@ -167,21 +167,21 @@ Day 6: Credibility damaged
 
 ### Arguments For Publishing
 
-✅ **Legitimate use case** — Researchers doing this manually today  
-✅ **No direct competitor** — Gap in market  
-✅ **Low maintenance burden** — Simple CLI + Python library  
-✅ **Clear audience** — Easy to find and pitch to  
-✅ **Establishes authority** — "We built the tool for formula-driven slides"  
-✅ **GitHub discoverability** — Gets easier to find via PyPI  
+✅ **Legitimate use case** — Researchers doing this manually today
+✅ **No direct competitor** — Gap in market
+✅ **Low maintenance burden** — Simple CLI + Python library
+✅ **Clear audience** — Easy to find and pitch to
+✅ **Establishes authority** — "We built the tool for formula-driven slides"
+✅ **GitHub discoverability** — Gets easier to find via PyPI
 
 ### Arguments Against Publishing
 
-❌ **Niche audience** — Maybe 1K active users long-term  
-❌ **Maintenance cost** — Must support Python 3.x, dependencies, bug fixes  
-❌ **API stability pressure** — PyPI users expect semver, deprecation periods  
-❌ **Documentation burden** — Tutorials, examples, troubleshooting  
-❌ **We don't know if it works yet** — Untested hypothesis  
-❌ **Could become technical debt** — Abandoned projects on PyPI hurt credibility  
+❌ **Niche audience** — Maybe 1K active users long-term
+❌ **Maintenance cost** — Must support Python 3.x, dependencies, bug fixes
+❌ **API stability pressure** — PyPI users expect semver, deprecation periods
+❌ **Documentation burden** — Tutorials, examples, troubleshooting
+❌ **We don't know if it works yet** — Untested hypothesis
+❌ **Could become technical debt** — Abandoned projects on PyPI hurt credibility
 
 ### Recommendation: **Conditional Yes**
 
@@ -257,7 +257,7 @@ Very lightweight. No JavaScript, no frontend framework.
 
 ### If We Publish, Here's the Pitch
 
-**Name:** `formula-slides`  
+**Name:** `formula-slides`
 **Tagline:** "Traceable formulas in Marp presentations"
 
 **Description:**
@@ -414,7 +414,7 @@ class Formula:
         "mul_symbol": "cdot",  # explicit multiplication symbol
     })
     assumptions: dict = field(default_factory=dict)  # e.g., {"n": {"positive": True}}
-    
+
     def to_latex(self) -> str:
         """Render with locked settings for reproducibility."""
         # Apply assumptions to symbols
@@ -435,7 +435,7 @@ class Formula:
 
 ### 2. Formula Index as First-Class Output
 
-**Current:** Comments in generated Markdown  
+**Current:** Comments in generated Markdown
 **New:** Dedicated slide + appendix listing every formula with full traceability
 
 **Generated `formula_index.md` (auto-created):**
@@ -511,13 +511,13 @@ Hint: If you meant to parameterize, use a form variant like {{formula:f_rule|for
 present:
     # Export formulas
     python paper/build_slides.py
-    
+
     # Invoke Marp (fail if rendering errors)
     marp presentation_generated.md -o presentation.pdf
-    
+
     # Generate formula index and check for missing formulas
     python paper/validate_formulas.py
-    
+
     # If index changed, fail with diff (catches silent changes)
     git diff --exit-code formula_index.md || \
         (echo "Formula index changed—review and commit"; exit 1)
@@ -529,7 +529,7 @@ present:
   run: |
     pip install sympy==1.14.0 marp-cli
     just present
-    
+
 - name: Check formula consistency
   run: |
     python paper/validate_formulas.py --strict
@@ -544,7 +544,7 @@ present:
 
 ### 5. Actionable Error Messages
 
-**Current:** Cryptic "formula not found"  
+**Current:** Cryptic "formula not found"
 **New:** Help the user fix it
 
 ```
@@ -591,7 +591,7 @@ Phase 1 Deliverables:
   ✓ `just present` one-command build
   ✓ CI gate (missing formulas, index changes)
   ✓ Actionable error messages
-  
+
 Deferred (Post-Pilot):
   - Form variants (|form=expanded)
   - VS Code snippets

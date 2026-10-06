@@ -101,9 +101,7 @@ class TestProvenance:
         model_file = sir_example_dir / "model.py"
         lines = model_file.read_text().split("\n")
         # Should have meaningful comments or documentation
-        comment_count = sum(
-            1 for line in lines if "#" in line and not line.strip().startswith("#!/")
-        )
+        comment_count = sum(1 for line in lines if "#" in line and not line.strip().startswith("#!/"))
         assert comment_count > 0, "Model should have explanatory comments"
 
     def test_citations_present(self, sir_example_dir):
@@ -134,9 +132,7 @@ class TestOutputManifest:
         # Verify it's valid Python
         build_file = sir_example_dir / "build_paper.py"
         content = build_file.read_text()
-        assert (
-            "def " in content or "class " in content
-        ), "build_paper.py should define functions/classes"
+        assert "def " in content or "class " in content, "build_paper.py should define functions/classes"
 
     def test_expected_outputs_documented(self, sir_example_dir):
         """Expected output files/formats are documented."""
@@ -154,7 +150,7 @@ class TestReproducibility:
     def test_build_runs_without_errors(self, sir_example_dir):
         """Build pipeline completes successfully."""
         build_file = sir_example_dir / "build_paper.py"
-        result = subprocess.run(  # noqa: S603
+        result = subprocess.run(
             [sys.executable, str(build_file)],
             cwd=str(sir_example_dir),
             capture_output=True,
@@ -171,7 +167,7 @@ class TestReproducibility:
         outputs2 = {}
 
         for run_num, outputs in [(1, outputs1), (2, outputs2)]:
-            result = subprocess.run(  # noqa: S603
+            result = subprocess.run(
                 [sys.executable, str(build_file)],
                 cwd=str(sir_example_dir),
                 capture_output=True,
@@ -199,7 +195,7 @@ class TestReproducibility:
     def test_r0_value_formula_consistency(self, sir_example_dir):
         """R0 value matches beta/gamma formula in outputs."""
         build_file = sir_example_dir / "build_paper.py"
-        result = subprocess.run(  # noqa: S603
+        result = subprocess.run(
             [sys.executable, str(build_file)],
             cwd=str(sir_example_dir),
             capture_output=True,
@@ -216,9 +212,7 @@ class TestReproducibility:
                     # If data contains beta, gamma, R0, verify formula
                     if "beta" in data and "gamma" in data and "R0" in data:
                         expected_r0 = data["beta"] / data["gamma"]
-                        assert (
-                            abs(data["R0"] - expected_r0) < 1e-10
-                        ), f"R0 formula mismatch in {json_file.name}"
+                        assert abs(data["R0"] - expected_r0) < 1e-10, f"R0 formula mismatch in {json_file.name}"
                 except json.JSONDecodeError:
                     pass  # Skip invalid JSON
 
@@ -229,7 +223,7 @@ class TestIntegration:
     def test_full_build_and_validate(self, sir_example_dir):
         """Complete build pipeline produces all required artifacts."""
         build_file = sir_example_dir / "build_paper.py"
-        result = subprocess.run(  # noqa: S603
+        result = subprocess.run(
             [sys.executable, str(build_file)],
             cwd=str(sir_example_dir),
             capture_output=True,

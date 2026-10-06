@@ -94,7 +94,7 @@ class Formula:
     expr: sp.Expr
     description: str
     source_line: int
-    
+
     def to_latex(self) -> str:
         return sp.latex(self.expr)
 

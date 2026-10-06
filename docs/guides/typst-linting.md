@@ -141,10 +141,10 @@ Use the **index at the top** of `TYPST-GOTCHAS.md` to find your error quickly:
    ```bash
    # Edit the file
    vim examples/membrane-dynamics/main.typ
-   
+
    # Test locally (if you have Typst installed)
    typst compile examples/membrane-dynamics/main.typ /tmp/test.pdf
-   
+
    # Commit
    git add examples/membrane-dynamics/main.typ
    git commit -m "fix: ..."
@@ -232,7 +232,7 @@ The linting system is designed to be easy to extend.
    def check_my_new_rule(paths: list[Path]) -> list[Issue]:
        """
        Check for my custom rule.
-       
+
        Why: [explanation]
        See: docs/TYPST-GOTCHAS.md §X
        """

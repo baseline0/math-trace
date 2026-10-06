@@ -66,9 +66,7 @@ class TestArxivExtraction:
         tex_content, equations = download_and_extract_equations(TEST_PAPER_ID, max_equations=20)
 
         # Filter for meaningful equations (LaTeX expressions, typically start with \ or contain =)
-        meaningful_equations = [
-            eq for eq in equations if len(eq.latex) > 5 and ("=" in eq.latex or "\\" in eq.latex)
-        ]
+        meaningful_equations = [eq for eq in equations if len(eq.latex) > 5 and ("=" in eq.latex or "\\" in eq.latex)]
 
         assert len(meaningful_equations) > 0, "Should have meaningful equations"
         print(f"✅ Found {len(meaningful_equations)} meaningful equations")
@@ -119,9 +117,7 @@ class TestArxivCaching:
 class TestSymPyConversion:
     """Test LaTeX to SymPy conversion."""
 
-    @pytest.mark.skip(
-        reason="antlr4 (v4.7.2) incompatible with Python 3.13; upgrade when available"
-    )
+    @pytest.mark.skip(reason="antlr4 (v4.7.2) incompatible with Python 3.13; upgrade when available")
     def test_direct_conversion(self):
         """Test direct latex2sympy2 conversion on extracted equations."""
         from math_trace.arxiv_extractor import load_extracted_paper
@@ -136,19 +132,13 @@ class TestSymPyConversion:
             result = convert_equation_to_sympy(eq["latex"], eq.get("context", ""))
 
             if result["conversion_status"] == "converted":
-                conversion_results["successful"].append(
-                    {"latex": eq["latex"][:50], "sympy": result["sympy_expr"][:50]}
-                )
+                conversion_results["successful"].append({"latex": eq["latex"][:50], "sympy": result["sympy_expr"][:50]})
             else:
-                conversion_results["failed"].append(
-                    {"latex": eq["latex"][:50], "error": result["error"][:50]}
-                )
+                conversion_results["failed"].append({"latex": eq["latex"][:50], "error": result["error"][:50]})
 
         # Report results
         success_rate = len(conversion_results["successful"]) / len(equations) * 100
-        print(
-            f"✅ Conversion rate: {success_rate:.0f}% ({len(conversion_results['successful'])}/{len(equations)})"
-        )
+        print(f"✅ Conversion rate: {success_rate:.0f}% ({len(conversion_results['successful'])}/{len(equations)})")
 
         # Should have at least some successful conversions
         assert len(conversion_results["successful"]) > 0, "Should convert at least some equations"
@@ -210,9 +200,7 @@ class TestAPIEndpoints:
 class TestEndToEndWorkflow:
     """Integration test: full workflow from paper to equations."""
 
-    @pytest.mark.skip(
-        reason="antlr4 (v4.7.2) incompatible with Python 3.13; upgrade when available"
-    )
+    @pytest.mark.skip(reason="antlr4 (v4.7.2) incompatible with Python 3.13; upgrade when available")
     def test_complete_pipeline(self):
         """Test complete workflow: extract → cache → load → convert."""
         from math_trace.arxiv_extractor import load_extracted_paper, save_extracted_paper
@@ -238,9 +226,7 @@ class TestEndToEndWorkflow:
         # Step 4: Verify conversion
         print("[4/4] Verifying conversion results...")
         paper_data_after = load_extracted_paper(TEST_PAPER_ID)
-        converted_count = sum(
-            1 for eq in paper_data_after["equations"] if eq.get("conversion_status") == "converted"
-        )
+        converted_count = sum(1 for eq in paper_data_after["equations"] if eq.get("conversion_status") == "converted")
 
         conversion_rate = converted_count / initial_eq_count * 100
         print("\n✅ End-to-end test complete!")

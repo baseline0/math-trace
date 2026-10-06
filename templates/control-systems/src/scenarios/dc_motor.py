@@ -6,8 +6,8 @@ Realistic parameters: J, b, K (inertia, damping, motor constant).
 """
 
 import numpy as np
-from typing import Dict, Tuple
-from ..model import LinearSystem, PIDController, simulate_feedback_system, second_order_response
+
+from ..model import LinearSystem, PIDController, simulate_feedback_system
 
 
 def dc_motor_system() -> LinearSystem:
@@ -31,13 +31,13 @@ def dc_motor_system() -> LinearSystem:
     - K = 0.01 N·m/A (motor constant)
     - R = 1.0 Ω (resistance)
     """
-    J = 0.01   # inertia
-    b = 0.1    # friction
-    K = 0.01   # motor constant
-    R = 1.0    # resistance
+    J = 0.01  # inertia
+    b = 0.1  # friction
+    K = 0.01  # motor constant
+    R = 1.0  # resistance
 
     # State-space: ẋ = A·x + B·u, y = C·x
-    A = np.array([[-b/J]])
+    A = np.array([[-b / J]])
     B = np.array([[K / (J * R)]])
     C = np.array([[1.0]])  # Measure speed
 
@@ -50,7 +50,7 @@ def simulate_speed_control(
     K_i: float = 0.5,
     K_d: float = 0.1,
     t_sim: float = 10.0,
-) -> Dict:
+) -> dict:
     """
     Simulate DC motor speed control with PID.
 
@@ -86,9 +86,9 @@ def simulate_speed_control(
         "peak_overshoot": peak_overshoot,
         "steady_state_error": terminal_tracking_error,  # backward compat: same numeric value
         "terminal_tracking_error": terminal_tracking_error,  # explicit finite-horizon label
-        "settling_time": settling_status['settling_time'],  # numeric value (or final time if unsettled)
-        "settling_status": settling_status['status'],  # 'observed' or 'not_observed_within_horizon'
-        "observation_horizon_sec": settling_status['observation_horizon_sec'],
+        "settling_time": settling_status["settling_time"],  # numeric value (or final time if unsettled)
+        "settling_status": settling_status["status"],  # 'observed' or 'not_observed_within_horizon'
+        "observation_horizon_sec": settling_status["observation_horizon_sec"],
     }
 
 
@@ -108,7 +108,7 @@ def estimate_settling_time(t: np.ndarray, y: np.ndarray, setpoint: float, tolera
         return t[-1]
 
 
-def check_settling_status(t: np.ndarray, y: np.ndarray, setpoint: float, tolerance: float = 0.02) -> Dict:
+def check_settling_status(t: np.ndarray, y: np.ndarray, setpoint: float, tolerance: float = 0.02) -> dict:
     """
     Check whether system settled within simulation horizon.
 
@@ -134,17 +134,17 @@ def check_settling_status(t: np.ndarray, y: np.ndarray, setpoint: float, toleran
 
     if settling_index is not None:
         return {
-            'settled': True,
-            'settling_time': t[settling_index],
-            'status': 'observed',
-            'observation_horizon_sec': t[-1],
+            "settled": True,
+            "settling_time": t[settling_index],
+            "status": "observed",
+            "observation_horizon_sec": t[-1],
         }
     else:
         return {
-            'settled': False,
-            'settling_time': t[-1],  # final time (not a true settling time)
-            'status': 'not_observed_within_horizon',
-            'observation_horizon_sec': t[-1],
+            "settled": False,
+            "settling_time": t[-1],  # final time (not a true settling time)
+            "status": "not_observed_within_horizon",
+            "observation_horizon_sec": t[-1],
         }
 
 
@@ -155,21 +155,25 @@ if __name__ == "__main__":
 
     result = simulate_speed_control(target_speed=100.0)
 
-    print(f"\nControl Performance:")
+    print("\nControl Performance:")
     print(f"  Target speed: {result['target_speed']:.1f} rad/s")
-    print(f"  Peak overshoot: {result['peak_overshoot']:.2f} rad/s ({result['peak_overshoot']/result['target_speed']*100:.1f}%)")
+    print(
+        f"  Peak overshoot: {result['peak_overshoot']:.2f} rad/s ({result['peak_overshoot'] / result['target_speed'] * 100:.1f}%)"
+    )
 
     # Display settling time with status
-    if result['settling_status'] == 'observed':
+    if result["settling_status"] == "observed":
         print(f"  Settling time (2%): {result['settling_time']:.2f} sec")
     else:
         print(f"  Settling time (2%): not observed within {result['observation_horizon_sec']:.1f} s horizon")
 
     # Display terminal tracking error with finite-horizon label
-    print(f"  Terminal tracking error at t={result['observation_horizon_sec']:.1f} s: {result['terminal_tracking_error']:.3f} rad/s")
-    print(f"  (Finite-horizon measurement; not an asymptotic steady-state-error claim.)")
+    print(
+        f"  Terminal tracking error at t={result['observation_horizon_sec']:.1f} s: {result['terminal_tracking_error']:.3f} rad/s"
+    )
+    print("  (Finite-horizon measurement; not an asymptotic steady-state-error claim.)")
 
-    print(f"\nPID Gains:")
+    print("\nPID Gains:")
     print(f"  K_p = {result['K_p']:.2f}")
     print(f"  K_i = {result['K_i']:.2f}")
     print(f"  K_d = {result['K_d']:.2f}")

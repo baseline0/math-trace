@@ -31,7 +31,7 @@ Define your own biochemistry equations (receptor binding, kinetics, thermodynami
 
 ```python
 def export_formulas() -> dict:
-    k_on, k_off, Kd = sp.symbols('k_on k_off K_d', positive=True)
+    k_on, k_off, Kd = sp.symbols("k_on k_off K_d", positive=True)
 
     formulas = {
         "binding_affinity": {

@@ -660,7 +660,7 @@ async def browse_arxiv_papers(limit: int = 20):
              hx-target="#formula-browser-equations"
              hx-swap="innerHTML">
             <div style="font-weight: 500; font-size: 12px;">{safe_title}</div>
-            <div style="font-size: 11px; color: #666;">{safe_paper_id} • {paper['total_equations']} eq • {paper['converted_equations']} ✅</div>
+            <div style="font-size: 11px; color: #666;">{safe_paper_id} • {paper["total_equations"]} eq • {paper["converted_equations"]} ✅</div>
         </div>
         """)
     html_parts.append("</div>")
@@ -697,7 +697,7 @@ async def browse_local_models(pattern: str = "*/src/model.py", root: str = "."):
              hx-target="#formula-browser-equations"
              hx-swap="innerHTML">
             <div style="font-weight: 500; font-size: 12px;">🐍 {safe_path_display}</div>
-            <div style="font-size: 11px; color: #666;">{model['formula_count']} formulas</div>
+            <div style="font-size: 11px; color: #666;">{model["formula_count"]} formulas</div>
         </div>
         """)
     html_parts.append("</div>")
@@ -739,9 +739,7 @@ async def get_arxiv_equations(paper_id: str):
             """)
 
         if len(equations) > 10:
-            html_parts.append(
-                f'<p style="font-size: 11px; color: #999;">... and {len(equations)-10} more</p>'
-            )
+            html_parts.append(f'<p style="font-size: 11px; color: #999;">... and {len(equations) - 10} more</p>')
 
         html_parts.append("</div></div>")
 
@@ -750,9 +748,7 @@ async def get_arxiv_equations(paper_id: str):
         return response
     except Exception as e:
         logger.error(f"Error getting equations for {paper_id}: {e}")
-        return HTMLResponse(
-            '<p style="color: #d32f2f;">Unable to load equations. Please try again.</p>'
-        )
+        return HTMLResponse('<p style="color: #d32f2f;">Unable to load equations. Please try again.</p>')
 
 
 @app.get("/api/formulas/local/{path:path}/equations")
@@ -764,9 +760,7 @@ async def get_local_model_formulas(path: str):
         result = local_model_formulas(path)
         if result.get("error"):
             logger.warning(f"Error loading formulas from {path}: {result['error']}")
-            return HTMLResponse(
-                '<p style="color: #d32f2f;">Unable to load formulas from this file.</p>'
-            )
+            return HTMLResponse('<p style="color: #d32f2f;">Unable to load formulas from this file.</p>')
 
         formulas = result["formulas"]
         safe_path = html.escape(str(path))
@@ -784,7 +778,7 @@ async def get_local_model_formulas(path: str):
             html_parts.append(f"""
             <button style="text-align: left; padding: 6px; background: white; border: 1px solid #ddd; border-radius: 3px; cursor: pointer; font-size: 11px;"
                     onclick="window.insertFormula('{formula_name}', {latex_json})">
-                {html.escape(formula['name'])}: {latex_preview}...
+                {html.escape(formula["name"])}: {latex_preview}...
             </button>
             """)
 
@@ -795,9 +789,7 @@ async def get_local_model_formulas(path: str):
         return response
     except Exception as e:
         logger.error(f"Error loading formulas from {path}: {e}")
-        return HTMLResponse(
-            '<p style="color: #d32f2f;">Unable to load formulas from this file.</p>'
-        )
+        return HTMLResponse('<p style="color: #d32f2f;">Unable to load formulas from this file.</p>')
 
 
 if __name__ == "__main__":

@@ -43,11 +43,11 @@ def simulate_harmonic_oscillator(
     return t, x
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Run default simulation
     t, x = simulate_harmonic_oscillator(amplitude=2.0, omega=0.5, steps=200, dt=0.1, seed=42)
 
-    print(f"✅ Simulated harmonic oscillator")
+    print("✅ Simulated harmonic oscillator")
     print(f"   Time steps: {len(t)}")
     print(f"   Initial x: {x[0]:.3f}")
     print(f"   Final x: {x[-1]:.3f}")

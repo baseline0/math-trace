@@ -115,7 +115,7 @@ Edit the Typst paper to use your formulas:
   = My Domain
 
   The rate follows:
-  
+
   $ #rate_formula $  // From model.py
 ])
 ```
@@ -132,13 +132,13 @@ import numpy as np
 def compute(k_val, n_val, num_steps=1000):
     """Simulate using formula from model.py."""
     rate = k_val * n_val * (n_val - 1) / 2  # MUST match model.py
-    
+
     # Your simulation logic
     results = []
     for step in range(num_steps):
         # Use rate_law
         pass
-    
+
     return results
 ```
 
@@ -164,15 +164,15 @@ def test_rate_increases_with_n():
     k_val = 2.0
     formula = FORMULAS['rate'].expr
     k, n = sp.symbols('k n', positive=True, integer=True)
-    
+
     # At n=3: rate = 2 * C(3,2) = 2 * 3 = 6
     rate_at_3 = formula.subs([(k, k_val), (n, 3)])
     assert rate_at_3 == 6
-    
+
     # At n=4: rate = 2 * C(4,2) = 2 * 6 = 12
     rate_at_4 = formula.subs([(k, k_val), (n, 4)])
     assert rate_at_4 == 12
-    
+
     assert rate_at_4 > rate_at_3
 ```
 
@@ -344,16 +344,16 @@ Write tests to verify:
 def test_simulation_matches_model():
     """Formula in code matches model.py."""
     k_val, n_val = 2.0, 5
-    
+
     # From model.py
     from model import FORMULAS
     formula_result = FORMULAS['rate'].expr.subs(
         [(sp.Symbol('k'), k_val), (sp.Symbol('n'), n_val)]
     )
-    
+
     # From simulate.py
     simulation_result = k_val * n_val * (n_val - 1) / 2
-    
+
     assert formula_result == simulation_result
 ```
 

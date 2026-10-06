@@ -9,21 +9,23 @@ References:
 - Anderson, R. M., & May, R. M. (1991). Infectious Diseases of Humans: Dynamics and Control.
 """
 
-import numpy as np
 import json
-from typing import Tuple, Callable, Optional, Dict, Any
-from scipy.integrate import odeint, trapezoid
 from dataclasses import dataclass
+from typing import Any
+
+import numpy as np
+from scipy.integrate import odeint
 
 
 @dataclass
 class DiseaseState:
     """Represents epidemiological state at a time point."""
+
     t: float
     S: float  # Susceptible
     I: float  # Infected
     R: float  # Recovered
-    E: Optional[float] = None  # Exposed (SEIR only)
+    E: float | None = None  # Exposed (SEIR only)
     N: float = 1.0  # Total population (normalized to 1)
 
 
@@ -34,6 +36,7 @@ class DiseaseState:
 #
 # Code Reference: basic_reproduction_number()
 # Validation: test_r0_endemic_equilibrium()
+
 
 def basic_reproduction_number(beta: float, gamma: float) -> float:
     """
@@ -65,6 +68,7 @@ def basic_reproduction_number(beta: float, gamma: float) -> float:
 #
 # Code Reference: sir_dynamics()
 # Validation: test_sir_energy_conservation()
+
 
 def sir_dynamics(y: np.ndarray, t: float, beta: float, gamma: float, N: float = 1.0) -> np.ndarray:
     """
@@ -102,7 +106,7 @@ def propagate_sir(
     beta: float,
     gamma: float,
     N: float = 1.0,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Propagate SIR model forward in time.
 
@@ -132,6 +136,7 @@ def propagate_sir(
 # S(t) + I(t) + R(t) = N (population conservation)
 #
 # Code Reference: check_population_conservation()
+
 
 def check_population_conservation(solution: np.ndarray, N: float = 1.0, tolerance: float = 1e-6) -> float:
     """
@@ -164,7 +169,8 @@ def check_population_conservation(solution: np.ndarray, N: float = 1.0, toleranc
 #
 # Code Reference: sir_equilibrium()
 
-def sir_equilibrium(beta: float, gamma: float, N: float = 1.0) -> Dict[str, float]:
+
+def sir_equilibrium(beta: float, gamma: float, N: float = 1.0) -> dict[str, float]:
     """
     Analytical endemic equilibrium for SIR model.
 
@@ -200,6 +206,7 @@ def sir_equilibrium(beta: float, gamma: float, N: float = 1.0) -> Dict[str, floa
 #
 # Code Reference: seir_dynamics()
 # Validation: test_seir_conservation()
+
 
 def seir_dynamics(y: np.ndarray, t: float, beta: float, sigma: float, gamma: float, N: float = 1.0) -> np.ndarray:
     """
@@ -242,7 +249,7 @@ def propagate_seir(
     sigma: float,
     gamma: float,
     N: float = 1.0,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Propagate SEIR model forward in time.
 
@@ -272,6 +279,7 @@ def propagate_seir(
 # ============================================================================
 # Attack Rate = (R_final - R_initial) / N
 
+
 def attack_rate(solution: np.ndarray, N: float = 1.0) -> float:
     """
     Fraction of population that gets infected during outbreak.
@@ -295,7 +303,7 @@ def attack_rate(solution: np.ndarray, N: float = 1.0) -> float:
     return (R_final - R_initial) / N
 
 
-def peak_infections(solution: np.ndarray) -> Tuple[float, float]:
+def peak_infections(solution: np.ndarray) -> tuple[float, float]:
     """
     Find peak infection count and timing.
 
@@ -318,7 +326,8 @@ def peak_infections(solution: np.ndarray) -> Tuple[float, float]:
 # Auto-Export: Equation Metadata (JSON)
 # ============================================================================
 
-def export_equation_metadata() -> Dict[str, Any]:
+
+def export_equation_metadata() -> dict[str, Any]:
     """Auto-generate equations.json for paper.typ formula cards."""
     metadata = {
         "basic_reproduction_number": {

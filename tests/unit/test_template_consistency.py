@@ -16,12 +16,20 @@ from pathlib import Path
 import pytest
 
 TEMPLATE_DIR = Path(__file__).parent.parent.parent / "templates"
-TEMPLATES = ["simple-physics", "biochemistry", "quantum-systems", "epidemiology", "control-systems", "thermodynamics", "gnns"]
+TEMPLATES = [
+    "simple-physics",
+    "biochemistry",
+    "quantum-systems",
+    "epidemiology",
+    "control-systems",
+    "thermodynamics",
+    "gnns",
+]
 
 REQUIRED_FILES = {
-    "model.py",    # Source of formulas
-    "main.typ",    # Paper template
-    "README.md",   # Documentation
+    "model.py",  # Source of formulas
+    "main.typ",  # Paper template
+    "README.md",  # Documentation
 }
 
 REQUIRED_FORMULA_FIELDS = {
@@ -49,8 +57,7 @@ class TestTemplateStructure:
         model_root = template_path / "model.py"
         model_src = template_path / "src" / "model.py"
 
-        assert model_root.exists() or model_src.exists(), \
-            f"{template}: model.py not found in root or src/"
+        assert model_root.exists() or model_src.exists(), f"{template}: model.py not found in root or src/"
 
     @pytest.mark.parametrize("template", TEMPLATES)
     def test_template_has_main_typ(self, template):
@@ -85,15 +92,14 @@ class TestFormulaJSON:
             pytest.skip(f"{template}: model.py not found")
 
         # Run model.py (safe: model_path is from controlled template directory)
-        result = subprocess.run(  # noqa: S603
+        result = subprocess.run(
             [sys.executable, str(model_path)],
             cwd=str(template_path),
             capture_output=True,
             text=True,
         )
 
-        assert result.returncode == 0, \
-            f"{template}: model.py failed:\n{result.stderr}"
+        assert result.returncode == 0, f"{template}: model.py failed:\n{result.stderr}"
 
     @pytest.mark.parametrize("template", TEMPLATES)
     def test_formula_json_has_required_fields(self, template):
@@ -112,8 +118,7 @@ class TestFormulaJSON:
 
         for name, formula in formulas.items():
             for field in REQUIRED_FORMULA_FIELDS:
-                assert field in formula, \
-                    f"{template} formula '{name}' missing field: {field}"
+                assert field in formula, f"{template} formula '{name}' missing field: {field}"
 
     @pytest.mark.parametrize("template", TEMPLATES)
     def test_no_duplicate_equation_names(self, template):
@@ -132,8 +137,7 @@ class TestFormulaJSON:
         equation_names = list(formulas.keys())
         unique_names = set(equation_names)
 
-        assert len(equation_names) == len(unique_names), \
-            f"{template} has duplicate equation names"
+        assert len(equation_names) == len(unique_names), f"{template} has duplicate equation names"
 
 
 class TestBuildScript:
@@ -154,8 +158,7 @@ class TestBuildScript:
         build_script = template_path / "build_paper.py"
 
         content = build_script.read_text()
-        assert "template_builder" in content, \
-            f"{template} build_paper.py doesn't use template_builder"
+        assert "template_builder" in content, f"{template} build_paper.py doesn't use template_builder"
 
 
 class TestFormulaMetadata:
@@ -177,8 +180,7 @@ class TestFormulaMetadata:
 
         # Check that at least 50% of formulas have units
         formulas_with_units = sum(1 for f in formulas.values() if f.get("units"))
-        assert formulas_with_units >= len(formulas) * 0.5, \
-            f"{template}: less than 50% of formulas have units"
+        assert formulas_with_units >= len(formulas) * 0.5, f"{template}: less than 50% of formulas have units"
 
     @pytest.mark.parametrize("template", ["simple-physics", "biochemistry"])
     def test_formulas_have_assumptions(self, template):
@@ -196,5 +198,6 @@ class TestFormulaMetadata:
 
         # Check that at least 50% of formulas have assumptions
         formulas_with_assumptions = sum(1 for f in formulas.values() if f.get("assumptions"))
-        assert formulas_with_assumptions >= len(formulas) * 0.5, \
-            f"{template}: less than 50% of formulas have assumptions"
+        assert (
+            formulas_with_assumptions >= len(formulas) * 0.5
+        ), f"{template}: less than 50% of formulas have assumptions"

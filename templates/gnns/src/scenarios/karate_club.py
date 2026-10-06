@@ -6,11 +6,16 @@ Task: Predict which faction each member joins after split.
 """
 
 import numpy as np
-from typing import Dict, Tuple
-from ..model import message_aggregate, node_update, graph_attention_layer, classification_loss, graph_accuracy
+
+from ..model import (
+    classification_loss,
+    graph_accuracy,
+    message_aggregate,
+    node_update,
+)
 
 
-def load_karate_club() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def load_karate_club() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Load Zachary's karate club graph.
 
@@ -23,32 +28,66 @@ def load_karate_club() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     A = np.zeros((34, 34))
 
     edges = [
-        (0,1), (0,2), (0,3), (0,4), (0,5), (0,6), (0,7), (0,8),
-        (1,2), (1,3), (1,7),
-        (2,3), (2,7), (2,8), (2,13),
-        (3,4), (3,6), (3,10),
-        (4,5), (4,6), (4,16),
-        (5,6), (5,16),
-        (6,16),
-        (8,30), (8,32), (8,33),
-        (13,33),
-        (14,32), (14,33),
-        (15,32), (15,33),
-        (18,32), (18,33),
-        (19,33),
-        (20,32), (20,33),
-        (22,32), (22,33),
-        (23,25), (23,27), (23,29),
-        (23,32), (23,33),
-        (24,25), (24,28), (24,31),
-        (25,31),
-        (26,29), (26,33),
-        (27,33),
-        (28,31), (28,33),
-        (29,32), (29,33),
-        (30,32), (30,33),
-        (31,32), (31,33),
-        (32,33),
+        (0, 1),
+        (0, 2),
+        (0, 3),
+        (0, 4),
+        (0, 5),
+        (0, 6),
+        (0, 7),
+        (0, 8),
+        (1, 2),
+        (1, 3),
+        (1, 7),
+        (2, 3),
+        (2, 7),
+        (2, 8),
+        (2, 13),
+        (3, 4),
+        (3, 6),
+        (3, 10),
+        (4, 5),
+        (4, 6),
+        (4, 16),
+        (5, 6),
+        (5, 16),
+        (6, 16),
+        (8, 30),
+        (8, 32),
+        (8, 33),
+        (13, 33),
+        (14, 32),
+        (14, 33),
+        (15, 32),
+        (15, 33),
+        (18, 32),
+        (18, 33),
+        (19, 33),
+        (20, 32),
+        (20, 33),
+        (22, 32),
+        (22, 33),
+        (23, 25),
+        (23, 27),
+        (23, 29),
+        (23, 32),
+        (23, 33),
+        (24, 25),
+        (24, 28),
+        (24, 31),
+        (25, 31),
+        (26, 29),
+        (26, 33),
+        (27, 33),
+        (28, 31),
+        (28, 33),
+        (29, 32),
+        (29, 33),
+        (30, 32),
+        (30, 33),
+        (31, 32),
+        (31, 33),
+        (32, 33),
     ]
 
     for i, j in edges:
@@ -59,19 +98,51 @@ def load_karate_club() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     np.fill_diagonal(A, 1)
 
     # Ground truth: 0 = Faction A, 1 = Faction B
-    labels = np.array([
-        0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-        0, 0, 0, 0, 1, 1, 0, 0, 1, 0,
-        1, 0, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1
-    ])
+    labels = np.array(
+        [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+        ]
+    )
 
     node_features = np.ones((34, 1))
 
     return A, labels, node_features
 
 
-def simulate_gnn_inference(num_layers: int = 2) -> Dict:
+def simulate_gnn_inference(num_layers: int = 2) -> dict:
     """
     Run GNN on karate club graph.
 
@@ -129,11 +200,11 @@ if __name__ == "__main__":
 
     result = simulate_gnn_inference(num_layers=2)
 
-    print(f"\nGraph Statistics:")
+    print("\nGraph Statistics:")
     print(f"  Nodes: {result['num_nodes']}")
     print(f"  Edges: {result['num_edges']}")
 
-    print(f"\nModel Performance:")
+    print("\nModel Performance:")
     print(f"  Loss: {result['loss']:.4f}")
     print(f"  Accuracy: {result['accuracy']:.1%}")
 

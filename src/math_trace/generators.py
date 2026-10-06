@@ -18,14 +18,14 @@ class SymPyToTypst:
     def __init__(self) -> None:
         """Initialize the converter."""
         self.latex_to_typst_map: dict[str, str] = {
-            r'\frac': 'frac',  # Typst uses frac() function
-            r'\left(': '(',
-            r'\right)': ')',
-            r'\cdot': '*',
-            r'\times': '*',
-            r'\alpha': 'alpha',
-            r'\beta': 'beta',
-            r'\gamma': 'gamma',
+            r"\frac": "frac",  # Typst uses frac() function
+            r"\left(": "(",
+            r"\right)": ")",
+            r"\cdot": "*",
+            r"\times": "*",
+            r"\alpha": "alpha",
+            r"\beta": "beta",
+            r"\gamma": "gamma",
         }
 
     def _extract_brace_content(self, s: str, start: int) -> tuple[str, int]:
@@ -33,22 +33,22 @@ class SymPyToTypst:
 
         Returns tuple of (content, end_position) where end_position is after closing brace.
         """
-        if start >= len(s) or s[start] != '{':
-            return '', start
+        if start >= len(s) or s[start] != "{":
+            return "", start
 
         depth = 0
         i = start
         while i < len(s):
-            if s[i] == '{':
+            if s[i] == "{":
                 depth += 1
-            elif s[i] == '}':
+            elif s[i] == "}":
                 depth -= 1
                 if depth == 0:
-                    return s[start + 1:i], i + 1
+                    return s[start + 1 : i], i + 1
             i += 1
-        return '', len(s)
+        return "", len(s)
 
-    def _replace_macro(self, latex: str, macro: str, replacement: str) -> str:  # noqa: C901
+    def _replace_macro(self, latex: str, macro: str, replacement: str) -> str:
         """Replace LaTeX macro with Typst equivalent, handling nested braces.
 
         Args:
@@ -61,23 +61,23 @@ class SymPyToTypst:
             Updated string
         """
         result = []
-        pattern = '\\' + macro
+        pattern = "\\" + macro
         i = 0
 
         while i < len(latex):
-            if latex[i:i+len(pattern)] == pattern:
+            if latex[i : i + len(pattern)] == pattern:
                 i += len(pattern)
                 # Skip optional whitespace
-                while i < len(latex) and latex[i] in ' \t':
+                while i < len(latex) and latex[i] in " \t":
                     i += 1
 
                 # Extract arguments (one or more)
                 args = []
-                while i < len(latex) and latex[i] == '{':
+                while i < len(latex) and latex[i] == "{":
                     arg, i = self._extract_brace_content(latex, i)
                     args.append(arg)
                     # Skip optional whitespace
-                    while i < len(latex) and latex[i] in ' \t':
+                    while i < len(latex) and latex[i] in " \t":
                         i += 1
 
                 if args:
@@ -93,11 +93,11 @@ class SymPyToTypst:
                 result.append(latex[i])
                 i += 1
 
-        return ''.join(result)
+        return "".join(result)
 
     def _replace_binom(self, latex: str) -> str:
         """Replace \\binom{n}{k} with binom(n, k), handling nested braces."""
-        return self._replace_macro(latex, 'binom', 'binom({0}, {1})')
+        return self._replace_macro(latex, "binom", "binom({0}, {1})")
 
     def convert(self, expr: sp.Expr) -> str:
         """
@@ -134,63 +134,74 @@ class SymPyToTypst:
         # Macro replacements (order matters for nested patterns)
         # Use brace-aware replacement for macros with arguments
         typst = self._replace_binom(typst)
-        typst = self._replace_macro(typst, 'frac', '({0})/({1})')
-        typst = self._replace_macro(typst, 'sqrt', 'sqrt({0})')
+        typst = self._replace_macro(typst, "frac", "({0})/({1})")
+        typst = self._replace_macro(typst, "sqrt", "sqrt({0})")
 
         # Function names: remove backslash and convert to lowercase (Typst uses plain text)
         # e.g., \sin, \cos, \log → sin, cos, log
         trig_functions = [
-            'sin', 'cos', 'tan', 'cot', 'sec', 'csc',
-            'arcsin', 'arccos', 'arctan',
-            'sinh', 'cosh', 'tanh',
-            'log', 'ln', 'exp',
+            "sin",
+            "cos",
+            "tan",
+            "cot",
+            "sec",
+            "csc",
+            "arcsin",
+            "arccos",
+            "arctan",
+            "sinh",
+            "cosh",
+            "tanh",
+            "log",
+            "ln",
+            "exp",
         ]
         for func in trig_functions:
-            typst = typst.replace('\\' + func, func)
+            typst = typst.replace("\\" + func, func)
 
         # Parentheses
-        typst = re.sub(r'\\left\(', '(', typst)
-        typst = re.sub(r'\\right\)', ')', typst)
+        typst = re.sub(r"\\left\(", "(", typst)
+        typst = re.sub(r"\\right\)", ")", typst)
 
         # Greek letters (comprehensive set)
         greek_map = {
-            r'\alpha': 'α',
-            r'\beta': 'β',
-            r'\gamma': 'γ',
-            r'\delta': 'δ',
-            r'\epsilon': 'ε',
-            r'\zeta': 'ζ',
-            r'\eta': 'η',
-            r'\theta': 'θ',
-            r'\iota': 'ι',
-            r'\kappa': 'κ',
-            r'\lambda': 'λ',
-            r'\mu': 'μ',
-            r'\nu': 'ν',
-            r'\xi': 'ξ',
-            r'\omicron': 'ο',
-            r'\pi': 'π',
-            r'\rho': 'ρ',
-            r'\sigma': 'σ',
-            r'\tau': 'τ',
-            r'\upsilon': 'υ',
-            r'\phi': 'φ',
-            r'\chi': 'χ',
-            r'\psi': 'ψ',
-            r'\omega': 'ω',
+            r"\alpha": "α",
+            r"\beta": "β",
+            r"\gamma": "γ",
+            r"\delta": "δ",
+            r"\epsilon": "ε",
+            r"\zeta": "ζ",
+            r"\eta": "η",
+            r"\theta": "θ",
+            r"\iota": "ι",
+            r"\kappa": "κ",
+            r"\lambda": "λ",
+            r"\mu": "μ",
+            r"\nu": "ν",
+            r"\xi": "ξ",
+            r"\omicron": "ο",
+            r"\pi": "π",
+            r"\rho": "ρ",
+            r"\sigma": "σ",
+            r"\tau": "τ",
+            r"\upsilon": "υ",
+            r"\phi": "φ",
+            r"\chi": "χ",
+            r"\psi": "ψ",
+            r"\omega": "ω",
         }
         for latex_char, typst_char in greek_map.items():
             typst = typst.replace(latex_char, typst_char)
 
         # Operators
-        typst = typst.replace(r'\cdot', '·')
-        typst = typst.replace(r'\times', '×')
-        typst = typst.replace(r'\div', '÷')
+        typst = typst.replace(r"\cdot", "·")
+        typst = typst.replace(r"\times", "×")
+        typst = typst.replace(r"\div", "÷")
 
         # Arrows
-        typst = typst.replace(r'\rightarrow', '->')
-        typst = typst.replace(r'\leftarrow', '<-')
-        typst = typst.replace(r'\leftrightarrow', '<->')
+        typst = typst.replace(r"\rightarrow", "->")
+        typst = typst.replace(r"\leftarrow", "<-")
+        typst = typst.replace(r"\leftrightarrow", "<->")
 
         # Quote multi-letter identifiers that aren't already quoted or subscripted
         # This prevents Typst from interpreting ES as E*S
@@ -199,7 +210,7 @@ class SymPyToTypst:
 
         return typst
 
-    def _quote_identifiers(self, typst: str) -> str:  # noqa: C901
+    def _quote_identifiers(self, typst: str) -> str:
         """Quote multi-letter identifiers and subscripts in Typst math mode.
 
         Converts multi-letter bare identifiers and multi-letter subscripts to quoted form.
@@ -217,29 +228,29 @@ class SymPyToTypst:
                 ident = typst[ident_start:i]
 
                 # Check if there's a subscript
-                if i < len(typst) and typst[i] == '_':
+                if i < len(typst) and typst[i] == "_":
                     # Found subscript
                     i += 1  # skip the underscore
-                    if i < len(typst) and typst[i] == '{':
+                    if i < len(typst) and typst[i] == "{":
                         # Extract subscript content
                         i += 1
                         subscript_content_start = i
                         depth = 1
                         while i < len(typst) and depth > 0:
-                            if typst[i] == '{':
+                            if typst[i] == "{":
                                 depth += 1
-                            elif typst[i] == '}':
+                            elif typst[i] == "}":
                                 depth -= 1
                             i += 1
-                        subscript_content = typst[subscript_content_start:i-1]
+                        subscript_content = typst[subscript_content_start : i - 1]
 
                         # Quote base if multi-letter
                         if len(ident) > 1:
                             result.append(f'"{ident}"')
                         else:
                             result.append(ident)
-                        result.append('_')
-                        result.append('{')
+                        result.append("_")
+                        result.append("{")
 
                         # Quote subscript if it's multi-letter text (not a number)
                         if subscript_content.isalpha() and len(subscript_content) > 1:
@@ -247,11 +258,11 @@ class SymPyToTypst:
                         else:
                             result.append(subscript_content)
 
-                        result.append('}')
+                        result.append("}")
                     else:
                         # Single character subscript
                         result.append(ident)
-                        result.append('_')
+                        result.append("_")
                         if i < len(typst):
                             result.append(typst[i])
                             i += 1
@@ -264,7 +275,7 @@ class SymPyToTypst:
             else:
                 result.append(typst[i])
                 i += 1
-        return ''.join(result)
+        return "".join(result)
 
     def binomial_to_readable(self, n: sp.Symbol, k: int) -> str:
         """
@@ -329,13 +340,13 @@ class TypstEnvironmentBuilder:
 """
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Quick test
     converter = SymPyToTypst()
 
     # Test basic conversion
-    x = sp.Symbol('x')
-    expr = x**2 + 2*x + 1
+    x = sp.Symbol("x")
+    expr = x**2 + 2 * x + 1
     typst = converter.convert(expr)
     print(f"Expression: {expr}")
     print(f"LaTeX: {sp.latex(expr)}")

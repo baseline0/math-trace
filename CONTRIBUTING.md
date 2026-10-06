@@ -115,7 +115,7 @@ kinetic_formula = FORMULAS['kinetic'].expr
   = My Domain Example
 
   The kinetic energy is:
-  
+
   $ #kinetic_energy_formula $
 ])
 ```
@@ -128,7 +128,7 @@ Create `tests/examples/test_your_domain.py`:
 def test_model_export():
     """Verify model formulas export correctly."""
     from examples.your_domain.model import FORMULAS
-    
+
     assert 'kinetic' in FORMULAS
     assert FORMULAS['kinetic'].expr is not None
 
@@ -178,10 +178,10 @@ Example:
 def convert_formula(expr: sp.Expr) -> str:
     """
     Convert SymPy expression to Typst notation.
-    
+
     Args:
         expr: SymPy expression
-        
+
     Returns:
         Typst-formatted string
     """

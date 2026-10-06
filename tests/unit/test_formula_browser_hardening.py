@@ -68,6 +68,6 @@ class TestMetadataStructure:
 
         for metadata, should_be_valid in test_cases:
             is_dict = isinstance(metadata, dict)
-            has_paper_id = is_dict and 'paper_id' in metadata
+            has_paper_id = is_dict and "paper_id" in metadata
             is_valid = is_dict and has_paper_id
             assert is_valid == should_be_valid

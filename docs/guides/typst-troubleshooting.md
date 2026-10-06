@@ -2,8 +2,8 @@
 
 When writing `.typ` files for math-trace, watch out for these common Typst syntax issues.
 
-**Target Typst version:** 0.15+ (math-trace templates)  
-**Last updated:** 2026-09-18  
+**Target Typst version:** 0.15+ (math-trace templates)
+**Last updated:** 2026-09-18
 **See also:** [TYPST-LINTING.md](TYPST-LINTING.md) for how we check your code
 
 ---
@@ -443,6 +443,6 @@ That's it! The check now runs for all contributors.
 
 ---
 
-**Last Updated:** 2026-09-18  
-**Typst Version:** 0.15+  
+**Last Updated:** 2026-09-18
+**Typst Version:** 0.15+
 **Script:** `scripts/check_typst.py`

@@ -6,11 +6,8 @@ Runs realistic pandemic scenarios and generates data for visualization.
 
 import numpy as np
 from model import (
-    propagate_sir,
     propagate_seir,
-    attack_rate,
-    peak_infections,
-    basic_reproduction_number,
+    propagate_sir,
 )
 
 

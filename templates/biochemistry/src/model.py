@@ -5,14 +5,14 @@ Export key formulas to JSON for Typst rendering.
 Edit this file to add your own equations.
 """
 
-import json
-import sys
-import sympy as sp
-from pathlib import Path
 import importlib.util
+import json
+from pathlib import Path
+
+import sympy as sp
 
 # Load formula.py directly without triggering __init__.py
-formula_path = Path(__file__).parent.parent.parent.parent / 'src' / 'math_trace' / 'formula.py'
+formula_path = Path(__file__).parent.parent.parent.parent / "src" / "math_trace" / "formula.py"
 spec = importlib.util.spec_from_file_location("formula", formula_path)
 formula_mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(formula_mod)
@@ -24,8 +24,8 @@ def export_formulas() -> dict[str, Formula]:
     """Define biochemistry formulas with full metadata."""
 
     # Define symbols
-    v, Vmax, Km, S = sp.symbols('v V_max K_m S', positive=True, real=True)
-    k1, k_minus1, k2, E, ES, P = sp.symbols('k_1 k_{-1} k_2 E ES P', real=True)
+    v, Vmax, Km, S = sp.symbols("v V_max K_m S", positive=True, real=True)
+    k1, k_minus1, k2, E, ES, P = sp.symbols("k_1 k_{-1} k_2 E ES P", real=True)
 
     formulas = {
         "michaelis_menten": Formula(
@@ -39,7 +39,7 @@ def export_formulas() -> dict[str, Formula]:
         ),
         "max_velocity": Formula(
             name="max_velocity",
-            latex=sp.latex(sp.Eq(sp.Symbol('V_max'), k2 * sp.Symbol('E_0'))),
+            latex=sp.latex(sp.Eq(sp.Symbol("V_max"), k2 * sp.Symbol("E_0"))),
             description="Maximum velocity proportional to enzyme concentration",
             source_line=34,
             assumptions="[S] >> Km at saturation",
@@ -66,7 +66,7 @@ def export_formulas() -> dict[str, Formula]:
         ),
         "turnover_number": Formula(
             name="turnover_number",
-            latex=sp.latex(sp.Eq(sp.Symbol('k_{cat}'), k2)),
+            latex=sp.latex(sp.Eq(sp.Symbol("k_{cat}"), k2)),
             description="Turnover number: catalytic events per enzyme per second",
             source_line=55,
             assumptions="First-order reaction at catalytic step",
@@ -75,7 +75,7 @@ def export_formulas() -> dict[str, Formula]:
         ),
         "specificity": Formula(
             name="specificity",
-            latex=sp.latex(sp.Eq(sp.Symbol('k_{cat}/K_m'), k2 / Km)),
+            latex=sp.latex(sp.Eq(sp.Symbol("k_{cat}/K_m"), k2 / Km)),
             description="Catalytic efficiency: how selective and fast the enzyme is",
             source_line=62,
             assumptions="Low substrate concentration regime",
@@ -87,13 +87,13 @@ def export_formulas() -> dict[str, Formula]:
     return formulas
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     formulas = export_formulas()
 
     # Export JSON (without verification metadata)
     json_data = {name: formula_to_json_dict(f) for name, f in formulas.items()}
 
-    output_file = Path(__file__).parent.parent / 'biochemistry_equations.json'
-    with open(output_file, 'w') as f:
+    output_file = Path(__file__).parent.parent / "biochemistry_equations.json"
+    with open(output_file, "w") as f:
         json.dump(json_data, f, indent=2)
     print(f"✅ Exported {len(formulas)} formulas to biochemistry_equations.json")

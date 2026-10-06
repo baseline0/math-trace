@@ -1,7 +1,7 @@
 # math-trace: Partnership Contract Template
 
-**Target Audience**: Academic researchers, AI companies, institutions auditing mathematical claims  
-**Version**: 1.0 (Sep 22, 2026)  
+**Target Audience**: Academic researchers, AI companies, institutions auditing mathematical claims
+**Version**: 1.0 (Sep 22, 2026)
 **Purpose**: Template for partnership & evaluation contracts; customize with partner name and terms
 
 ---
@@ -207,6 +207,6 @@ To contribute a template:
 
 ---
 
-**Contract finalized**: Sep 22, 2026  
-**Author**: Mark Alexiuk  
+**Contract finalized**: Sep 22, 2026
+**Author**: Mark Alexiuk
 **Version**: 1.0

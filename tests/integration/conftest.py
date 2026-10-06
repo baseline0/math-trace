@@ -17,9 +17,7 @@ def pytest_configure(config):
     src_path = Path(__file__).parent.parent.parent / "src"
     sys.path.insert(0, str(src_path))
 
-    config.addinivalue_line(
-        "markers", "integration: test requiring sibling repos or local setup"
-    )
+    config.addinivalue_line("markers", "integration: test requiring sibling repos or local setup")
 
 
 @pytest.fixture(scope="session", autouse=True)

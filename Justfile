@@ -55,6 +55,18 @@ serve:
     uv run uvicorn math_trace.server:app --reload --host 127.0.0.1 --port 8000
 
 [group("verify")]
+fmt:
+    @echo "🎨 Formatting with ruff..."
+    uv run ruff format src tests examples templates
+    uv run ruff check --fix src tests examples templates
+    @echo "✅ Formatting complete"
+
+[group("verify")]
+check:
+    @echo "🔍 Checking with ruff..."
+    uv run ruff check src tests examples templates --output-format grouped
+
+[group("verify")]
 test:
     @echo "🧪 Running unit tests (CI-safe)..."
     uv run pytest tests/unit -v --tb=short

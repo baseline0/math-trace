@@ -220,6 +220,7 @@ Recommended: >= 512 points for eigenvalue accuracy < 0.1%.
 
 ```python
 from scipy.integrate import trapezoid
+
 integral = trapezoid(f_values, x_grid)
 ```
 
@@ -230,7 +231,7 @@ integral = trapezoid(f_values, x_grid)
 
 **Normalization computation:**
 ```python
-norm = np.sqrt(trapezoid(np.abs(psi)**2, x))
+norm = np.sqrt(trapezoid(np.abs(psi) ** 2, x))
 psi_normalized = psi / norm
 ```
 
@@ -299,7 +300,7 @@ def momentum_operator(psi, x):
 def kinetic_energy_operator(psi, x, mass=1.0):
     dx = x[1] - x[0]
     d2psi_dx2 = np.gradient(np.gradient(psi, dx), dx)
-    return -1/(2*mass) * d2psi_dx2  # hbar=1
+    return -1 / (2 * mass) * d2psi_dx2  # hbar=1
 ```
 
 Error: O(dx^2) for smooth wavefunctions; larger error at boundaries.
@@ -373,21 +374,23 @@ All tolerances are **deterministic and reproducible** under fixed parameters (N,
 def my_potential(x, param1=1.0, param2=0.5):
     """
     Your custom V(x) = ...
-    
+
     Args:
         x: Position array
         param1, param2: Physical parameters
-    
+
     Returns:
         V(x) array
     """
-    return param1 * np.sin(x) + param2 * np.exp(-x**2)
+    return param1 * np.sin(x) + param2 * np.exp(-(x**2))
+
 
 # Solve
 energies, eigenstates = solve_tise_fdm(x, my_potential, ...)
 
 # Plot results
 import matplotlib.pyplot as plt
+
 plt.plot(x, my_potential(x), label="V(x)")
 for i in range(3):
     plt.plot(x, eigenstates[:, i], label=f"ψ_{i}")

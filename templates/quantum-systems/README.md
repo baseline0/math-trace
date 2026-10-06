@@ -134,6 +134,7 @@ Demonstrates quantum interference.
 
 ```python
 from src.scenarios.double_slit import *
+
 result = compute_double_slit_interference(slit_width=0.1, slit_sep=0.5)
 plot_interference_pattern(result)
 ```
@@ -148,6 +149,7 @@ Particle tunnels through barrier—classically forbidden.
 
 ```python
 from src.scenarios.tunneling import *
+
 T_numerical = compute_tunneling_transmission(barrier_width=0.2, barrier_height=2.0)
 T_wkb = wkb_transmission(...)  # Analytical WKB estimate
 print(f"Transmission: {T_numerical:.4f} (numerical) vs {T_wkb:.4f} (WKB)")
@@ -166,13 +168,15 @@ Edit `src/model.py` and add:
 ```python
 def my_potential(x, param=1.0):
     """Your custom V(x)."""
-    return param * np.sin(x)**2
+    return param * np.sin(x) ** 2
+
 
 # Solve
 energies, eigenstates = solve_tise_fdm(x, lambda xg: my_potential(xg, param=0.5))
 
 # Plot
 import matplotlib.pyplot as plt
+
 plt.plot(x, my_potential(x))
 plt.show()
 ```
@@ -190,7 +194,7 @@ times, psi_t = propagate_ssfm(psi_0, x, t_max=10, dt=0.01, V=my_potential)
 
 # Animation
 for i in range(0, len(times), 10):
-    plt.plot(x, np.abs(psi_t[:, i])**2)
+    plt.plot(x, np.abs(psi_t[:, i]) ** 2)
     plt.pause(0.01)
 ```
 
@@ -202,18 +206,19 @@ Create `src/tests/test_my_potential.py`:
 import pytest
 import numpy as np
 
+
 def test_my_potential_energy_conservation():
     """Verify energy is conserved for my_potential."""
     # Setup
     x = np.linspace(-10, 10, 512)
     psi_0 = ...  # Initial state
-    
+
     # Evolve
     times, psi_t = propagate_ssfm(psi_0, x, t_max=5, dt=0.01, V=my_potential)
-    
+
     # Check energy
     E = [total_energy(psi_t[:, i], x, my_potential) for i in range(len(times))]
-    
+
     # Assert
     assert np.max(np.abs(np.array(E) - E[0])) < 1e-6
 ```
@@ -289,7 +294,7 @@ See `src/tests/test_harmonic_oscillator.py` for test implementations and `PARAME
 
 ### Out-of-Scope Scenarios
 
-**Double-Slit Interference (NOT SUPPORTED for this lane):** 
+**Double-Slit Interference (NOT SUPPORTED for this lane):**
 - Implementation exists in src/model.py::double_slit_potential()
 - Not validated under contract framework in this lane
 - Deferred to future reference-contract effort
@@ -319,8 +324,8 @@ All figures are **deterministic** (fixed random seed) and reproducible via `just
 
 ---
 
-**Template Version**: 1.0  
-**Last Updated**: 2026-09-30  
-**Test Coverage**: 76% (src/model.py); 100% (harmonic oscillator contract tests)  
-**Reference Scenario Status**: ✅ Contract-Validated (Harmonic Oscillator Only)  
+**Template Version**: 1.0
+**Last Updated**: 2026-09-30
+**Test Coverage**: 76% (src/model.py); 100% (harmonic oscillator contract tests)
+**Reference Scenario Status**: ✅ Contract-Validated (Harmonic Oscillator Only)
 **Production Status**: ✅ Ready for Publication (Harmonic Oscillator Reference)
