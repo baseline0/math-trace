@@ -60,7 +60,7 @@ async def fetch_paper(url: str):
         logger.info(f"Fetching paper {paper_id}")
 
         # Download and extract equations
-        tar_path, equations = download_and_extract_equations(paper_id)
+        _tar_path, equations = download_and_extract_equations(paper_id)
         logger.info(f"Extracted {len(equations)} equations from {paper_id}")
 
         # Save to cache

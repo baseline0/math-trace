@@ -65,7 +65,7 @@ class TestWorkflowEndToEnd:
 
     def test_simulation_initial_conditions(self) -> None:
         """Step 4: Simulation respects initial conditions."""
-        ts, na = simulate(k_val=0.01, na0=50, steps=100, seed=42)
+        _ts, na = simulate(k_val=0.01, na0=50, steps=100, seed=42)
 
         assert na[0] == 50  # Initial condition
         assert len(na) == 101  # 100 steps + initial
@@ -74,7 +74,7 @@ class TestWorkflowEndToEnd:
 
     def test_simulation_decreases_with_positive_rate(self) -> None:
         """Step 5: Population decreases over time (with high enough k)."""
-        ts, na = simulate(k_val=0.1, na0=50, steps=200, seed=42)
+        _ts, na = simulate(k_val=0.1, na0=50, steps=200, seed=42)
 
         # With k=0.1 and 50 initial a objects, expect decay
         # (May not decrease monotonically due to stochasticity, but trend should be down)
@@ -90,7 +90,7 @@ class TestWorkflowEndToEnd:
 
         # Run simulation and check that initial rate is approximately correct
         # (In Gillespie sense: prob of reaction in dt = rate * dt)
-        ts, na = simulate(k_val=k_test, na0=n_test, steps=1, dt=0.1, seed=None)
+        _ts, _na = simulate(k_val=k_test, na0=n_test, steps=1, dt=0.1, seed=None)
 
         # Expected rate should be positive
         assert expected_rate > 0
@@ -106,7 +106,7 @@ class TestWorkflowEndToEnd:
         assert "mass-action" in rate_formula.description
 
         # 3. Simulation is based on the same rate formula
-        ts, na = simulate(k_val=0.01, na0=50, steps=10, seed=42)
+        _ts, na = simulate(k_val=0.01, na0=50, steps=10, seed=42)
         assert len(na) == 11
 
         # 4. Formulas can be exported

@@ -12,6 +12,7 @@ import re
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+from typing import ClassVar
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
@@ -116,7 +117,7 @@ class FormulaExtractor:
     """Extract LaTeX formulas from PDF."""
 
     # Common LaTeX math environment patterns
-    MATH_PATTERNS = [
+    MATH_PATTERNS: ClassVar[list[str]] = [
         r"\$\$(.+?)\$\$",  # Display math: $$ ... $$
         r"\$(.+?)\$",  # Inline math: $ ... $
         r"\\begin\{equation\*?\}(.+?)\\end\{equation\*?\}",  # equation env

@@ -64,14 +64,14 @@ class TestSymPyToTypstBraces:
         """Extract content with nested braces."""
         converter = SymPyToTypst()
 
-        content, end = converter._extract_brace_content("{a{b}c}", 0)
+        content, _end = converter._extract_brace_content("{a{b}c}", 0)
         assert content == "a{b}c"
 
     def test_extract_multiple_nested_levels(self):
         """Extract content with multiple nesting levels."""
         converter = SymPyToTypst()
 
-        content, end = converter._extract_brace_content("{a{b{c}d}e}", 0)
+        content, _end = converter._extract_brace_content("{a{b{c}d}e}", 0)
         assert content == "a{b{c}d}e"
 
     def test_extract_invalid_position(self):

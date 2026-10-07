@@ -47,7 +47,7 @@ class TestArxivExtraction:
         """Verify extracted equations have required fields."""
         from math_trace.arxiv_extractor import Equation, download_and_extract_equations
 
-        tex_content, equations = download_and_extract_equations(TEST_PAPER_ID, max_equations=10)
+        _tex_content, equations = download_and_extract_equations(TEST_PAPER_ID, max_equations=10)
 
         assert equations, "Should extract equations"
 
@@ -63,7 +63,7 @@ class TestArxivExtraction:
         """Verify extracted equations are meaningful (not just formatting)."""
         from math_trace.arxiv_extractor import download_and_extract_equations
 
-        tex_content, equations = download_and_extract_equations(TEST_PAPER_ID, max_equations=20)
+        _tex_content, equations = download_and_extract_equations(TEST_PAPER_ID, max_equations=20)
 
         # Filter for meaningful equations (LaTeX expressions, typically start with \ or contain =)
         meaningful_equations = [eq for eq in equations if len(eq.latex) > 5 and ("=" in eq.latex or "\\" in eq.latex)]

@@ -42,13 +42,11 @@ from .services import (
 Formula = ExtractedEquation
 
 __all__ = [
-    # Generators
+    "Formula",
+    "FormulaExtractor",
+    "PaperDownloader",
+    "PaperMetadata",
+    "PresentationBuilder",
     "SymPyToTypst",
     "TypstEnvironmentBuilder",
-    # Services
-    "PaperDownloader",
-    "FormulaExtractor",
-    "PresentationBuilder",
-    "PaperMetadata",
-    "Formula",
 ]

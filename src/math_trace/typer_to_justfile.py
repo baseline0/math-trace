@@ -93,7 +93,8 @@ class TyperToJustfile:
             recipe_content += " " + " ".join(params + flags)
 
         # Build full recipe
-        lines = comment_lines + [
+        lines = [
+            *comment_lines,
             f"{recipe_header}:",
             f"    {recipe_content}",
         ]

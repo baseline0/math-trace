@@ -106,9 +106,9 @@ class TestFormulaPipelineIntegrity:
             # Rule 2: Matching braces
             open_braces = latex.count("{")
             close_braces = latex.count("}")
-            assert open_braces == close_braces, (
-                f"{eq_name} has mismatched braces ({open_braces} open, " f"{close_braces} closed): {latex[:60]}"
-            )
+            assert (
+                open_braces == close_braces
+            ), f"{eq_name} has mismatched braces ({open_braces} open, {close_braces} closed): {latex[:60]}"
 
             # Rule 3: No double-escaped backslashes (likely corruption)
             assert "\\\\\\\\" not in latex, f"{eq_name} has double-escaped backslashes: {latex[:50]}"
