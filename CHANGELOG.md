@@ -2,6 +2,7 @@
 
 Generated from conventional commits. See git log for full history.
 
+eef49d3 fix: Resolve all linting violations (RUF, F821, I001)
 0babc33 fix: standardize ruff config and resolve all linting errors
 f885516 fix: resolve all ruff linting errors in tests
 d8c5fb9 refactor(phase1): remove deprecated presentation modules
