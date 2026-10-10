@@ -94,3 +94,7 @@ docs/equation-traceability-semantic-minimum.md
 .claude/
 .fleetconfig.yaml
 CLAUDE.md
+# Unit test / coverage reports
+.coverage.*
+*.cover
+coverage.xml

@@ -1,8 +1,9 @@
 """Control systems simulations: feedback control and PID tuning."""
 
 import numpy as np
-from model import LinearSystem, PIDController
 from scipy.integrate import odeint
+
+from src.model import LinearSystem, PIDController
 
 
 def step_response_first_order(tau: float = 1.0, K: float = 1.0, t_end: float = 5.0):
@@ -23,16 +24,15 @@ def pid_control_demo(Kp: float = 2.0, Ki: float = 0.5, Kd: float = 0.1):
     C = np.array([[1.0]])
     system = LinearSystem(A, B, C)
 
-    pid = PIDController(Kp, Ki, Kd, dt=0.01)
+    pid = PIDController(Kp, Ki, Kd, setpoint=1.0)
 
     t = np.linspace(0, 10, 1000)
     y_list, u_list = [], []
     x = np.array([0.0])
 
     for ti in t:
-        error = 1.0 - x[0]
-        u = pid.compute(error)
-        dx = A @ x + B * u
+        u = pid.update(x[0], 0.01)
+        dx = A @ x + B[:, 0] * u
         x = x + dx * 0.01
         y_list.append(x[0])
         u_list.append(u)

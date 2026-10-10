@@ -38,7 +38,7 @@ jobs:
       - name: Test ${{ matrix.template }} - model.py
         run: |
           cd templates/${{ matrix.template }}
-          uv run python model.py
+          uv run python src/model.py
           # Check that JSON file was generated
           [ -f *_equations.json ] || exit 1
 

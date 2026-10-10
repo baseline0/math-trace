@@ -1,7 +1,8 @@
 """Thermodynamics simulations: ideal gas and carnot cycles."""
 
 import numpy as np
-from model import (
+
+from src.model import (
     carnot_efficiency,
     ideal_gas_pressure,
     ideal_gas_volume,
