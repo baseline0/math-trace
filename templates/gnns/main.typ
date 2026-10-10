@@ -54,7 +54,7 @@ Common aggregation: sum, mean, max. Order-invariant to handle variable neighborh
 Aggregated messages update node representation:
 
 #figure(
-  align(center, $h_i^"new" = σ(W_{self} h_i + m_i^"agg")$),
+  align(center, $h_i^"new" = σ(W_{"self"} h_i + m_i^"agg")$),
   caption: [Node update (from model.py:60)]
 )
 
@@ -64,7 +64,7 @@ Aggregated messages update node representation:
 Stacking layers increases receptive field. L layers → each node sees neighbors up to distance L:
 
 #figure(
-  align(center, $text(receptive field) = L$),
+  align(center, $"receptive field" = L$),
   caption: [Receptive field depth (from model.py:70)]
 )
 
@@ -74,7 +74,7 @@ Deeper networks capture longer-range dependencies.
 Attention weights modulate message importance:
 
 #figure(
-  align(center, $α_{ij} = softmax_j(a(h_i, h_j))$),
+  align(center, $α_{"ij"} = "softmax"_j(a(h_i, h_j))$),
   caption: [Attention weights (from model.py:85)]
 )
 
@@ -84,7 +84,7 @@ Where a is a learned attention function. Important neighbors get higher weights.
 Supervised task: predict node labels given graph structure and features:
 
 #figure(
-  align(center, $ŷ_i = argmax(h_i^"final")$),
+  align(center, $ŷ_i = "argmax"(h_i^"final")$),
   caption: [Node classification (from model.py:95)]
 )
 

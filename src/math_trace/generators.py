@@ -11,6 +11,62 @@ import re
 
 import sympy as sp
 
+# LaTeX operators and symbols with their Typst equivalents.
+SYMBOL_MAP: dict[str, str] = {
+    "sum": "sum",
+    "prod": "product",
+    "int": "integral",
+    "partial": "partial",
+    "nabla": "nabla",
+    "infty": "infinity",
+    "hbar": "ℏ",
+    "langle": "⟨",
+    "rangle": "⟩",
+    "in": "∈",
+    "iff": "⇔",
+    "approx": "≈",
+    "leq": "<=",
+    "geq": ">=",
+    "neq": "!=",
+    "quad": " ",
+}
+
+# Names Typst resolves as functions or built-in symbols. They must stay unquoted:
+# "log"(x) is a string, and "integral" is not the integral symbol.
+TYPST_BARE_NAMES: frozenset[str] = frozenset(
+    {
+        "sin",
+        "cos",
+        "tan",
+        "cot",
+        "sec",
+        "csc",
+        "arcsin",
+        "arccos",
+        "arctan",
+        "sinh",
+        "cosh",
+        "tanh",
+        "log",
+        "sum",
+        "product",
+        "integral",
+        "partial",
+        "nabla",
+        "infinity",
+        "ln",
+        "exp",
+        "sqrt",
+        "hat",
+        "bar",
+        "dot",
+        "tilde",
+        "vec",
+        "bold",
+        "upright",
+    }
+)
+
 
 class SymPyToTypst:
     """Convert SymPy expressions to Typst math notation."""
@@ -137,6 +193,12 @@ class SymPyToTypst:
         typst = self._replace_macro(typst, "frac", "({0})/({1})")
         typst = self._replace_macro(typst, "sqrt", "sqrt({0})")
 
+        # Accents and styling: \hat{y} → hat(y), \mathbf{h} → bold(h), \text{x} → "x"
+        for accent in ("hat", "bar", "dot", "tilde", "vec"):
+            typst = self._replace_macro(typst, accent, accent + "({0})")
+        typst = self._replace_macro(typst, "mathbf", "bold({0})")
+        typst = self._replace_macro(typst, "text", '"{0}"')
+
         # Function names: remove backslash and convert to lowercase (Typst uses plain text)
         # e.g., \sin, \cos, \log → sin, cos, log
         trig_functions = [
@@ -193,6 +255,12 @@ class SymPyToTypst:
         for latex_char, typst_char in greek_map.items():
             typst = typst.replace(latex_char, typst_char)
 
+        # Operators and symbols. Longest names first, with a word boundary, so that
+        # \in does not rewrite the start of \int.
+        for name in sorted(SYMBOL_MAP, key=len, reverse=True):
+            typst = re.sub(rf"\\{name}(?![A-Za-z])", lambda _m, n=name: SYMBOL_MAP[n], typst)
+        typst = re.sub(r"\\(left|right)(?![A-Za-z])", "", typst)
+
         # Operators
         typst = typst.replace(r"\cdot", "·")
         typst = typst.replace(r"\times", "×")
@@ -219,6 +287,13 @@ class SymPyToTypst:
         result = []
         i = 0
         while i < len(typst):
+            # Copy string literals (from \text{...}) through unchanged
+            if typst[i] == '"':
+                end = typst.find('"', i + 1)
+                end = len(typst) if end == -1 else end + 1
+                result.append(typst[i:end])
+                i = end
+                continue
             # Check if we're at the start of an identifier
             if typst[i].isalpha():
                 # Collect the base identifier
@@ -245,7 +320,7 @@ class SymPyToTypst:
                         subscript_content = typst[subscript_content_start : i - 1]
 
                         # Quote base if multi-letter
-                        if len(ident) > 1:
+                        if len(ident) > 1 and ident not in TYPST_BARE_NAMES:
                             result.append(f'"{ident}"')
                         else:
                             result.append(ident)
@@ -266,7 +341,7 @@ class SymPyToTypst:
                         if i < len(typst):
                             result.append(typst[i])
                             i += 1
-                elif len(ident) > 1:
+                elif len(ident) > 1 and ident not in TYPST_BARE_NAMES:
                     # Multi-letter identifier without subscript
                     result.append(f'"{ident}"')
                 else:

@@ -10,6 +10,42 @@ from model import (
     propagate_sir,
 )
 
+DT = 0.1  # time step in days, the value the model's examples use
+
+
+def _run_sir(
+    S0: float,
+    I0: float,
+    R0: float,
+    days: float,
+    beta: float,
+    gamma: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Run the SIR model and return t, S, I, R as separate arrays.
+
+    model.propagate_sir takes t_max and dt and returns an (n, 3) trajectory.
+    """
+    t, solution = propagate_sir(S0, I0, R0, t_max=days, dt=DT, beta=beta, gamma=gamma)
+    return t, solution[:, 0], solution[:, 1], solution[:, 2]
+
+
+def _run_seir(
+    S0: float,
+    E0: float,
+    I0: float,
+    R0: float,
+    days: float,
+    beta: float,
+    sigma: float,
+    gamma: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Run the SEIR model and return t, S, E, I, R as separate arrays.
+
+    model.propagate_seir takes t_max and dt and returns an (n, 4) trajectory.
+    """
+    t, solution = propagate_seir(S0, E0, I0, R0, t_max=days, dt=DT, beta=beta, sigma=sigma, gamma=gamma)
+    return t, solution[:, 0], solution[:, 1], solution[:, 2], solution[:, 3]
+
 
 def covid_baseline(
     beta: float = 0.5,
@@ -33,7 +69,7 @@ def covid_baseline(
     R0 = 0.0
 
     # Run SIR model
-    t, S, I, R = propagate_sir(
+    t, S, I, _R = _run_sir(
         beta=beta,
         gamma=gamma,
         S0=S0,
@@ -68,7 +104,7 @@ def measles_scenario(
     I0 = 0.0
     R0 = 0.0
 
-    t, S, E, I, R = propagate_seir(
+    t, S, E, I, _R = _run_seir(
         beta=beta,
         sigma=sigma,
         gamma=gamma,
@@ -105,7 +141,7 @@ def intervention_scenario(
         Tuple of (time, susceptible, infected)
     """
     # Phase 1: Before intervention
-    t1, S1, I1, R1 = propagate_sir(
+    t1, S1, I1, R1 = _run_sir(
         beta=beta_baseline,
         gamma=gamma,
         S0=0.999,
@@ -119,7 +155,7 @@ def intervention_scenario(
     I_at_intervention = I1[-1]
     R_at_intervention = R1[-1]
 
-    t2, S2, I2, R2 = propagate_sir(
+    t2, S2, I2, _R2 = _run_sir(
         beta=beta_intervention,
         gamma=gamma,
         S0=S_at_intervention,

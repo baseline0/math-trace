@@ -34,7 +34,7 @@ Where C_v is heat capacity at constant volume. For monatomic gases, C_v = (3/2)R
 Energy is conserved: heat absorbed equals internal energy change plus work done by the system:
 
 #figure(
-  align(center, $"d"U = δQ - δW$),
+  align(center, $"d"U = δ Q - δ W$),
   caption: [First law (from model.py:50)]
 )
 

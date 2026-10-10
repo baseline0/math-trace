@@ -14,10 +14,10 @@ Control systems maintain desired behavior by using feedback. We model linear sys
 Linear systems are described by coupled first-order ODEs:
 
 #figure(
-  align(center, block(
-    "$dot(x) = A x + B u$",
-    "$y = C x + D u$"
-  )),
+  align(center, block[
+    $dot(x) = A x + B u$ \
+    $y = C x + D u$
+  ]),
   caption: [State-space form (from model.py:30)]
 )
 

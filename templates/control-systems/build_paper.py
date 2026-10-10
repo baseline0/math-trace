@@ -10,7 +10,7 @@ except ImportError:
 
 def main() -> bool:
     return run_build_pipeline(
-        equations_json="control_equations.json",
+        equations_json="equations.json",
         typst_file="main.typ",
         figure_generator=None,
         domain_name="control-systems",

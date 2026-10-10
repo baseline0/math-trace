@@ -363,3 +363,33 @@ class TestTypstEnvironmentBuilder:
 
         assert "By construction" in proof_text
         assert len(proof_text) > 0
+
+
+class TestLatexToTypstMacros:
+    """Macros that the template equations use and that Typst must receive as valid syntax."""
+
+    def _convert(self, latex: str) -> str:
+        return SymPyToTypst()._latex_to_typst(latex)
+
+    def test_accent_macro_becomes_typst_function(self):
+        assert self._convert(r"\hat{y}_{ic}") == r'hat(y)_{"ic"}'
+
+    def test_mathbf_becomes_bold(self):
+        assert self._convert(r"\mathbf{h}_j") == "bold(h)_j"
+
+    def test_text_becomes_string_literal_and_is_not_requoted(self):
+        assert self._convert(r"W_{\text{self}}") == 'W_{"self"}'
+
+    def test_sum_and_integral_stay_bare_symbol_names(self):
+        assert self._convert(r"\sum_i") == "sum_i"
+        assert self._convert(r"\int x") == "integral x"
+
+    def test_in_does_not_rewrite_int(self):
+        assert self._convert(r"\int") == "integral"
+        assert self._convert(r"j \in N") == "j ∈ N"
+
+    def test_log_is_a_function_not_a_string(self):
+        assert self._convert(r"\log(x)") == "log(x)"
+
+    def test_hbar_maps_to_typst_symbol(self):
+        assert self._convert(r"\hbar \omega") == "ℏ ω"

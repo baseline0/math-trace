@@ -81,7 +81,7 @@ def generate_figures() -> bool:
 def main() -> bool:
     """Full build pipeline."""
     return run_build_pipeline(
-        equations_json="sir_equations.json",
+        equations_json="equations.json",
         typst_file="main.typ",
         figure_generator=generate_figures,
         domain_name="epidemiology",

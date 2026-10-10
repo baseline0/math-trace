@@ -21,7 +21,7 @@ The time-dependent Schrödinger equation is the fundamental equation of quantum 
 Where:
 - $Psi(x, t)$ is the wavefunction
 - $hat(H)$ is the Hamiltonian operator
-- $hbar$ is the reduced Planck constant
+- $ℏ$ is the reduced Planck constant
 
 === The Hamiltonian
 

@@ -42,11 +42,11 @@ For COVID-19 (respiratory transmission), $R_0 approx 2–3$. For measles (airbor
 The dynamics are governed by three coupled ODEs:
 
 #figure(
-  align(center, block(
-    "dS/dt = −βSI/N",
-    "dI/dt = βSI/N − γI",
-    "dR/dt = γI"
-  )),
+  align(center, block[
+    $"d"S / "d"t = −β S I / N$ \
+    $"d"I / "d"t = β S I / N − γ I$ \
+    $"d"R / "d"t = γ I$
+  ]),
   caption: [SIR dynamics (from model.py:69)]
 )
 
@@ -58,7 +58,7 @@ The term $beta S I / N$ represents the force of infection—how susceptibles enc
 
 == 5. Equilibrium Analysis
 
-At endemic equilibrium ($dI\/dt = 0$), the number of infected individuals stabilizes:
+At endemic equilibrium ($"d"I / "d"t = 0$), the number of infected individuals stabilizes:
 
 #figure(
   align(center, $I^* = (1 - 1/R_0) times N$),
@@ -92,7 +92,7 @@ Higher $R_0$ → higher attack rate. For measles ($R_0 = 15$), ~95% of unvaccina
 
 == 8. Peak Infections
 
-The peak infection occurs when $dI\/dt = 0$ (before the disease burns out):
+The peak infection occurs when $"d"I / "d"t = 0$ (before the disease burns out):
 
 #figure(
   align(center, $I_"max" = arg max(I(t))$),
