@@ -87,6 +87,14 @@ TYPST_BARE_NAMES: frozenset[str] = frozenset(
 )
 
 
+_DIFFERENTIAL_NAME = re.compile(r"^d[A-Za-zα-ωΑ-Ω]$")
+
+
+def _is_differential(ident: str) -> bool:
+    """True for a two-character differential token such as dU, dx or dτ."""
+    return bool(_DIFFERENTIAL_NAME.match(ident))
+
+
 class SymPyToTypst:
     """Convert SymPy expressions to Typst math notation."""
 
@@ -383,6 +391,9 @@ class SymPyToTypst:
                         if i < len(typst):
                             result.append(typst[i])
                             i += 1
+                elif _is_differential(ident):
+                    # A differential such as dU or dτ is d followed by a variable, not a name
+                    result.append(f"d {ident[1]}")
                 elif len(ident) > 1 and ident not in TYPST_BARE_NAMES:
                     # Multi-letter identifier without subscript
                     result.append(f'"{ident}"')

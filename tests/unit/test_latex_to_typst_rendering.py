@@ -33,6 +33,8 @@ def converter() -> SymPyToTypst:
         (r"E\Psi", "E Ψ"),
         (r"\Psi(x,t)", "Ψ(x,t)"),
         (r"\Delta\Phi", "Δ Φ"),
+        (r"dU", "d U"),
+        (r"d\tau", "d τ"),
     ],
 )
 def test_greek_letter_is_separated_from_adjacent_letters(converter, latex, typst):
