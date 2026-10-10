@@ -14,8 +14,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from src.math_trace.generators import SymPyToTypst
+from math_trace.generators import SymPyToTypst
 
 
 def generate_formulas() -> bool:

@@ -19,7 +19,7 @@ import pytest
 @pytest.fixture
 def sir_example_dir():
     """Path to epidemiology-sir example."""
-    return Path(__file__).parent.parent / "examples" / "epidemiology-sir"
+    return Path(__file__).parent.parent.parent / "examples" / "epidemiology-sir"
 
 
 @pytest.fixture
