@@ -1,16 +1,9 @@
 name: Test Templates
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'templates/**'
-      - '.github/workflows/test-templates.yml'
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'templates/**'
-      - '.github/workflows/test-templates.yml'
+  schedule:
+    - cron: "0 9 * * 1"  # Mondays 09:00 UTC
+  workflow_dispatch:
 
 jobs:
   test-templates:
