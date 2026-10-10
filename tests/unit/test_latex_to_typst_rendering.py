@@ -29,6 +29,10 @@ def converter() -> SymPyToTypst:
         (r"\partial\psi", "partial ψ"),
         (r"\hbar\psi", "ℏ ψ"),
         (r"\alpha\beta", "α β"),
+        (r"\Psi", "Ψ"),
+        (r"E\Psi", "E Ψ"),
+        (r"\Psi(x,t)", "Ψ(x,t)"),
+        (r"\Delta\Phi", "Δ Φ"),
     ],
 )
 def test_greek_letter_is_separated_from_adjacent_letters(converter, latex, typst):

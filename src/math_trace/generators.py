@@ -38,7 +38,7 @@ _DIFFERENTIAL_FRAC = re.compile(rf"\\frac\{{{_DIFFERENTIAL_OPERAND}\}}\{{{_DIFFE
 
 # Greek letters and ℏ render as symbols, but Typst reads "Eψ" as one unknown name.
 # A space between a letter and an adjacent Greek symbol keeps them separate.
-_GREEK_CHARS: str = "α-ωℏ"
+_GREEK_CHARS: str = "Α-Ωα-ωℏ"
 _SPACE_BETWEEN_LETTER_AND_GREEK = re.compile(
     rf"(?<=[A-Za-z])(?=[{_GREEK_CHARS}])|(?<=[{_GREEK_CHARS}])(?=[A-Za-z{_GREEK_CHARS}])"
 )
@@ -281,6 +281,17 @@ class SymPyToTypst:
             r"\chi": "χ",
             r"\psi": "ψ",
             r"\omega": "ω",
+            r"\Gamma": "Γ",
+            r"\Delta": "Δ",
+            r"\Theta": "Θ",
+            r"\Lambda": "Λ",
+            r"\Xi": "Ξ",
+            r"\Pi": "Π",
+            r"\Sigma": "Σ",
+            r"\Upsilon": "Υ",
+            r"\Phi": "Φ",
+            r"\Psi": "Ψ",
+            r"\Omega": "Ω",
         }
         for latex_char, typst_char in greek_map.items():
             typst = typst.replace(latex_char, typst_char)
