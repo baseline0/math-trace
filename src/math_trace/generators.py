@@ -31,6 +31,25 @@ SYMBOL_MAP: dict[str, str] = {
     "quad": " ",
 }
 
+# Differential fractions such as \frac{dS}{dt} or \frac{\partial^2\psi}{\partial x^2}.
+# Each side is d, an optional order (d^2), a variable (x or \psi), and an optional power.
+_DIFFERENTIAL_OPERAND: str = r"d(?:\^\{?(\d+)\}?)?(\\[A-Za-z]+|[A-Za-z])(\^\{?\d+\}?)?"
+_DIFFERENTIAL_FRAC = re.compile(rf"\\frac\{{{_DIFFERENTIAL_OPERAND}\}}\{{{_DIFFERENTIAL_OPERAND}\}}")
+
+# Greek letters and ℏ render as symbols, but Typst reads "Eψ" as one unknown name.
+# A space between a letter and an adjacent Greek symbol keeps them separate.
+_GREEK_CHARS: str = "α-ωℏ"
+_SPACE_BETWEEN_LETTER_AND_GREEK = re.compile(
+    rf"(?<=[A-Za-z])(?=[{_GREEK_CHARS}])|(?<=[{_GREEK_CHARS}])(?=[A-Za-z{_GREEK_CHARS}])"
+)
+
+
+def _differential_term(order: str | None, variable: str, power: str | None) -> str:
+    """Build one differential term, e.g. ("2", "\\psi", None) -> "d^2 \\psi"."""
+    order_part = f"^{order}" if order else ""
+    return f"d{order_part} {variable}{power or ''}"
+
+
 # Names Typst resolves as functions or built-in symbols. They must stay unquoted:
 # "log"(x) is a string, and "integral" is not the integral symbol.
 TYPST_BARE_NAMES: frozenset[str] = frozenset(
@@ -151,6 +170,16 @@ class SymPyToTypst:
 
         return "".join(result)
 
+    @staticmethod
+    def _differential_fraction(match: re.Match[str]) -> str:
+        """Render a differential fraction as (d x)/(d y), keeping order and power.
+
+        Groups 1-3 are the numerator (order, variable, power); groups 4-6 the denominator.
+        """
+        num = _differential_term(match.group(1), match.group(2), match.group(3))
+        den = _differential_term(match.group(4), match.group(5), match.group(6))
+        return f"({num})/({den})"
+
     def _replace_binom(self, latex: str) -> str:
         """Replace \\binom{n}{k} with binom(n, k), handling nested braces."""
         return self._replace_macro(latex, "binom", "binom({0}, {1})")
@@ -190,6 +219,7 @@ class SymPyToTypst:
         # Macro replacements (order matters for nested patterns)
         # Use brace-aware replacement for macros with arguments
         typst = self._replace_binom(typst)
+        typst = _DIFFERENTIAL_FRAC.sub(self._differential_fraction, typst)
         typst = self._replace_macro(typst, "frac", "({0})/({1})")
         typst = self._replace_macro(typst, "sqrt", "sqrt({0})")
 
@@ -260,6 +290,7 @@ class SymPyToTypst:
         for name in sorted(SYMBOL_MAP, key=len, reverse=True):
             typst = re.sub(rf"\\{name}(?![A-Za-z])", lambda _m, n=name: SYMBOL_MAP[n], typst)
         typst = re.sub(r"\\(left|right)(?![A-Za-z])", "", typst)
+        typst = _SPACE_BETWEEN_LETTER_AND_GREEK.sub(" ", typst)
 
         # Operators
         typst = typst.replace(r"\cdot", "·")
