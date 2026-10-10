@@ -151,7 +151,7 @@ To contribute a template:
 
 ## Release Roadmap
 
-### v0.9.0-rc1 (Release Candidate)
+### Release candidate
 
 - ✅ All 5 templates complete (code + tests)
 - ✅ Epidemiology paper = golden path (10 sections, 100% claims verified)
@@ -163,7 +163,7 @@ To contribute a template:
 
 ### v0.9.0 (Release)
 
-- Same as rc1, feedback incorporated
+- Same as the release candidate, feedback incorporated
 
 ### v1.0.0 (When Ready)
 

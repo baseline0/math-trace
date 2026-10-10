@@ -1,8 +1,8 @@
-# v0.9.0-rc1 Reproducibility Verification Checklist
+# Reproducibility Verification Checklist
 
 **For External Reviewers**
 
-This checklist verifies that math-trace v0.9.0-rc1 is reproducible from a fresh checkout on standard environments.
+This checklist verifies that math-trace is reproducible from a fresh checkout on standard environments.
 
 ---
 
@@ -20,7 +20,7 @@ This checklist verifies that math-trace v0.9.0-rc1 is reproducible from a fresh 
 ```bash
 git clone https://github.com/baseline0/math-trace.git
 cd math-trace
-git checkout v0.9.0-rc1  # Or the RC tag you're verifying
+git checkout <commit-or-tag-under-review>
 ```
 
 **Acceptance**: Repository clones without errors.
@@ -192,7 +192,7 @@ Verify these files exist at repository root:
 
 ### Recommendation
 
-**☐ APPROVED for v0.9.0-rc1**
+**☐ APPROVED**
 Reproducibility verified. Math-trace is ready for release.
 
 **☐ CONDITIONAL** (list issues below)

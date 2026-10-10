@@ -1,8 +1,8 @@
-# External Review Guide for v0.9.0-rc1
+# External Review Guide
 
 **What We're Asking You To Do**
 
-Verify that math-trace v0.9.0-rc1 can be built and tested reproducibly from a fresh checkout on your local machine. This is the final gate before releasing to PyPI.
+Verify that math-trace can be built and tested reproducibly from a fresh checkout on your local machine. This is the final gate before releasing to PyPI.
 
 ---
 
@@ -56,7 +56,7 @@ Python (SymPy) → LaTeX → Typst → PDF + JSON provenance
 ```bash
 git clone https://github.com/baseline0/math-trace.git
 cd math-trace
-git checkout v0.9.0-rc1
+git checkout <commit-or-tag-under-review>
 
 # One-command setup
 just setup
@@ -183,7 +183,7 @@ We're asking: "Does the code work as intended on your machine?"
 
 1. Complete `docs/REPRODUCIBILITY-CHECKLIST.md`
 2. Email or PR with your sign-off
-3. We'll cut the v0.9.0-rc1 tag and release to PyPI
+3. We'll cut the release tag and release to PyPI
 
 ---
 
