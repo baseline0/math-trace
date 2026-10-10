@@ -12,7 +12,7 @@ import re
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, Optional
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
