@@ -199,6 +199,6 @@ class TestFormulaMetadata:
 
         # Check that at least 50% of formulas have assumptions
         formulas_with_assumptions = sum(1 for f in formulas.values() if f.get("assumptions"))
-        assert (
-            formulas_with_assumptions >= len(formulas) * 0.5
-        ), f"{template}: less than 50% of formulas have assumptions"
+        assert formulas_with_assumptions >= len(formulas) * 0.5, (
+            f"{template}: less than 50% of formulas have assumptions"
+        )

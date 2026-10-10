@@ -212,14 +212,14 @@ from formula_slides import FormulaPresentation, Formula
 # Define formulas (in model.py)
 formulas = [
     Formula(id="f_input", expr=sp.Integer(3), parameters={}),
-    Formula(id="f_rule", expr=sp.Lambda((n,), 2*n), parameters={"n": sp.Symbol("n")}),
+    Formula(id="f_rule", expr=sp.Lambda((n,), 2 * n), parameters={"n": sp.Symbol("n")}),
 ]
 
 # Build presentation (in build_slides.py)
 presentation = FormulaPresentation(
     markdown_file="presentation.md",
     formulas=formulas,
-    output_format="marp"  # or "pdf"
+    output_format="marp",  # or "pdf"
 )
 presentation.render()
 ```
@@ -408,11 +408,13 @@ class Formula:
     id: str
     expr: sp.Expr
     # NEW: Lock rendering parameters
-    rendering_opts: dict = field(default_factory=lambda: {
-        "mode": "plain",  # or "equation"
-        "fold_short_frac": False,
-        "mul_symbol": "cdot",  # explicit multiplication symbol
-    })
+    rendering_opts: dict = field(
+        default_factory=lambda: {
+            "mode": "plain",  # or "equation"
+            "fold_short_frac": False,
+            "mul_symbol": "cdot",  # explicit multiplication symbol
+        }
+    )
     assumptions: dict = field(default_factory=dict)  # e.g., {"n": {"positive": True}}
 
     def to_latex(self) -> str:
@@ -484,12 +486,12 @@ def generate_formula_index(formulas: dict, markdown_path: str) -> str:
 ```python
 Formula(
     id="f_rule",
-    expr=sp.Lambda((n,), 2*n),
+    expr=sp.Lambda((n,), 2 * n),
     # NEW: Symbol display mapping
     symbols={"n": r"\theta"},  # code uses n, display as θ
     # NEW: Lock assumptions
     assumptions={"n": {"positive": True, "real": True}},
-    rendering_opts={"mul_symbol": "cdot"}
+    rendering_opts={"mul_symbol": "cdot"},
 )
 ```
 

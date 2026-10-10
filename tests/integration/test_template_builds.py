@@ -147,9 +147,9 @@ class TestTemplateFullBuild:
         assert len(content) > 100, "main.typ is too small to be a valid document"
 
         # Spot-check for Typst structure (should have assignments or directives)
-        assert (
-            "#set" in content or "#let" in content or "let " in content or "=" in content or "import" in content
-        ), "main.typ doesn't look like valid Typst"
+        assert "#set" in content or "#let" in content or "let " in content or "=" in content or "import" in content, (
+            "main.typ doesn't look like valid Typst"
+        )
 
     @pytest.mark.parametrize("template", PRODUCTION_TEMPLATES, indirect=False)
     def test_template_has_minimum_directory_structure(self, template):

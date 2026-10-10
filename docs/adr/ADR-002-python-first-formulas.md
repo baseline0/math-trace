@@ -37,8 +37,8 @@ All papers, simulations, and formalizations derive from this Python definition.
 
 ```python
 # model.py - SOURCE OF TRUTH
-k = sp.Symbol('k', positive=True, real=True)
-n_a = sp.Symbol('n_a', positive=True, integer=True)
+k = sp.Symbol("k", positive=True, real=True)
+n_a = sp.Symbol("n_a", positive=True, integer=True)
 rate_expr = k * sp.binomial(n_a, 2)
 ```
 
@@ -88,6 +88,7 @@ Then:
 from dataclasses import dataclass
 import sympy as sp
 
+
 @dataclass
 class Formula:
     name: str
@@ -98,13 +99,9 @@ class Formula:
     def to_latex(self) -> str:
         return sp.latex(self.expr)
 
+
 FORMULAS = {
-    'rate': Formula(
-        name='rate',
-        expr=k * sp.binomial(n_a, 2),
-        description='Rate law for 2a → b',
-        source_line=25
-    )
+    "rate": Formula(name="rate", expr=k * sp.binomial(n_a, 2), description="Rate law for 2a → b", source_line=25)
 }
 ```
 

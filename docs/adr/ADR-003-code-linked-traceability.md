@@ -138,7 +138,7 @@ code_of_truth:
    ```python
    # tests/examples/test_membrane_end_to_end.py
    def test_formula_metadata():
-       rate = FORMULAS['rate']
+       rate = FORMULAS["rate"]
        assert rate.source_line == 25  # Points to model.py:25
    ```
 

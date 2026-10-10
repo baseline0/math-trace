@@ -240,14 +240,9 @@ The linting system is designed to be easy to extend.
        for path in paths:
            content = path.read_text()
            # ... check content ...
-           issues.append(Issue(
-               path=str(path),
-               line=line_num,
-               level="warning",
-               message="...",
-               suggestion="...",
-               doc_section="§X"
-           ))
+           issues.append(
+               Issue(path=str(path), line=line_num, level="warning", message="...", suggestion="...", doc_section="§X")
+           )
        return issues
    ```
 

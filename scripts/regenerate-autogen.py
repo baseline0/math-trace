@@ -53,7 +53,7 @@ def generate_recipes_block():
         sig_parts = []
         for arg in cmd["args"]:
             if arg in cmd.get("defaults", {}):
-                sig_parts.append(f'{arg}={cmd["defaults"][arg]}')
+                sig_parts.append(f"{arg}={cmd['defaults'][arg]}")
             else:
                 sig_parts.append(arg)
 

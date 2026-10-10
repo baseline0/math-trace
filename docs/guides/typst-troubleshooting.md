@@ -417,14 +417,16 @@ The linting system is designed to be easy to extend. If you discover a new patte
 In `scripts/check_typst.py`, add to `REGEX_CHECKS`:
 
 ```python
-RegexCheck(
-    name="windows_include_path",
-    pattern=re.compile(r'#\s*include\s+"[^"]*\\[^"]*"'),
-    level="warning",
-    message="Windows-style backslash in #include path",
-    suggestion='Use forward slashes: #include "generated/formulas.typ"',
-    doc_section="§3 (Backslashes in file paths)",
-),
+(
+    RegexCheck(
+        name="windows_include_path",
+        pattern=re.compile(r'#\s*include\s+"[^"]*\\[^"]*"'),
+        level="warning",
+        message="Windows-style backslash in #include path",
+        suggestion='Use forward slashes: #include "generated/formulas.typ"',
+        doc_section="§3 (Backslashes in file paths)",
+    ),
+)
 ```
 
 Then add/update §3 in this file, update the index, and test.

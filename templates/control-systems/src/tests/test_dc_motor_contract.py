@@ -121,9 +121,9 @@ class TestSettlingTime:
         # Either system settled (error in band) or didn't settle (at t_sim end)
         if settling_time < 9.99:
             # System settled before end; error should be in band
-            assert (
-                error_at_settle <= threshold + 1e-6
-            ), f"At t={settling_time:.2f}s, error={error_at_settle:.3f} exceeds 2% threshold {threshold:.3f}"
+            assert error_at_settle <= threshold + 1e-6, (
+                f"At t={settling_time:.2f}s, error={error_at_settle:.3f} exceeds 2% threshold {threshold:.3f}"
+            )
         else:
             # System didn't settle within simulation; settling_time = t[-1]
             # This is acceptable for this tuning; error will be above threshold
@@ -151,9 +151,9 @@ class TestSettlingTime:
 
         # Final error should exceed 2% band
         final_error = np.abs(y[-1] - setpoint)
-        assert (
-            final_error > threshold
-        ), f"Expected final error > {threshold:.3f} rad/s (unsettled), got {final_error:.3f} rad/s"
+        assert final_error > threshold, (
+            f"Expected final error > {threshold:.3f} rad/s (unsettled), got {final_error:.3f} rad/s"
+        )
 
 
 class TestOvershoot:
@@ -192,9 +192,9 @@ class TestOvershoot:
         expected_overshoot = max(0.0, peak - setpoint)
 
         # Should match reported value
-        assert np.isclose(
-            reported_overshoot, expected_overshoot, atol=1e-6
-        ), f"Reported overshoot {reported_overshoot:.3f} doesn't match calculated {expected_overshoot:.3f}"
+        assert np.isclose(reported_overshoot, expected_overshoot, atol=1e-6), (
+            f"Reported overshoot {reported_overshoot:.3f} doesn't match calculated {expected_overshoot:.3f}"
+        )
 
 
 class TestTerminalTrackingError:
@@ -237,9 +237,9 @@ class TestTerminalTrackingError:
         # Calculate terminal error from raw error array
         expected_fte = np.abs(error[-1])
 
-        assert np.isclose(
-            reported_fte, expected_fte, atol=1e-6
-        ), f"Reported terminal error {reported_fte:.6f} doesn't match final error {expected_fte:.6f}"
+        assert np.isclose(reported_fte, expected_fte, atol=1e-6), (
+            f"Reported terminal error {reported_fte:.6f} doesn't match final error {expected_fte:.6f}"
+        )
 
     def test_terminal_error_vs_asymptotic_distinction(self):
         """
@@ -260,14 +260,14 @@ class TestTerminalTrackingError:
 
         # Terminal error should equal reported value
         reported_error = result["steady_state_error"]
-        assert np.isclose(
-            final_error, reported_error, atol=1e-6
-        ), f"Terminal error at t={t[-1]:.2f}s is {final_error:.3f}, not {reported_error:.3f}"
+        assert np.isclose(final_error, reported_error, atol=1e-6), (
+            f"Terminal error at t={t[-1]:.2f}s is {final_error:.3f}, not {reported_error:.3f}"
+        )
 
         # Affirm this is finite-horizon, not asymptotic
-        assert (
-            t[-1] == 9.99
-        ), f"Simulation horizon is {t[-1]:.2f}s; terminal error is snapshot at this instant, not asymptotic value"
+        assert t[-1] == 9.99, (
+            f"Simulation horizon is {t[-1]:.2f}s; terminal error is snapshot at this instant, not asymptotic value"
+        )
 
 
 class TestDeterminism:
@@ -340,15 +340,15 @@ class TestStepResponse:
 
         # With t_sim=10.0 and dt=0.01, expect 1000 steps
         expected_steps = 1000
-        assert (
-            len(result["speed"]) == expected_steps
-        ), f"Expected {expected_steps} speed samples, got {len(result['speed'])}"
-        assert (
-            len(result["error"]) == expected_steps
-        ), f"Expected {expected_steps} error samples, got {len(result['error'])}"
-        assert (
-            len(result["voltage"]) == expected_steps
-        ), f"Expected {expected_steps} voltage samples, got {len(result['voltage'])}"
+        assert len(result["speed"]) == expected_steps, (
+            f"Expected {expected_steps} speed samples, got {len(result['speed'])}"
+        )
+        assert len(result["error"]) == expected_steps, (
+            f"Expected {expected_steps} error samples, got {len(result['error'])}"
+        )
+        assert len(result["voltage"]) == expected_steps, (
+            f"Expected {expected_steps} voltage samples, got {len(result['voltage'])}"
+        )
         assert len(result["t"]) == expected_steps, f"Expected {expected_steps} time samples, got {len(result['t'])}"
 
     def test_step_response_consistency(self):

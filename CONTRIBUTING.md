@@ -61,6 +61,7 @@ examples/your-domain/
 import sympy as sp
 from dataclasses import dataclass
 
+
 @dataclass
 class Formula:
     name: str
@@ -68,23 +69,19 @@ class Formula:
     description: str
     source_line: int
 
+
 # Define your domain
 # Example: Quantum mechanics
-hbar = sp.Symbol('hbar', positive=True, real=True)
-m = sp.Symbol('m', positive=True, real=True)
-x = sp.Symbol('x', real=True)
+hbar = sp.Symbol("hbar", positive=True, real=True)
+m = sp.Symbol("m", positive=True, real=True)
+x = sp.Symbol("x", real=True)
 
 # Schrödinger equation (simplified form)
-kinetic_energy = -hbar**2 / (2 * m) * sp.Symbol('d2psi_dx2')
+kinetic_energy = -(hbar**2) / (2 * m) * sp.Symbol("d2psi_dx2")
 
 # Export formulas for paper
 FORMULAS = {
-    'kinetic': Formula(
-        name='kinetic_energy',
-        expr=kinetic_energy,
-        description='Kinetic energy term',
-        source_line=20
-    )
+    "kinetic": Formula(name="kinetic_energy", expr=kinetic_energy, description="Kinetic energy term", source_line=20)
 }
 ```
 
@@ -98,7 +95,7 @@ from model import FORMULAS
 import numpy as np
 
 # Extract formula
-kinetic_formula = FORMULAS['kinetic'].expr
+kinetic_formula = FORMULAS["kinetic"].expr
 
 # Evaluate or use in computation
 # Your simulation code here
@@ -129,8 +126,9 @@ def test_model_export():
     """Verify model formulas export correctly."""
     from examples.your_domain.model import FORMULAS
 
-    assert 'kinetic' in FORMULAS
-    assert FORMULAS['kinetic'].expr is not None
+    assert "kinetic" in FORMULAS
+    assert FORMULAS["kinetic"].expr is not None
+
 
 def test_simulation_uses_model():
     """Verify simulation uses model formulas."""

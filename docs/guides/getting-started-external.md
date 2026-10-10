@@ -78,6 +78,7 @@ This is your **source of truth**. All formulas live here.
 import sympy as sp
 from dataclasses import dataclass
 
+
 @dataclass
 class Formula:
     name: str
@@ -85,20 +86,21 @@ class Formula:
     description: str
     source_line: int
 
+
 # Your symbols
-k = sp.Symbol('k', positive=True, real=True)
-n = sp.Symbol('n', positive=True, integer=True)
+k = sp.Symbol("k", positive=True, real=True)
+n = sp.Symbol("n", positive=True, integer=True)
 
 # Your formula
 rate_law = k * sp.binomial(n, 2)
 
 # Export for paper
 FORMULAS = {
-    'rate': Formula(
-        name='rate_law',
+    "rate": Formula(
+        name="rate_law",
         expr=rate_law,
-        description='Reaction rate',
-        source_line=15  # Where this formula is defined
+        description="Reaction rate",
+        source_line=15,  # Where this formula is defined
     )
 }
 ```
@@ -129,6 +131,7 @@ Write code that uses your model:
 from model import FORMULAS
 import numpy as np
 
+
 def compute(k_val, n_val, num_steps=1000):
     """Simulate using formula from model.py."""
     rate = k_val * n_val * (n_val - 1) / 2  # MUST match model.py
@@ -154,16 +157,18 @@ import pytest
 from examples.my_domain.model import FORMULAS, rate_law
 import sympy as sp
 
+
 def test_rate_formula_defined():
     """Check that formula is exported."""
-    assert 'rate' in FORMULAS
-    assert FORMULAS['rate'].expr is not None
+    assert "rate" in FORMULAS
+    assert FORMULAS["rate"].expr is not None
+
 
 def test_rate_increases_with_n():
     """Check mathematical properties."""
     k_val = 2.0
-    formula = FORMULAS['rate'].expr
-    k, n = sp.symbols('k n', positive=True, integer=True)
+    formula = FORMULAS["rate"].expr
+    k, n = sp.symbols("k n", positive=True, integer=True)
 
     # At n=3: rate = 2 * C(3,2) = 2 * 3 = 6
     rate_at_3 = formula.subs([(k, k_val), (n, 3)])
@@ -294,13 +299,10 @@ just paper  # Everything updates automatically
 ```python
 # model.py
 FORMULAS = {
-    'rate': Formula(...),
-    'equilibrium': Formula(  # New formula
-        name='equilibrium',
-        expr=your_expression,
-        description='Equilibrium concentration',
-        source_line=30
-    )
+    "rate": Formula(...),
+    "equilibrium": Formula(  # New formula
+        name="equilibrium", expr=your_expression, description="Equilibrium concentration", source_line=30
+    ),
 }
 ```
 
@@ -320,7 +322,7 @@ Or in Python:
 from examples.my_domain.model import FORMULAS
 import sympy as sp
 
-formula = FORMULAS['rate']
+formula = FORMULAS["rate"]
 print(f"Expression: {formula.expr}")
 print(f"LaTeX: {sp.latex(formula.expr)}")
 ```
@@ -347,9 +349,8 @@ def test_simulation_matches_model():
 
     # From model.py
     from model import FORMULAS
-    formula_result = FORMULAS['rate'].expr.subs(
-        [(sp.Symbol('k'), k_val), (sp.Symbol('n'), n_val)]
-    )
+
+    formula_result = FORMULAS["rate"].expr.subs([(sp.Symbol("k"), k_val), (sp.Symbol("n"), n_val)])
 
     # From simulate.py
     simulation_result = k_val * n_val * (n_val - 1) / 2
@@ -391,7 +392,7 @@ from examples.my_domain.model import FORMULAS
 import sympy as sp
 
 # Check derivative, integrals, etc.
-formula = FORMULAS['rate'].expr
+formula = FORMULAS["rate"].expr
 print(sp.latex(formula))
 
 # Your code should implement this exactly

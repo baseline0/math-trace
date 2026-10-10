@@ -89,8 +89,8 @@ The included example demonstrates end-to-end formula traceability:
 ```python
 import sympy as sp
 
-k = sp.Symbol('k', positive=True, real=True)
-n_a = sp.Symbol('n_a', positive=True, integer=True)
+k = sp.Symbol("k", positive=True, real=True)
+n_a = sp.Symbol("n_a", positive=True, integer=True)
 rate_expr = k * sp.binomial(n_a, 2)  # Rate law: r = k * n_a * (n_a - 1) / 2
 ```
 
@@ -199,7 +199,7 @@ cd math-trace/examples/membrane-dynamics
 import sympy as sp
 
 # Your symbols
-k, n = sp.symbols('k n', positive=True)
+k, n = sp.symbols("k n", positive=True)
 
 # Your formula (source of truth)
 your_formula = k * sp.binomial(n, 2)
@@ -275,7 +275,7 @@ Every formula, theorem, and proof links to its source:
 # model.py
 rate_formula = Formula(
     expr=k * sp.binomial(n_a, 2),
-    source_line=25  # Always document where this comes from
+    source_line=25,  # Always document where this comes from
 )
 ```
 
@@ -376,7 +376,7 @@ from math_trace import SymPyToTypst
 import sympy as sp
 
 converter = SymPyToTypst()
-expr = sp.Symbol('x')**2 + 1
+expr = sp.Symbol("x") ** 2 + 1
 typst_code = converter.convert(expr)
 print(typst_code)
 ```
