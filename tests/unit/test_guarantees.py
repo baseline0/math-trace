@@ -10,7 +10,9 @@ import sys
 from pathlib import Path
 
 # Add examples to path for model imports
-sys.path.insert(0, str(Path(__file__).parent / "../../examples/membrane-dynamics/src"))
+from math_trace.constants import REPO_ROOT
+
+sys.path.insert(0, str(REPO_ROOT / "examples" / "membrane-dynamics" / "src"))
 
 from model import FORMULAS, export_json
 

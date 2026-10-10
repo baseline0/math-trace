@@ -1,20 +1,21 @@
 """Unit test configuration.
 
-All tests in this directory are marked as @pytest.mark.unit.
-No external services, network calls, or sibling repos required.
+Every test under tests/unit/ gets the `unit` marker at collection time, so
+`pytest -m unit` selects this folder. Unit tests are deterministic and need no
+external services, network access, or sibling repos.
 """
+
+from pathlib import Path
 
 import pytest
 
+from math_trace.constants import REPO_ROOT
 
-def pytest_configure(config):
-    """Apply unit marker to all tests in this directory."""
-    config.addinivalue_line("markers", "unit: deterministic test with no external dependencies")
+UNIT_DIR = REPO_ROOT / "tests" / "unit"
 
 
-@pytest.fixture(scope="session", autouse=True)
-def _mark_unit_tests(request):
-    """Auto-mark all tests in unit/ as @pytest.mark.unit."""
-    for item in request.session.items:
-        if "tests/unit" in str(item.fspath):
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    """Mark every collected test that lives under tests/unit/."""
+    for item in items:
+        if Path(item.path).is_relative_to(UNIT_DIR):
             item.add_marker(pytest.mark.unit)

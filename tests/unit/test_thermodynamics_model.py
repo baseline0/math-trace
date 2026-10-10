@@ -4,12 +4,13 @@ Happy path tests for ideal gas law, internal energy, and Carnot cycles.
 """
 
 import importlib.util
-from pathlib import Path
 
 import pytest
 
+from math_trace.constants import REPO_ROOT
+
 # Load thermodynamics model module
-thermo_model_path = Path(__file__).parent.parent.parent / "templates" / "thermodynamics" / "src" / "model.py"
+thermo_model_path = REPO_ROOT / "templates" / "thermodynamics" / "src" / "model.py"
 spec = importlib.util.spec_from_file_location("thermo_model", thermo_model_path)
 thermo_model = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(thermo_model)

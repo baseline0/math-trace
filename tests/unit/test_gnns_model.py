@@ -4,13 +4,13 @@ Happy path tests for message passing, node updates, and graph operations.
 """
 
 import importlib.util
-from pathlib import Path
 
 import numpy as np
-import pytest
+
+from math_trace.constants import REPO_ROOT
 
 # Load gnns model module
-gnns_model_path = Path(__file__).parent.parent.parent / "templates" / "gnns" / "src" / "model.py"
+gnns_model_path = REPO_ROOT / "templates" / "gnns" / "src" / "model.py"
 spec = importlib.util.spec_from_file_location("gnns_model", gnns_model_path)
 gnns_model = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gnns_model)

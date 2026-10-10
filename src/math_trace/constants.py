@@ -8,6 +8,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+# This repository's root: src/math_trace/constants.py -> repo root
+REPO_ROOT: Path = Path(__file__).resolve().parents[2]
+
 # Cache directory for arXiv papers and extracted equations
 CACHE_DIR: Path = Path.home() / ".math-trace" / "arxiv-cache"
 EQUATIONS_SUBDIR: str = "equations"

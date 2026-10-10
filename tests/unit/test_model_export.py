@@ -7,12 +7,13 @@ to Typst/LaTeX formats.
 
 import json
 import sys
-from pathlib import Path
 
 import pytest
 
 # Add examples to path
-sys.path.insert(0, str(Path(__file__).parent / "../../examples/membrane-dynamics/src"))
+from math_trace.constants import REPO_ROOT
+
+sys.path.insert(0, str(REPO_ROOT / "examples" / "membrane-dynamics" / "src"))
 
 from model import FORMULAS
 

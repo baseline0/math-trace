@@ -11,11 +11,12 @@ Validates:
 import json
 import subprocess
 import sys
-from pathlib import Path
 
 import pytest
 
-TEMPLATE_DIR = Path(__file__).parent.parent.parent / "templates"
+from math_trace.constants import REPO_ROOT
+
+TEMPLATE_DIR = REPO_ROOT / "templates"
 TEMPLATES = [
     "simple-physics",
     "biochemistry",

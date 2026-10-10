@@ -4,12 +4,13 @@ Tests the full flow: fetch paper → extract formulas → load → preview.
 """
 
 import sys
-from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
-sys.path.insert(0, str(Path(__file__).parent / "../../src"))
+from math_trace.constants import REPO_ROOT
+
+sys.path.insert(0, str(REPO_ROOT / "src"))
 from math_trace.server import app
 
 client = TestClient(app)

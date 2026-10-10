@@ -1,8 +1,8 @@
 """Integration test configuration.
 
-All tests in this directory are marked as @pytest.mark.integration.
-May require sibling repos, local MCP servers, or cross-package contracts.
-Skipped in CI; developers run locally before push with 'just test-integration'.
+Every test under tests/integration/ gets the `integration` marker at collection
+time, so `pytest -m integration` selects this folder. Integration tests may need
+sibling repos, local MCP servers, or cross-package contracts.
 """
 
 import sys
@@ -10,19 +10,19 @@ from pathlib import Path
 
 import pytest
 
+from math_trace.constants import REPO_ROOT
 
-def pytest_configure(config):
-    """Setup path and apply integration marker to all tests in this directory."""
-    # Add src/ to path for imports
-    src_path = Path(__file__).parent.parent.parent / "src"
-    sys.path.insert(0, str(src_path))
-
-    config.addinivalue_line("markers", "integration: test requiring sibling repos or local setup")
+INTEGRATION_DIR = REPO_ROOT / "tests" / "integration"
+SRC_DIR = REPO_ROOT / "src"
 
 
-@pytest.fixture(scope="session", autouse=True)
-def _mark_integration_tests(request):
-    """Auto-mark all tests in integration/ as @pytest.mark.integration."""
-    for item in request.session.items:
-        if "tests/integration" in str(item.fspath):
+def pytest_configure(config: pytest.Config) -> None:
+    """Make the source tree importable for tests that import math_trace directly."""
+    sys.path.insert(0, str(SRC_DIR))
+
+
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    """Mark every collected test that lives under tests/integration/."""
+    for item in items:
+        if Path(item.path).is_relative_to(INTEGRATION_DIR):
             item.add_marker(pytest.mark.integration)

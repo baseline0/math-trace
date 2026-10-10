@@ -10,11 +10,12 @@ These tests prevent breaking the critical path for end-users.
 import json
 import subprocess
 import sys
-from pathlib import Path
 
 import pytest
 
-MATH_TRACE_ROOT = Path(__file__).parent.parent.parent
+from math_trace.constants import REPO_ROOT
+
+MATH_TRACE_ROOT = REPO_ROOT
 TEMPLATES_DIR = MATH_TRACE_ROOT / "templates"
 
 PRODUCTION_TEMPLATES = [

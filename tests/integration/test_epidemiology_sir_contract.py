@@ -11,15 +11,16 @@ Validates:
 import json
 import subprocess
 import sys
-from pathlib import Path
 
 import pytest
+
+from math_trace.constants import REPO_ROOT
 
 
 @pytest.fixture
 def sir_example_dir():
     """Path to epidemiology-sir example."""
-    return Path(__file__).parent.parent.parent / "examples" / "epidemiology-sir"
+    return REPO_ROOT / "examples" / "epidemiology-sir"
 
 
 @pytest.fixture
@@ -33,13 +34,13 @@ class TestFrequencyDependentModel:
 
     def test_model_imports_sympy(self, sir_example_dir):
         """Model uses SymPy for symbolic equations."""
-        model_file = sir_example_dir / "model.py"
+        model_file = sir_example_dir / "src" / "model.py"
         content = model_file.read_text()
         assert "from sympy import" in content or "import sympy" in content
 
     def test_model_defines_required_symbols(self, sir_example_dir):
         """Model defines S, I, R, N, beta, gamma, R0."""
-        model_file = sir_example_dir / "model.py"
+        model_file = sir_example_dir / "src" / "model.py"
         content = model_file.read_text()
         required_symbols = ["S", "I", "R", "N", "beta", "gamma"]
         for symbol in required_symbols:
@@ -47,14 +48,14 @@ class TestFrequencyDependentModel:
 
     def test_frequency_dependent_transmission(self, sir_example_dir):
         """Transmission rate is frequency-dependent (beta * S * I / N)."""
-        model_file = sir_example_dir / "model.py"
+        model_file = sir_example_dir / "src" / "model.py"
         content = model_file.read_text()
         # Check for frequency-dependent (divide by N) convention
         assert "/ N" in content or "N)" in content, "Expected frequency-dependent transmission"
 
     def test_r0_formula_beta_over_gamma(self, sir_example_dir):
         """R0 is defined as beta / gamma."""
-        model_file = sir_example_dir / "model.py"
+        model_file = sir_example_dir / "src" / "model.py"
         content = model_file.read_text()
         assert "R0" in content or "R_0" in content
         assert "beta" in content and "gamma" in content
@@ -98,7 +99,7 @@ class TestProvenance:
 
     def test_model_has_line_comments(self, sir_example_dir):
         """Model includes line numbers and comments for traceability."""
-        model_file = sir_example_dir / "model.py"
+        model_file = sir_example_dir / "src" / "model.py"
         lines = model_file.read_text().split("\n")
         # Should have meaningful comments or documentation
         comment_count = sum(1 for line in lines if "#" in line and not line.strip().startswith("#!/"))
@@ -113,7 +114,7 @@ class TestProvenance:
 
     def test_scenario_labels_explicit(self, sir_example_dir):
         """Scenario parameters are explicitly labeled (COVID-like, measles)."""
-        simulate_file = sir_example_dir / "simulate.py"
+        simulate_file = sir_example_dir / "src" / "simulate.py"
         content = simulate_file.read_text()
         assert "covid" in content.lower() or "COVID" in content
         assert "measles" in content.lower() or "Measles" in content
@@ -244,7 +245,7 @@ class TestIntegration:
 
     def test_model_consistency_with_paper(self, sir_example_dir):
         """Model equations match paper derivations."""
-        model_file = sir_example_dir / "model.py"
+        model_file = sir_example_dir / "src" / "model.py"
         paper_file = sir_example_dir / "main.typ"
 
         model_file.read_text()
