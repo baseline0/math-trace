@@ -18,7 +18,7 @@ from .logging import get_logger
 logger = get_logger(__name__)
 
 
-def ensure_cache_dir(paper_id: str = None) -> Path:
+def ensure_cache_dir(paper_id: str | None = None) -> Path:
     """Ensure cache directory exists.
 
     Args:
