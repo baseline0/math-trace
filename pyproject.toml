@@ -150,7 +150,7 @@ ignore = ["E501", "SIM105", "N818", "RUF001", "RUF002", "RUF022"]
 "tests/unit/test_thermodynamics_model.py" = ["N806"]
 
 [tool.pyright]
-include = ["src"]
+include = ["src", "tests"]
 typeCheckingMode = "standard"
 pythonVersion = "3.13"
 

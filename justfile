@@ -69,6 +69,10 @@ check:
     @echo "🔍 Checking with ruff..."
     uv run ruff check src tests examples templates --output-format grouped
 
+# Pyright ratchet: fails when a file gains errors (scripts in fleet-base; mode from pyproject.toml).
+check-types:
+    uv run python ../fleet-base/scripts/pyright_ratchet.py check
+
 [group("verify")]
 test:
     @echo "🧪 Running unit tests (CI-safe)..."
