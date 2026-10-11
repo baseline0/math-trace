@@ -316,13 +316,52 @@ validate-precommit:
     @echo "🔍 Validating pre-commit consistency across fleet..."
     bash scripts/validate-precommit-consistency.sh
 
+[group("release")]
+version-bump VERSION:
+    #!/usr/bin/env bash
+    set -e
+
+    echo "🚀 Bumping version to {{VERSION}}..."
+
+    # 1. Update pyproject.toml version
+    sed -i 's/^version = "[^"]*"/version = "{{VERSION}}"/' pyproject.toml
+    echo "   ✓ Updated pyproject.toml"
+
+    # 2. Update __init__.py version
+    sed -i 's/__version__ = "[^"]*"/__version__ = "{{VERSION}}"/' src/math_trace/__init__.py
+    echo "   ✓ Updated src/math_trace/__init__.py"
+
+    # 3. Generate changelog
+    echo "   📝 Generating CHANGELOG..."
+    uv run python scripts/generate-changelog.py {{VERSION}}
+
+    # 4. Stage changes
+    git add pyproject.toml src/math_trace/__init__.py CHANGELOG.md
+    echo "   ✓ Staged version and changelog"
+
+    # 5. Create commit (with optional MESSAGE env var, or use commitmate)
+    echo "   💾 Creating commit..."
+    MESSAGE="chore: bump version to {{VERSION}}" just commit || true
+
+    # 6. Create tag
+    echo "   📌 Creating git tag v{{VERSION}}..."
+    git tag -a "v{{VERSION}}" -m "Release v{{VERSION}}"
+
+    echo ""
+    echo "✅ Version bumped to {{VERSION}}"
+    echo "   Commit: $(git rev-parse --short HEAD)"
+    echo "   Tag: v{{VERSION}}"
+    echo ""
+    echo "Next steps:"
+    echo "  git push origin main --tags"
+    echo "  just build-release"
+    echo "  just publish-release"
+
 [group("maintain")]
-generate-changelog:
-    @echo "📝 Generating CHANGELOG from conventional commits..."
-    @git log --oneline --all --grep="^feat\|^fix\|^docs\|^refactor\|^chore" --format="%h %s" > /tmp/changelog.tmp && \
-    echo "# Changelog\n\nGenerated from conventional commits. See git log for full history.\n" | cat - /tmp/changelog.tmp > CHANGELOG.md && \
-    rm /tmp/changelog.tmp
-    @echo "✅ CHANGELOG.md generated"
+generate-changelog VERSION:
+    @echo "📝 Generating CHANGELOG for v{{VERSION}}..."
+    uv run python scripts/generate-changelog.py {{VERSION}}
+    @echo "✅ CHANGELOG.md updated"
 
 [group("help")]
 help:
@@ -358,9 +397,14 @@ help:
     @echo "  just typecheck         — Type check code"
     @echo ""
     @echo "RELEASE:"
-    @echo "  just prep-release VERSION    — Tag and push release (e.g., just prep-release 0.1.0)"
+    @echo "  just version-bump VERSION    — Update version, generate changelog, commit & tag"
     @echo "  just build-release           — Build wheel and sdist for PyPI"
-    @echo "  just publish-release         — Publish to PyPI (requires credentials)"
+    @echo "  just publish-release         — Publish to PyPI (requires PYPI_TOKEN secret)"
+    @echo ""
+    @echo "  Example workflow:"
+    @echo "    just version-bump 0.2.0       # Updates version, generates changelog"
+    @echo "    git push origin main --tags   # Push tag to trigger CI publish"
+    @echo "    just build-release            # Local build verification"
     @echo ""
     @echo "SETUP:"
     @echo "  just install-typst — Install Typst (required for PDF generation)"
