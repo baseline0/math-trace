@@ -42,10 +42,7 @@ def simulate(
         t = times[-1]
 
         # Compute rate: r = k * C(n_a, 2)
-        if na < 2:
-            rate = 0.0
-        else:
-            rate = k_val * na * (na - 1) / 2
+        rate = 0.0 if na < 2 else k_val * na * (na - 1) / 2
 
         # Probability of reaction in dt (Euler method)
         prob_reaction = rate * dt

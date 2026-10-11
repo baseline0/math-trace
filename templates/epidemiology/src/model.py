@@ -88,7 +88,7 @@ def sir_dynamics(y: np.ndarray, t: float, beta: float, gamma: float, N: float = 
     Returns:
         dy/dt: Time derivatives [dS/dt, dI/dt, dR/dt]
     """
-    S, I, R = y
+    S, I, _R = y
 
     dS_dt = -beta * S * I / N
     dI_dt = beta * S * I / N - gamma * I
@@ -228,7 +228,7 @@ def seir_dynamics(y: np.ndarray, t: float, beta: float, sigma: float, gamma: flo
     Returns:
         dy/dt: Time derivatives [dS/dt, dE/dt, dI/dt, dR/dt]
     """
-    S, E, I, R = y
+    S, E, I, _R = y
 
     dS_dt = -beta * S * I / N
     dE_dt = beta * S * I / N - sigma * E

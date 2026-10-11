@@ -36,7 +36,7 @@ class TestSIRPopulationConservation:
     def test_conservation_over_100_days(self):
         """Population conserved to machine precision."""
         S0, I0, R0 = 0.99, 0.01, 0.0
-        t, sol = propagate_sir(S0, I0, R0, t_max=100, dt=0.1, beta=0.25, gamma=0.1)
+        _t, sol = propagate_sir(S0, I0, R0, t_max=100, dt=0.1, beta=0.25, gamma=0.1)
 
         error = check_population_conservation(sol, N=1.0)
         assert error < 1e-10, f"Conservation error {error:.2e} too large"

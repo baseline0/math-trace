@@ -5,7 +5,6 @@ Runs realistic pandemic scenarios and generates data for visualization.
 """
 
 import numpy as np
-
 from src.model import (
     propagate_seir,
     propagate_sir,

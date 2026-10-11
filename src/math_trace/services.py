@@ -66,7 +66,7 @@ class PaperDownloader:
         return None
 
     @staticmethod
-    def download(url: str, cache_dir: Path = None) -> Path:
+    def download(url: str, cache_dir: Path | None = None) -> Path:
         """Download paper PDF from URL.
 
         Supports:

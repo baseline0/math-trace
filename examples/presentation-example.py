@@ -24,8 +24,9 @@ python presentation-example.py
 - **Export:** Print to PDF from browser
 """
 
-from math_trace.formula import Formula
 from math_trace.presentation_server import PresentationServer
+
+from math_trace.formula import Formula
 
 
 def build_presentation():

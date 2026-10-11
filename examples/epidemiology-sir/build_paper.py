@@ -93,7 +93,7 @@ def step_3_generate_figures(scenarios):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
 
     # COVID
-    t_covid, S_covid, I_covid, R_covid, p_covid = scenarios["covid"]
+    t_covid, _S_covid, I_covid, _R_covid, p_covid = scenarios["covid"]
     ax1.plot(t_covid, I_covid / 1e6, linewidth=2.5, color="#d62728")
     ax1.fill_between(t_covid, 0, I_covid / 1e6, alpha=0.3, color="#d62728")
     ax1.set_xlabel("Time (days)", fontsize=11)
@@ -102,7 +102,7 @@ def step_3_generate_figures(scenarios):
     ax1.grid(True, alpha=0.3)
 
     # Measles
-    t_measles, S_measles, I_measles, R_measles, p_measles = scenarios["measles"]
+    t_measles, _S_measles, I_measles, _R_measles, p_measles = scenarios["measles"]
     ax2.plot(t_measles, I_measles / 1e6, linewidth=2.5, color="#1f77b4")
     ax2.fill_between(t_measles, 0, I_measles / 1e6, alpha=0.3, color="#1f77b4")
     ax2.set_xlabel("Time (days)", fontsize=11)
@@ -120,8 +120,8 @@ def step_4_verify_reproducibility():
     """Run simulation twice and verify identical output."""
     print("\n=== Step 4: Verify Reproducibility ===")
 
-    t1, S1, I1, R1, p1 = covid_baseline()
-    t2, S2, I2, R2, p2 = covid_baseline()
+    _t1, S1, I1, R1, _p1 = covid_baseline()
+    _t2, S2, I2, R2, _p2 = covid_baseline()
 
     # Check exact numerical reproducibility
     assert np.allclose(S1, S2), "S not reproducible"
@@ -139,7 +139,7 @@ def main():
 
     try:
         formulas = step_1_export_formulas()
-        scenarios, reports = step_2_run_simulations()
+        scenarios, _reports = step_2_run_simulations()
         step_3_generate_figures(scenarios)
         step_4_verify_reproducibility()
 

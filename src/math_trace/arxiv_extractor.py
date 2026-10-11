@@ -156,7 +156,7 @@ def download_and_extract_equations(paper_id: str, max_equations: int = 50) -> tu
     return tex_content, equations
 
 
-def save_extracted_paper(paper_id: str, output_dir: Path = None) -> Path:
+def save_extracted_paper(paper_id: str, output_dir: Path | None = None) -> Path:
     """Extract paper and save to disk.
 
     Structure:
@@ -200,7 +200,7 @@ def save_extracted_paper(paper_id: str, output_dir: Path = None) -> Path:
     return paper_dir
 
 
-def load_extracted_paper(paper_id: str, cache_dir: Path = None) -> dict:
+def load_extracted_paper(paper_id: str, cache_dir: Path | None = None) -> dict:
     """Load previously extracted paper from cache."""
     if cache_dir is None:
         cache_dir = CACHE_DIR

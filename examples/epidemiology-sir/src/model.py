@@ -112,7 +112,7 @@ FORMULAS = {
 }
 
 
-def export_formulas(output_file: Path = None) -> dict[str, Any]:
+def export_formulas(output_file: Path | None = None) -> dict[str, Any]:
     """Export all formulas as JSON for reproducibility and traceability."""
     formulas_dict = {name: formula.to_dict() for name, formula in FORMULAS.items()}
     result = {

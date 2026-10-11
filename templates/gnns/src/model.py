@@ -230,15 +230,9 @@ def graph_accuracy(predictions: np.ndarray, labels: np.ndarray, mask: np.ndarray
     Returns:
         Accuracy (fraction correct)
     """
-    if predictions.ndim == 2:
-        pred_labels = np.argmax(predictions, axis=1)
-    else:
-        pred_labels = predictions
+    pred_labels = np.argmax(predictions, axis=1) if predictions.ndim == 2 else predictions
 
-    if labels.ndim == 2:
-        true_labels = np.argmax(labels, axis=1)
-    else:
-        true_labels = labels
+    true_labels = np.argmax(labels, axis=1) if labels.ndim == 2 else labels
 
     if mask is not None:
         pred_labels = pred_labels[mask]

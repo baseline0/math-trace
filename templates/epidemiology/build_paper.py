@@ -36,8 +36,8 @@ def generate_figures() -> bool:
 
     # Run scenarios
     t_covid, S_covid, I_covid = covid_baseline()
-    t_measles, S_measles, E_measles, I_measles = measles_scenario()
-    t_int, S_int, I_int = intervention_scenario()
+    t_measles, S_measles, _E_measles, I_measles = measles_scenario()
+    t_int, _S_int, I_int = intervention_scenario()
 
     # Generate comparison figure
     fig, axes = plt.subplots(1, 3, figsize=(15, 4))
@@ -62,7 +62,7 @@ def generate_figures() -> bool:
 
     # Intervention impact
     axes[2].plot(t_int, I_int * 100, "purple", linewidth=2, label="Lockdown at day 50")
-    t_covid_only, S_covid_only, I_covid_only = covid_baseline(days=200)
+    t_covid_only, _S_covid_only, I_covid_only = covid_baseline(days=200)
     axes[2].plot(t_covid_only, I_covid_only * 100, "b--", linewidth=1.5, alpha=0.6, label="No intervention")
     axes[2].axvline(x=50, color="red", linestyle=":", alpha=0.7, label="Intervention start")
     axes[2].set_xlabel("Days", fontsize=11)

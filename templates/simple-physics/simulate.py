@@ -12,7 +12,7 @@ def simulate_harmonic_oscillator(
     omega: float = 1.0,
     steps: int = 200,
     dt: float = 0.01,
-    seed: int = None,
+    seed: int | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Simulate a harmonic oscillator: x(t) = A * cos(ωt)

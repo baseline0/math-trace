@@ -2,7 +2,6 @@
 
 import numpy as np
 from scipy.integrate import odeint
-
 from src.model import LinearSystem, PIDController
 
 

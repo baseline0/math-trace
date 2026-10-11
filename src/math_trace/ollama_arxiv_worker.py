@@ -43,7 +43,7 @@ def convert_equation_to_sympy(latex: str, context: str = "") -> dict:
         }
 
 
-def process_paper(paper_id: str, cache_dir: Path = None) -> dict:
+def process_paper(paper_id: str, cache_dir: Path | None = None) -> dict:
     """Convert all equations in a paper from LaTeX to SymPy.
 
     Reads equations.jsonl, converts each, updates in place.

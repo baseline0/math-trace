@@ -25,7 +25,7 @@ def export_formulas() -> dict[str, Formula]:
 
     # Define symbols
     v, Vmax, Km, S = sp.symbols("v V_max K_m S", positive=True, real=True)
-    k1, k_minus1, k2, E, ES, P = sp.symbols("k_1 k_{-1} k_2 E ES P", real=True)
+    k1, k_minus1, k2, _E, _ES, _P = sp.symbols("k_1 k_{-1} k_2 E ES P", real=True)
 
     formulas = {
         "michaelis_menten": Formula(

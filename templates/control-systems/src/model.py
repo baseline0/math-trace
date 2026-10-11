@@ -137,10 +137,7 @@ class PIDController:
         I = self.K_i * self.integral
 
         # Derivative term
-        if dt > 0:
-            D = self.K_d * (error - self.prev_error) / dt
-        else:
-            D = 0.0
+        D = self.K_d * (error - self.prev_error) / dt if dt > 0 else 0.0
 
         self.prev_error = error
 

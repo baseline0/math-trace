@@ -65,7 +65,7 @@ def simulate_speed_control(
     system = dc_motor_system()
     controller = PIDController(K_p, K_i, K_d, setpoint=target_speed)
 
-    t, x, y, u = simulate_feedback_system(system, controller, t_sim, dt=0.01)
+    t, _x, y, u = simulate_feedback_system(system, controller, t_sim, dt=0.01)
 
     error = target_speed - y
     peak_overshoot = np.max(y) - target_speed if np.max(y) > target_speed else 0

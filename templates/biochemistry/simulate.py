@@ -27,7 +27,7 @@ def simulate_enzyme_kinetics(
     Km: float = 5.0,
     steps: int = 100,
     S_max: float = 50.0,
-    seed: int = None,
+    seed: int | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Simulate enzyme kinetics across substrate concentration range.
