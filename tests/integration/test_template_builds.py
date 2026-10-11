@@ -92,8 +92,8 @@ class TestTemplateFullBuild:
         if not template_dir.exists():
             pytest.skip(f"Template {template} not found")
 
-        # Verify simulate.py exists
-        simulate_file = template_dir / "src" / "simulate.py"
+        # Verify simulate.py exists (it lives at the template root, beside build_paper.py)
+        simulate_file = template_dir / "simulate.py"
         if not simulate_file.exists():
             pytest.skip(f"No simulate.py found in {template}")
 
@@ -102,7 +102,7 @@ class TestTemplateFullBuild:
             [
                 sys.executable,
                 "-c",
-                "import sys; sys.path.insert(0, 'src'); from simulate import *; print('OK')",
+                "import sys; sys.path.insert(0, '.'); from simulate import *; print('OK')",
             ],
             cwd=template_dir,
             capture_output=True,

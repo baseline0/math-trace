@@ -27,6 +27,28 @@ TEMPLATES = [
     "gnns",
 ]
 
+# Equations JSON each template's model.py exports and build_paper.py consumes.
+# Declared explicitly: older templates use a "<name>_equations.json" file,
+# newer ones a plain "equations.json".
+EQUATIONS_JSON = {
+    "simple-physics": "physics_equations.json",
+    "biochemistry": "biochemistry_equations.json",
+    "quantum-systems": "quantum_systems_equations.json",
+    "epidemiology": "equations.json",
+    "control-systems": "equations.json",
+    "thermodynamics": "equations.json",
+    "gnns": "equations.json",
+}
+
+
+def _load_equations(template: str) -> dict:
+    """Load a template's equations JSON, failing if it is missing."""
+    json_file = TEMPLATE_DIR / template / EQUATIONS_JSON[template]
+    assert json_file.exists(), f"{template}: {json_file.name} not found"
+    with open(json_file) as f:
+        return json.load(f)
+
+
 REQUIRED_FILES = {
     "model.py",  # Source of formulas
     "main.typ",  # Paper template
@@ -105,17 +127,7 @@ class TestFormulaJSON:
     @pytest.mark.parametrize("template", TEMPLATES)
     def test_formula_json_has_required_fields(self, template):
         """All formulas in JSON have required fields."""
-        template_path = TEMPLATE_DIR / template
-
-        # Find JSON file (pattern: *_equations.json)
-        json_files = list(template_path.glob("*_equations.json"))
-        if not json_files:
-            pytest.skip(f"{template}: no *_equations.json found")
-
-        json_file = json_files[0]
-
-        with open(json_file) as f:
-            formulas = json.load(f)
+        formulas = _load_equations(template)
 
         for name, formula in formulas.items():
             for field in REQUIRED_FORMULA_FIELDS:
@@ -124,16 +136,7 @@ class TestFormulaJSON:
     @pytest.mark.parametrize("template", TEMPLATES)
     def test_no_duplicate_equation_names(self, template):
         """No duplicate equation names within template."""
-        template_path = TEMPLATE_DIR / template
-
-        json_files = list(template_path.glob("*_equations.json"))
-        if not json_files:
-            pytest.skip(f"{template}: no *_equations.json found")
-
-        json_file = json_files[0]
-
-        with open(json_file) as f:
-            formulas = json.load(f)
+        formulas = _load_equations(template)
 
         equation_names = list(formulas.keys())
         unique_names = set(equation_names)
@@ -168,16 +171,7 @@ class TestFormulaMetadata:
     @pytest.mark.parametrize("template", ["simple-physics", "biochemistry"])
     def test_formulas_have_units(self, template):
         """Formulas should have units field in metadata."""
-        template_path = TEMPLATE_DIR / template
-
-        json_files = list(template_path.glob("*_equations.json"))
-        if not json_files:
-            pytest.skip(f"{template}: no *_equations.json found")
-
-        json_file = json_files[0]
-
-        with open(json_file) as f:
-            formulas = json.load(f)
+        formulas = _load_equations(template)
 
         # Check that at least 50% of formulas have units
         formulas_with_units = sum(1 for f in formulas.values() if f.get("units"))
@@ -186,16 +180,7 @@ class TestFormulaMetadata:
     @pytest.mark.parametrize("template", ["simple-physics", "biochemistry"])
     def test_formulas_have_assumptions(self, template):
         """Formulas should have assumptions field in metadata."""
-        template_path = TEMPLATE_DIR / template
-
-        json_files = list(template_path.glob("*_equations.json"))
-        if not json_files:
-            pytest.skip(f"{template}: no *_equations.json found")
-
-        json_file = json_files[0]
-
-        with open(json_file) as f:
-            formulas = json.load(f)
+        formulas = _load_equations(template)
 
         # Check that at least 50% of formulas have assumptions
         formulas_with_assumptions = sum(1 for f in formulas.values() if f.get("assumptions"))

@@ -240,7 +240,7 @@ def heat_capacity_constant_pressure(n: float, f: int = 5) -> float:
 
 def export_equation_metadata() -> dict[str, Any]:
     """Auto-generate equations.json for paper.typ."""
-    return {
+    metadata = {
         "ideal_gas_law": {
             "latex": r"PV = nRT",
             "code_ref": "model.py:ideal_gas_pressure()",
@@ -269,13 +269,19 @@ def export_equation_metadata() -> dict[str, Any]:
             "latex": r"\eta_{\text{Carnot}} = 1 - \frac{T_c}{T_h}",
             "code_ref": "model.py:carnot_efficiency()",
             "line": 189,
+            "description": "Carnot efficiency: maximum efficiency of a heat engine between two reservoirs",
             "validation": "η = 0 at T_c = T_h; η < 1 always (2nd Law)",
         },
     }
+    # template_builder and the shared formula schema read "source_line".
+    for info in metadata.values():
+        info["source_line"] = info["line"]
+    return metadata
 
 
 if __name__ == "__main__":
     metadata = export_equation_metadata()
     with open("equations.json", "w") as f:
         json.dump(metadata, f, indent=2)
+        f.write("\n")
     print("✅ Exported equations.json")

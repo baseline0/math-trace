@@ -272,7 +272,7 @@ def simulate_feedback_system(
 
 def export_equation_metadata() -> dict[str, Any]:
     """Auto-generate equations.json for paper.typ."""
-    return {
+    metadata = {
         "state_space": {
             "latex": r"\dot{x} = A \mathbf{x} + B \mathbf{u}, \quad \mathbf{y} = C \mathbf{x} + D \mathbf{u}",
             "code_ref": "model.py:LinearSystem",
@@ -289,25 +289,33 @@ def export_equation_metadata() -> dict[str, Any]:
             "latex": r"e_{ss} = \frac{1}{1 + K_p}",
             "code_ref": "model.py:steady_state_error()",
             "line": 159,
+            "description": "Steady-state error of a unity-feedback proportional loop to a step",
             "validation": "↓ K_p → ↓ e_ss (higher gain → lower error)",
         },
         "settling_time": {
             "latex": r"t_s \approx \frac{4}{\zeta \omega_n}",
             "code_ref": "model.py:second_order_response()",
             "line": 187,
+            "description": "Approximate 2% settling time of an underdamped second-order system",
             "validation": "2% settling time criterion",
         },
         "stability": {
             "latex": r"\text{Stable} \iff \text{Re}(\lambda_i) < 0 \text{ for all poles}",
             "code_ref": "model.py:LinearSystem.is_stable()",
             "line": 59,
+            "description": "Continuous-time LTI stability criterion on the poles of A",
             "validation": "All eigenvalues of A in left half-plane",
         },
     }
+    # template_builder and the shared formula schema read "source_line".
+    for info in metadata.values():
+        info["source_line"] = info["line"]
+    return metadata
 
 
 if __name__ == "__main__":
     metadata = export_equation_metadata()
     with open("equations.json", "w") as f:
         json.dump(metadata, f, indent=2)
+        f.write("\n")
     print("✅ Exported equations.json")

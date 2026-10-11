@@ -334,6 +334,7 @@ def export_equation_metadata() -> dict[str, Any]:
             "latex": r"R_0 = \frac{\beta}{\gamma}",
             "code_ref": "model.py:basic_reproduction_number()",
             "line": 48,
+            "description": "Basic reproduction number: transmission rate over recovery rate",
             "test_ref": "tests/test_sir_model.py",
             "validation": "R₀ > 1 predicts epidemic spread; R₀ < 1 predicts extinction",
             "interpretation": "Average number of secondary infections per infected individual",
@@ -342,6 +343,7 @@ def export_equation_metadata() -> dict[str, Any]:
             "latex": r"\frac{dS}{dt} = -\frac{\beta \cdot S \cdot I}{N}",
             "code_ref": "model.py:sir_dynamics()",
             "line": 92,
+            "description": "SIR susceptible compartment: depletion by mass-action infection",
             "test_ref": "tests/test_sir_model.py",
             "validation": "Population conserved: S + I + R = N",
         },
@@ -349,6 +351,7 @@ def export_equation_metadata() -> dict[str, Any]:
             "latex": r"\frac{dI}{dt} = \frac{\beta \cdot S \cdot I}{N} - \gamma \cdot I",
             "code_ref": "model.py:sir_dynamics()",
             "line": 93,
+            "description": "SIR infected compartment: new infections minus recoveries",
             "test_ref": "tests/test_sir_model.py",
             "validation": "Peak infection timing matches data for COVID-19, 1918 flu",
         },
@@ -356,12 +359,14 @@ def export_equation_metadata() -> dict[str, Any]:
             "latex": r"\frac{dR}{dt} = \gamma \cdot I",
             "code_ref": "model.py:sir_dynamics()",
             "line": 94,
+            "description": "SIR recovered compartment: inflow from recovery",
             "test_ref": "tests/test_sir_model.py",
         },
         "population_conservation": {
             "latex": r"S(t) + I(t) + R(t) = N",
             "code_ref": "model.py:check_population_conservation()",
             "line": 144,
+            "description": "Total population is conserved across S, I and R",
             "test_ref": "tests/test_sir_model.py",
             "validation": "Error < 1e-6 (numerical precision)",
         },
@@ -369,6 +374,7 @@ def export_equation_metadata() -> dict[str, Any]:
             "latex": r"S^* = \frac{N}{R_0}, \quad R^* = N\left(1 - \frac{1}{R_0}\right)",
             "code_ref": "model.py:sir_equilibrium()",
             "line": 176,
+            "description": "Final-state susceptible and recovered populations for R_0 > 1",
             "test_ref": "tests/test_sir_model.py",
             "validation": "Long-time limit matches numerical solution",
         },
@@ -376,6 +382,7 @@ def export_equation_metadata() -> dict[str, Any]:
             "latex": r"\frac{dE}{dt} = \frac{\beta \cdot S \cdot I}{N} - \sigma \cdot E",
             "code_ref": "model.py:seir_dynamics()",
             "line": 232,
+            "description": "SEIR exposed compartment: new infections minus progression to infectious",
             "test_ref": "tests/test_seir_model.py",
             "interpretation": "σ = 1/incubation period (e.g., 5.1 days for COVID-19)",
         },
@@ -383,10 +390,14 @@ def export_equation_metadata() -> dict[str, Any]:
             "latex": r"\text{Attack Rate} = \frac{R_{\text{final}}}{N}",
             "code_ref": "model.py:attack_rate()",
             "line": 282,
+            "description": "Attack rate: fraction of the population ever infected",
             "test_ref": "tests/test_observables.py",
             "validation": "Predicted attack rate vs observed seroprevalence studies",
         },
     }
+    # template_builder and the shared formula schema read "source_line".
+    for info in metadata.values():
+        info["source_line"] = info["line"]
     return metadata
 
 
@@ -395,4 +406,5 @@ if __name__ == "__main__":
     metadata = export_equation_metadata()
     with open("equations.json", "w") as f:
         json.dump(metadata, f, indent=2)
+        f.write("\n")
     print("✅ Exported equations.json")

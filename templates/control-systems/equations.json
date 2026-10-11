@@ -3,30 +3,38 @@
     "latex": "\\dot{x} = A \\mathbf{x} + B \\mathbf{u}, \\quad \\mathbf{y} = C \\mathbf{x} + D \\mathbf{u}",
     "code_ref": "model.py:LinearSystem",
     "line": 24,
-    "description": "LTI system representation: compact form for analysis & control design"
+    "description": "LTI system representation: compact form for analysis & control design",
+    "source_line": 24
   },
   "pid_control": {
     "latex": "u(t) = K_p e(t) + K_i \\int e(\\tau) d\\tau + K_d \\frac{de}{dt}",
     "code_ref": "model.py:PIDController",
     "line": 95,
-    "description": "PID controller: proportional, integral, derivative terms"
+    "description": "PID controller: proportional, integral, derivative terms",
+    "source_line": 95
   },
   "steady_state_error": {
     "latex": "e_{ss} = \\frac{1}{1 + K_p}",
     "code_ref": "model.py:steady_state_error()",
     "line": 159,
-    "validation": "\u2193 K_p \u2192 \u2193 e_ss (higher gain \u2192 lower error)"
+    "description": "Steady-state error of a unity-feedback proportional loop to a step",
+    "validation": "\u2193 K_p \u2192 \u2193 e_ss (higher gain \u2192 lower error)",
+    "source_line": 159
   },
   "settling_time": {
     "latex": "t_s \\approx \\frac{4}{\\zeta \\omega_n}",
     "code_ref": "model.py:second_order_response()",
     "line": 187,
-    "validation": "2% settling time criterion"
+    "description": "Approximate 2% settling time of an underdamped second-order system",
+    "validation": "2% settling time criterion",
+    "source_line": 187
   },
   "stability": {
     "latex": "\\text{Stable} \\iff \\text{Re}(\\lambda_i) < 0 \\text{ for all poles}",
     "code_ref": "model.py:LinearSystem.is_stable()",
     "line": 59,
-    "validation": "All eigenvalues of A in left half-plane"
+    "description": "Continuous-time LTI stability criterion on the poles of A",
+    "validation": "All eigenvalues of A in left half-plane",
+    "source_line": 59
   }
 }

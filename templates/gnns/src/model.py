@@ -243,7 +243,7 @@ def graph_accuracy(predictions: np.ndarray, labels: np.ndarray, mask: np.ndarray
 
 def export_equation_metadata() -> dict[str, Any]:
     """Auto-generate equations.json for paper.typ."""
-    return {
+    metadata = {
         "message_aggregation": {
             "latex": r"m_i = \sum_{j \in N(i)} A_{ij} \mathbf{h}_j",
             "code_ref": "model.py:message_aggregate()",
@@ -275,10 +275,15 @@ def export_equation_metadata() -> dict[str, Any]:
             "description": "Node classification cross-entropy loss",
         },
     }
+    # template_builder and the shared formula schema read "source_line".
+    for info in metadata.values():
+        info["source_line"] = info["line"]
+    return metadata
 
 
 if __name__ == "__main__":
     metadata = export_equation_metadata()
     with open("equations.json", "w") as f:
         json.dump(metadata, f, indent=2)
+        f.write("\n")
     print("✅ Exported equations.json")
