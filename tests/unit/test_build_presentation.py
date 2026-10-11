@@ -1,6 +1,8 @@
 """Tests for the SIR presentation builder: pure helpers and the Typer wiring."""
 
 import importlib.util
+import re
+import sys
 from pathlib import Path
 from types import ModuleType
 
@@ -154,6 +156,33 @@ def test_cli_all_with_output_override(tmp_path: Path, monkeypatch: pytest.Monkey
     assert result.exit_code == 0
     assert gen.calls == [("all", out)]
     assert "✅ marp       →" in result.output
+
+
+def test_load_generator_reports_the_removing_commit_when_module_is_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setitem(sys.modules, "math_trace.presentation_generator", None)
+
+    with pytest.raises(
+        bp.GeneratorUnavailableError, match=re.escape("math_trace.presentation_generator is missing")
+    ) as info:
+        bp._load_generator(tmp_path / "m.json", tmp_path / "c.yaml")
+
+    assert "d8c5fb9" in str(info.value)
+
+
+def test_cli_missing_generator_exits_1_with_clear_message(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    (tmp_path / "m.json").write_text("{}")
+    (tmp_path / "c.yaml").write_text("")
+    monkeypatch.setattr(bp, "default_paths", lambda _: (tmp_path / "m.json", tmp_path / "c.yaml", tmp_path))
+    monkeypatch.setitem(sys.modules, "math_trace.presentation_generator", None)
+
+    result = runner.invoke(bp.app, [])
+
+    assert result.exit_code == 1
+    assert "math_trace.presentation_generator is missing" in result.output
+    assert "d8c5fb9" in result.output
+    assert "Traceback" not in result.output
 
 
 def test_cli_rejects_unknown_backend() -> None:

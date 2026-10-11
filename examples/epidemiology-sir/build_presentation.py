@@ -101,9 +101,35 @@ def next_steps_lines(output_dir: Path, backend: Backend, build_all: bool) -> lis
     return lines
 
 
+GENERATOR_MODULE = "math_trace.presentation_generator"
+GENERATOR_REMOVED_IN = "d8c5fb9"
+
+
+class GeneratorUnavailableError(RuntimeError):
+    """The presentation generator module is not present in this checkout."""
+
+
+def generator_missing_message() -> str:
+    """Explain why the generator is missing and which commit removed it."""
+    return (
+        f"❌ {GENERATOR_MODULE} is missing: commit {GENERATOR_REMOVED_IN} "
+        "(refactor(phase1): remove deprecated presentation modules) deleted it. "
+        "Restoring it is a design decision, not a fix; see that commit message."
+    )
+
+
 def _load_generator(model_path: Path, config_path: Path) -> PresentationBuilder:
-    """Import and construct the generator. The import is lazy so pure logic loads without it."""
-    from math_trace.presentation_generator import PresentationGenerator
+    """Import and construct the generator. The import is lazy so pure logic loads without it.
+
+    Raises GeneratorUnavailableError only when the generator module itself is absent.
+    Any other import failure is a real bug and propagates unchanged.
+    """
+    try:
+        from math_trace.presentation_generator import PresentationGenerator
+    except ModuleNotFoundError as exc:
+        if exc.name != GENERATOR_MODULE:
+            raise
+        raise GeneratorUnavailableError(generator_missing_message()) from exc
 
     return PresentationGenerator(model_path, config_path)
 
@@ -125,8 +151,12 @@ def main(
         raise typer.Exit(1)
 
     output_dir = output or default_output
+    try:
+        generator = _load_generator(model_path, config_path)
+    except GeneratorUnavailableError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1) from exc
     typer.echo(start_line(backend, build_all))
-    generator = _load_generator(model_path, config_path)
 
     results = build_outputs(generator, backend, build_all, output_dir)
     for line in result_lines(results, build_all):
