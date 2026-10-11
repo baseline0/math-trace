@@ -1,58 +1,49 @@
 """
-Build presentations from the SIR model.
+Build the SIR presentation as a single Revealjs HTML file.
 
-Supports multiple output formats:
-- Marp (Markdown slides) → HTML/PDF via Marp CLI
-- Reveal.js (HTML slides) → Live presentations
-- Beamer (LaTeX/PDF) → Traditional academic format
+Reads generated/sir_equations.json and presentation_config.yaml, and writes
+generated/presentation.html (or --output). The HTML loads reveal.js and MathJax from
+CDNs at pinned versions, so viewing it needs network access.
 
 Usage:
-  python build_presentation.py              # Build with default backend (Marp)
-  python build_presentation.py --backend marp  # Explicit backend
-  python build_presentation.py --all        # Build all available backends
+  python build_presentation.py                          # writes generated/presentation.html
+  python build_presentation.py --output /tmp/deck.html  # write elsewhere
 
 Design Intent:
 - The Typer command only parses arguments, maps errors to exit codes, and prints.
-- Input checks, build orchestration, and output formatting are pure functions.
-- The presentation generator is loaded lazily, so the pure logic imports without it.
+- Input checks, figure relocation, and output formatting are pure functions.
+- The slide and HTML logic lives in math_trace.revealjs_generator.
 """
 
 import sys
-from collections.abc import Mapping, Sequence
-from enum import StrEnum
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Protocol
 
 import typer
 
 # Add parent to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-app = typer.Typer(help="Build presentations from SIR model")
+from math_trace.revealjs_generator import (
+    Slide,
+    build_slides,
+    load_presentation_inputs,
+    relocate_figures,
+    render_html,
+    write_presentation,
+)
 
+app = typer.Typer(help="Build the SIR presentation as a Revealjs HTML file")
 
-class Backend(StrEnum):
-    """Presentation backends the generator supports."""
-
-    MARP = "marp"
-    REVEAL = "reveal"
-    BEAMER = "beamer"
-
-
-class PresentationBuilder(Protocol):
-    """The subset of PresentationGenerator used by this script."""
-
-    def build(self, backend: str, output_dir: Path) -> Path: ...
-
-    def build_all(self, output_dir: Path) -> Mapping[str, Path]: ...
+OUTPUT_NAME = "presentation.html"
 
 
 def default_paths(script_dir: Path) -> tuple[Path, Path, Path]:
-    """Return (model_path, config_path, output_dir) defaults relative to the example folder."""
+    """Return (model_path, config_path, output_path) defaults relative to the example folder."""
     return (
         script_dir / "generated" / "sir_equations.json",
         script_dir / "presentation_config.yaml",
-        script_dir / "generated",
+        script_dir / "generated" / OUTPUT_NAME,
     )
 
 
@@ -66,81 +57,31 @@ def input_errors(model_path: Path, config_path: Path) -> list[str]:
     return errors
 
 
-def build_outputs(
-    generator: PresentationBuilder,
-    backend: Backend,
-    build_all: bool,
-    output_dir: Path,
-) -> list[tuple[str, Path]]:
-    """Build one backend, or every backend when build_all is set. Returns (backend, path) pairs."""
-    if build_all:
-        return [(name, Path(path)) for name, path in generator.build_all(output_dir).items()]
-    return [(backend.value, generator.build(backend.value, output_dir))]
+def warning_lines(slides: Sequence[Slide]) -> list[str]:
+    """Format one line per slide warning (for example, a formula name missing from the model)."""
+    return [f"  ⚠️  Slide '{slide.title}': {message}" for slide in slides for message in slide.warnings]
 
 
-def start_line(backend: Backend, build_all: bool) -> str:
-    """Format the line printed before a build starts."""
-    if build_all:
-        return "🎬 Building presentations in all formats..."
-    return f"🎬 Building {backend.value} presentation..."
+def result_lines(output: Path) -> list[str]:
+    """Format the line printed after the file is written."""
+    return [f"  ✅ Generated: {output}"]
 
 
-def result_lines(results: Sequence[tuple[str, Path]], build_all: bool) -> list[str]:
-    """Format the per-output lines printed after a build."""
-    if build_all:
-        return [f"  ✅ {name:10} → {path}" for name, path in results]
-    return [f"  ✅ Generated: {results[0][1]}"]
-
-
-def next_steps_lines(output_dir: Path, backend: Backend, build_all: bool) -> list[str]:
-    """Format the next-steps hints. Marp hints appear for the marp backend or for --all."""
-    lines = ["\n📊 Next steps:"]
-    if backend == Backend.MARP or build_all:
-        lines.append(f"  • View Marp: marp {output_dir}/slides.md")
-        lines.append(f"  • Export to PDF: marp {output_dir}/slides.md --pdf")
-    return lines
-
-
-GENERATOR_MODULE = "math_trace.presentation_generator"
-GENERATOR_REMOVED_IN = "d8c5fb9"
-
-
-class GeneratorUnavailableError(RuntimeError):
-    """The presentation generator module is not present in this checkout."""
-
-
-def generator_missing_message() -> str:
-    """Explain why the generator is missing and which commit removed it."""
-    return (
-        f"❌ {GENERATOR_MODULE} is missing: commit {GENERATOR_REMOVED_IN} "
-        "(refactor(phase1): remove deprecated presentation modules) deleted it. "
-        "Restoring it is a design decision, not a fix; see that commit message."
-    )
-
-
-def _load_generator(model_path: Path, config_path: Path) -> PresentationBuilder:
-    """Import and construct the generator. The import is lazy so pure logic loads without it.
-
-    Raises GeneratorUnavailableError only when the generator module itself is absent.
-    Any other import failure is a real bug and propagates unchanged.
-    """
-    try:
-        from math_trace.presentation_generator import PresentationGenerator
-    except ModuleNotFoundError as exc:
-        if exc.name != GENERATOR_MODULE:
-            raise
-        raise GeneratorUnavailableError(generator_missing_message()) from exc
-
-    return PresentationGenerator(model_path, config_path)
+def next_steps_lines(output: Path) -> list[str]:
+    """Format the next-steps hints."""
+    return [
+        "\n📊 Next steps:",
+        f"  • Open in a browser: {output}",
+        "  • The page loads reveal.js and MathJax from cdn.jsdelivr.net, so it needs network access.",
+        "  • Press S in the deck to open speaker notes.",
+    ]
 
 
 @app.command()
 def main(
-    backend: Backend = typer.Option(Backend.MARP, help="Presentation backend (default: marp)"),
-    build_all: bool = typer.Option(False, "--all", help="Build all available backends"),
-    output: Path | None = typer.Option(None, help="Output directory (default: generated/)"),
+    output: Path | None = typer.Option(None, help=f"Output HTML file (default: generated/{OUTPUT_NAME})"),
 ) -> None:
-    """Build presentations from SIR model."""
+    """Build the SIR presentation as a single Revealjs HTML file."""
     script_dir = Path(__file__).parent
     model_path, config_path, default_output = default_paths(script_dir)
 
@@ -150,18 +91,19 @@ def main(
             typer.echo(message)
         raise typer.Exit(1)
 
-    output_dir = output or default_output
-    try:
-        generator = _load_generator(model_path, config_path)
-    except GeneratorUnavailableError as exc:
-        typer.echo(str(exc), err=True)
-        raise typer.Exit(1) from exc
-    typer.echo(start_line(backend, build_all))
+    output_path = output or default_output
+    typer.echo("🎬 Building Revealjs presentation...")
 
-    results = build_outputs(generator, backend, build_all, output_dir)
-    for line in result_lines(results, build_all):
+    inputs = load_presentation_inputs(model_path, config_path)
+    slides = relocate_figures(build_slides(inputs), script_dir, output_path.parent)
+    html_text = render_html(slides, title=str(inputs.config.get("title", "Presentation")))
+    written = write_presentation(html_text, output_path)
+
+    for line in warning_lines(slides):
         typer.echo(line)
-    for line in next_steps_lines(output_dir, backend, build_all):
+    for line in result_lines(written):
+        typer.echo(line)
+    for line in next_steps_lines(written):
         typer.echo(line)
 
 
