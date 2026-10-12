@@ -413,3 +413,7 @@ help:
     @echo "  just clean      — Remove generated files"
     @echo "  just view-paper — Open main.pdf in viewer"
     @echo "  just help       — Show this message"
+
+# Unit tests: the gate the pre-push hook runs (fleet hook standard, fleet_base.hook_standard R4)
+test-unit:
+    just test

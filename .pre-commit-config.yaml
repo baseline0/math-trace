@@ -9,6 +9,8 @@
 #   [P2] Medium: Style and formatting
 #   [P3] Low: Whitespace and hygiene
 
+default_stages:
+  - pre-commit
 default_install_hook_types:
   - pre-commit
   - pre-push
@@ -99,10 +101,11 @@ repos:
 
       # ----- P0: Pre-push: Tests -----
       - id: just-test-unit
-        name: "[P0] Pre-push: Run unit tests"
-        entry: bash -c 'uv run --python 3.13 pytest tests/unit tests/e2e -q --tb=short'
+        name: "[P0] Pre-push: just test-unit (unit tests)"
+        entry: env -u VIRTUAL_ENV just test-unit
         language: system
-        stages: [pre-push]
+        stages:
+          - pre-push
         pass_filenames: false
         always_run: true
 
