@@ -436,3 +436,19 @@ class TestTypstGroupingRendering:
     def test_sympy_braced_binomial_renders_without_braces(self):
         k, n = sp.symbols("k n_a")
         assert SymPyToTypst()._latex_to_typst(sp.latex(k * sp.binomial(n, 2))) == "k binom(n_a, 2)"
+
+
+class TestTypstBareGroupRendering:
+    """Bare LaTeX grouping braces are dropped, so Typst does not print them (TODO tech debt, 2026-10-13)."""
+
+    @pytest.mark.parametrize(
+        ("latex", "typst"),
+        [
+            ("{x}", "x"),
+            ("{a + b}", "(a + b)"),
+            (r"x_{i}^{2} + {a + b}", "x_i^2 + (a + b)"),
+            (r"\left|{x}\right|", "|x|"),
+        ],
+    )
+    def test_bare_groups_render_without_braces(self, latex: str, typst: str):
+        assert SymPyToTypst()._latex_to_typst(latex) == typst

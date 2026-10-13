@@ -353,8 +353,27 @@ class SymPyToTypst:
         # SymPy wraps some function calls in braces for grouping, e.g. k {\binom{n}{2}}.
         # Typst shows those braces, so drop them around a single call.
         typst = re.sub(r"\{([a-z]+\([^{}]*\))\}", r"\1", typst)
+        typst = self._unwrap_remaining_groups(typst)
 
         return typst
+
+    def _unwrap_remaining_groups(self, typst: str) -> str:
+        """Drop bare LaTeX grouping braces that reach the end of conversion: {x} becomes x, {a + b} becomes (a + b).
+
+        Every earlier step has handled the braces it knows, so any brace left here would print in Typst math.
+        """
+        parts: list[str] = []
+        i = 0
+        while (start := typst.find("{", i)) != -1:
+            parts.append(typst[i:start])
+            content, end = self._extract_brace_content(typst, start)
+            if end == start:  # unbalanced: leave the rest as it is
+                break
+            content = content.strip()
+            parts.append(content if re.fullmatch(r"[A-Za-z0-9]", content) else f"({content})")
+            i = end
+        parts.append(typst[i:])
+        return "".join(parts)
 
     def _unwrap_scripts(self, typst: str) -> str:
         """Render LaTeX script braces the way Typst reads them: x^{2} becomes x^2, x_{"ic"} becomes x_"ic".
