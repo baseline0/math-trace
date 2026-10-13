@@ -350,6 +350,9 @@ class SymPyToTypst:
         # Do this AFTER all LaTeX command replacements
         typst = self._quote_identifiers(typst)
         typst = self._unwrap_scripts(typst)
+        # SymPy wraps some function calls in braces for grouping, e.g. k {\binom{n}{2}}.
+        # Typst shows those braces, so drop them around a single call.
+        typst = re.sub(r"\{([a-z]+\([^{}]*\))\}", r"\1", typst)
 
         return typst
 

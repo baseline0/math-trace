@@ -428,3 +428,11 @@ class TestTypstScriptRendering:
     )
     def test_script_braces_are_unwrapped(self, latex: str, typst: str):
         assert SymPyToTypst()._latex_to_typst(latex) == typst
+
+
+class TestTypstGroupingRendering:
+    """SymPy's grouping braces around a single function call are dropped, so Typst does not show them."""
+
+    def test_sympy_braced_binomial_renders_without_braces(self):
+        k, n = sp.symbols("k n_a")
+        assert SymPyToTypst()._latex_to_typst(sp.latex(k * sp.binomial(n, 2))) == "k binom(n_a, 2)"
