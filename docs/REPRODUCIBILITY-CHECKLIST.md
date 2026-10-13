@@ -66,16 +66,13 @@ just test
 
 ---
 
-## Step 4: Verify All 5 Templates
+## Step 4: Verify the Example Paper
 
-For each template, run:
+The review covers the build `just paper` runs today: `examples/membrane-dynamics`. The per-template sections below
+are out of scope for this review. They stay as the checklist for the later per-template build.
 
 ```bash
-cd templates/epidemiology       && just paper && cd ../..
-cd templates/quantum-systems    && just paper && cd ../..
-cd templates/control-systems    && just paper && cd ../..
-cd templates/gnns               && just paper && cd ../..
-cd templates/thermodynamics     && just paper && cd ../..
+just paper
 ```
 
 ### Epidemiology
@@ -177,8 +174,8 @@ Verify these files exist at repository root:
 
 ### Reproducibility Assessment
 
-- [ ] All 5 templates build without errors
-- [ ] PDFs render correctly with equations and figures
+- [ ] `just paper` builds `examples/membrane-dynamics/main.pdf` without errors
+- [ ] PDF renders correctly with equations and figures
 - [ ] 144 tests pass
 - [ ] Code quality checks pass (lint, format, type)
 - [ ] Documentation is complete and accurate

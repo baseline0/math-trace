@@ -23,13 +23,13 @@ Python (SymPy) → LaTeX → Typst → PDF + JSON provenance
 
 ## What You'll Verify
 
-**Scope**: 5 production templates, 144 unit tests, publication pipeline
+**Scope**: one example paper (`examples/membrane-dynamics`), 144 unit tests, publication pipeline. The other templates are out of scope for this review until a per-template build exists.
 
 | Component | What to check |
 | --- | --- |
-| **Model definitions** | 5 templates export SymPy formulas cleanly |
+| **Model definitions** | membrane-dynamics formulas export SymPy cleanly |
 | **Test suite** | 144 unit tests pass (happy-path coverage) |
-| **Paper generation** | All 5 PDFs build without errors |
+| **Paper generation** | `just paper` builds `examples/membrane-dynamics/main.pdf` without errors |
 | **Documentation** | README, CONTRIBUTING, AGMAI-READY, ADRs complete |
 | **Release artifacts** | LICENSE, CITATION.cff, CHANGELOG, Justfile present |
 | **Code quality** | Lint, format, type checks pass |
@@ -77,19 +77,13 @@ Expected result:
 
 Expected time: ~2 minutes
 
-### 3. Build All 5 Templates
+### 3. Build the Example Paper
 
 ```bash
-# Option A: Build all (takes ~20 min)
-for t in epidemiology quantum-systems control-systems gnns thermodynamics; do
-  cd templates/$t && just paper && cd ../..
-done
-
-# Option B: Build one at a time (spot-check)
-cd templates/epidemiology && just paper
+just paper
 ```
 
-Expected result: All templates generate `main.pdf` without errors.
+Expected result: `examples/membrane-dynamics/main.pdf` is generated without errors.
 
 ### 4. Code Quality Checks
 
@@ -171,7 +165,7 @@ We're asking: "Does the code work as intended on your machine?"
 
 ## Success Criteria
 
-✅ All 5 templates generate PDFs
+✅ `just paper` generates `examples/membrane-dynamics/main.pdf`
 ✅ 144 tests pass
 ✅ Documentation is complete
 ✅ Code quality checks pass
