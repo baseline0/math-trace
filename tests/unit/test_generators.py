@@ -5,6 +5,7 @@ These tests verify the core conversion pipeline that affects all
 published mathematics. High coverage here is critical for correctness.
 """
 
+import pytest
 import sympy as sp
 
 from math_trace.generators import SymPyToTypst, TypstEnvironmentBuilder
@@ -393,3 +394,20 @@ class TestLatexToTypstMacros:
 
     def test_hbar_maps_to_typst_symbol(self):
         assert self._convert(r"\hbar \omega") == "ℏ ω"
+
+
+class TestTypstFunctionRendering:
+    """Typst must read these as functions, not as literal text or braces (TODO tech debt, 2026-10-13)."""
+
+    @pytest.mark.parametrize(
+        ("latex", "typst"),
+        [
+            (r"\binom{n}{k} x", "binom(n, k) x"),
+            (r"\sin{\left(t \right)}", "sin(t )"),
+            (r"\sin{x}", "sin x"),
+            (r"\cos{\theta} + \sin{\left(2 t\right)}", "cos θ + sin(2 t)"),
+            (r"\log{\left(x\right)}", "log(x)"),
+        ],
+    )
+    def test_function_names_render_without_quotes_or_braces(self, latex: str, typst: str):
+        assert SymPyToTypst()._latex_to_typst(latex) == typst

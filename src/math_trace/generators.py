@@ -75,6 +75,7 @@ TYPST_BARE_NAMES: frozenset[str] = frozenset(
         "infinity",
         "ln",
         "exp",
+        "binom",
         "sqrt",
         "hat",
         "bar",
@@ -182,6 +183,24 @@ class SymPyToTypst:
 
         return "".join(result)
 
+    def _unwrap_function_arguments(self, typst: str, names: list[str]) -> str:
+        """Drop the grouping braces LaTeX writes after a function name: sin{(t)} becomes sin(t).
+
+        Typst shows those braces literally. A non-parenthesised argument gets a space
+        (sin x), so the name is not read as part of one identifier.
+        """
+        pattern = re.compile(r"\b(" + "|".join(sorted(names, key=len, reverse=True)) + r")\s*\{")
+        parts: list[str] = []
+        i = 0
+        while match := pattern.search(typst, i):
+            parts.append(typst[i : match.start()])
+            name = match.group(1)
+            content, i = self._extract_brace_content(typst, match.end() - 1)
+            content = content.strip()
+            parts.append(name + content if content.startswith("(") else f"{name} {content}")
+        parts.append(typst[i:])
+        return "".join(parts)
+
     @staticmethod
     def _differential_fraction(match: re.Match[str]) -> str:
         """Render a differential fraction as (d x)/(d y), keeping order and power.
@@ -266,6 +285,7 @@ class SymPyToTypst:
         # Parentheses
         typst = re.sub(r"\\left\(", "(", typst)
         typst = re.sub(r"\\right\)", ")", typst)
+        typst = self._unwrap_function_arguments(typst, trig_functions)
 
         # Greek letters (comprehensive set)
         greek_map = {
