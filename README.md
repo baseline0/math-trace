@@ -351,7 +351,7 @@ See `.pre-commit-config.yaml` for the full hook configuration.
 ### Cleanup
 
 ```bash
-just clean             # Remove generated files
+just clean-generated   # Remove generated files
 ```
 
 ## How to Use

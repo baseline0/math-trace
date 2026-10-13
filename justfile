@@ -1,4 +1,6 @@
 # Shared commit recipe from fleet-base. Literal path: just does not interpolate variables into import paths.
+import 'just/fleet-clean.just'
+
 set default-list := true
 
 [group("build")]
@@ -108,8 +110,9 @@ typecheck:
     @echo "🔎 Type checking..."
     uv run mypy src/ tests/ --ignore-missing-imports --no-error-summary 2>&1 | grep -v "numpy" | grep -v "error:" || echo "✅ Type check passed"
 
+# Renamed from `clean`: removes generated example outputs (PDF, JSON, generated slides), which are not caches. The shared clean (fleet-clean.just) removes caches only.
 [group("clean")]
-clean:
+clean-generated:
     @echo "🗑️  Cleaning generated files..."
     rm -rf examples/membrane-dynamics/generated/*
     rm -f examples/membrane-dynamics/main.pdf
@@ -408,7 +411,7 @@ help:
     @echo "  just install-typst — Install Typst (required for PDF generation)"
     @echo ""
     @echo "UTILITIES:"
-    @echo "  just clean      — Remove generated files"
+    @echo "  just clean-generated      — Remove generated files"
     @echo "  just view-paper — Open main.pdf in viewer"
     @echo "  just help       — Show this message"
 
