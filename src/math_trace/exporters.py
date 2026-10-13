@@ -12,9 +12,7 @@ touching formula definitions or the publishing layer.
 
 ## Current Implementation
 
-- **LatexToTypstConverter:** Regex-based conversion from LaTeX to Typst
-  - Handles common math markup transformations
-  - Could be replaced with a proper LaTeX parser if needed
+- No LaTeX-to-Typst converter lives here. The production converter is `SymPyToTypst` in `generators.py`.
 
 ## To Swap Converters (e.g., LaTeX → MathML)
 
@@ -36,7 +34,6 @@ See Also:
 
 from __future__ import annotations
 
-import re
 from abc import ABC, abstractmethod
 
 
@@ -58,53 +55,6 @@ class Converter(ABC):
             Converted content in target format
         """
         pass
-
-
-class LatexToTypstConverter(Converter):
-    """Converts LaTeX math syntax to Typst markup.
-
-    MIGRATION PATH: If Typst's math syntax changes significantly, replace this
-    converter with an updated version. All formula definitions continue to work.
-
-    Current implementation uses regex-based replacements for common patterns.
-    Future implementation could use a proper LaTeX parser for robustness.
-
-    Examples:
-        \\frac{a}{b} → a / b
-        x^2 → x^2 (Typst uses same syntax)
-        \\alpha → α (Unicode substitution)
-    """
-
-    def convert(self, latex: str) -> str:
-        """Convert LaTeX to Typst markup.
-
-        Args:
-            latex: LaTeX math string
-
-        Returns:
-            Typst-compatible math string
-        """
-        result = latex
-
-        # Common substitutions
-        substitutions = {
-            r"\\frac{([^}]*)}{([^}]*)}": r"\1 / \2",
-            r"\\sqrt{([^}]*)}": r"sqrt(\1)",
-            r"\\alpha": "α",
-            r"\\beta": "β",
-            r"\\gamma": "γ",
-            r"\\delta": "δ",
-            r"\\epsilon": "ε",
-            r"\\lambda": "λ",
-            r"\\mu": "μ",
-            r"\\pi": "π",
-            r"\\sigma": "σ",
-        }
-
-        for latex_pattern, typst_replacement in substitutions.items():
-            result = re.sub(latex_pattern, typst_replacement, result)
-
-        return result
 
 
 class LatexExporter:

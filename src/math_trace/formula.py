@@ -45,7 +45,7 @@ Example:
             self.latex = expr.to_latex()  # Provide LaTeX for downstream
 
 See Also:
-    - exporters.py: LatexToTypstConverter (swap if Typst syntax changes)
+    - generators.py: SymPyToTypst (swap if Typst syntax changes)
     - publishers.py: Publisher interface (swap if Typst becomes unmaintained)
     - examples/*/build_paper.py: Orchestration (unchanged when swapping)
 """

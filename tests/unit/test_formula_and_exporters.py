@@ -10,7 +10,7 @@ failure so the gap stays visible.
 
 import pytest
 
-from math_trace.exporters import LatexExporter, LatexToTypstConverter
+from math_trace.exporters import LatexExporter
 from math_trace.formula import Formula, formula_to_json_dict
 
 
@@ -59,35 +59,6 @@ def test_optional_fields_default_to_empty_and_unverified():
 def test_formula_without_required_fields_is_rejected():
     with pytest.raises(TypeError):
         Formula(name="n", latex="x")  # missing description and source_line
-
-
-# --- LaTeX to Typst converter -------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    ("latex", "typst"),
-    [
-        (r"\alpha + \beta", "α + β"),
-        (r"\sqrt{x}", "sqrt(x)"),
-        (r"\frac{a}{b}", "a / b"),
-        (r"\pi r^2", "π r^2"),
-    ],
-)
-def test_converter_handles_common_macros(latex, typst):
-    assert LatexToTypstConverter().convert(latex) == typst
-
-
-def test_converter_leaves_plain_text_unchanged():
-    assert LatexToTypstConverter().convert("x^2 + y") == "x^2 + y"
-
-
-@pytest.mark.xfail(
-    strict=True,
-    reason="Known limitation: the regex converter does not handle nested fractions. "
-    "Fix by replacing the regex with a brace-aware parser.",
-)
-def test_converter_handles_nested_fractions():
-    assert LatexToTypstConverter().convert(r"\frac{\frac{a}{b}}{c}") == "(a / b) / c"
 
 
 # --- LaTeX exporter ----------------------------------------------------------------
