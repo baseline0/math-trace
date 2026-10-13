@@ -3,6 +3,11 @@ import 'just/fleet-clean.just'
 
 set default-list := true
 
+# Install the latest elan (Lean toolchain manager) into ~/.elan after checking its SHA-256 against GitHub's digest.
+[group("build")]
+install-elan:
+    uv run python scripts/install_elan.py --install-dir ~/.elan
+
 # Reviewer path: rebuild a registered reference twice, check it, and write its JSON report. Exits 1 on any failure.
 [group("build")]
 reference-check reference="epidemiology-sir":
