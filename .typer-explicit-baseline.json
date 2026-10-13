@@ -1,0 +1,10 @@
+{
+  "violations": [
+    "examples/epidemiology-sir/build_presentation.py::main::output::optional-type",
+    "src/math_trace/formula_browser.py::arxiv_equations::paper_id::positional",
+    "src/math_trace/formula_browser.py::arxiv_papers::limit::optional-option",
+    "src/math_trace/formula_browser.py::list_local_models::pattern::optional-option",
+    "src/math_trace/formula_browser.py::list_local_models::root::optional-option",
+    "src/math_trace/formula_browser.py::local_model_formulas::path::positional"
+  ]
+}
