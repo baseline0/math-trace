@@ -3,6 +3,11 @@ import 'just/fleet-clean.just'
 
 set default-list := true
 
+# Reviewer path: rebuild a registered reference twice, check it, and write its JSON report. Exits 1 on any failure.
+[group("build")]
+reference-check reference="epidemiology-sir":
+    uv run python -m math_trace.reference_check --reference {{reference}} --repo {{justfile_directory()}} --report {{justfile_directory()}}/examples/{{reference}}/generated/reference-report.json
+
 [group("build")]
 model:
     @echo "📐 Exporting formulas from Python model..."
