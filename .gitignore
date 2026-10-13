@@ -98,3 +98,6 @@ CLAUDE.md
 .coverage.*
 *.cover
 coverage.xml
+
+# Python caches and environments (fleet standard)
+.ruff_cache/
