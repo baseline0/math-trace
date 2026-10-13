@@ -452,3 +452,42 @@ class TestTypstBareGroupRendering:
     )
     def test_bare_groups_render_without_braces(self, latex: str, typst: str):
         assert SymPyToTypst()._latex_to_typst(latex) == typst
+
+
+class TestTypstOperatorRendering:
+    """Operator names and roots render as Typst functions, not stray macros (TODO tech debt, 2026-10-13)."""
+
+    @pytest.mark.parametrize(
+        ("latex", "typst"),
+        [
+            (r"\operatorname{Abs}{\left(x \right)}", 'op("Abs")(x )'),
+            (r"\operatorname{argmax}_{x}", 'op("argmax")_x'),
+            (r"\mathrm{d}x", "upright(d)x"),
+            (r"\mathrm{max}{x}", 'op("max") x'),
+        ],
+    )
+    def test_operator_names_render_as_typst_operators(self, latex: str, typst: str):
+        assert SymPyToTypst()._latex_to_typst(latex) == typst
+
+    @pytest.mark.parametrize(
+        ("latex", "typst"),
+        [
+            (r"\sqrt[3]{x}", "root(3, x)"),
+            (r"\sqrt[n]{\frac{1}{2}}", "root(n, (1)/(2))"),
+            (r"\sqrt{x}", "sqrt(x)"),
+        ],
+    )
+    def test_roots_keep_their_index(self, latex: str, typst: str):
+        assert SymPyToTypst()._latex_to_typst(latex) == typst
+
+    @pytest.mark.parametrize(
+        ("latex", "typst"),
+        [
+            (r"e^{- \frac{x^{2}}{2}}", "e^(- (x^2)/(2))"),
+            (r"x^{y^{2}}", "x^(y^2)"),
+            (r"x^{a^{b^{c}}}", "x^(a^(b^c))"),
+            (r"x_{a_{b_{c}}}", "x_(a_(b_c))"),
+        ],
+    )
+    def test_nested_script_braces_are_all_unwrapped(self, latex: str, typst: str):
+        assert SymPyToTypst()._latex_to_typst(latex) == typst

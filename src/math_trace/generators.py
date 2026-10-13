@@ -76,6 +76,9 @@ TYPST_BARE_NAMES: frozenset[str] = frozenset(
         "ln",
         "exp",
         "binom",
+        "root",
+        "op",
+        "upright",
         "sqrt",
         "hat",
         "bar",
@@ -183,13 +186,33 @@ class SymPyToTypst:
 
         return "".join(result)
 
+    def _replace_root_index(self, latex: str) -> str:
+        """Replace \\sqrt[n]{x} with root(n, x). The radicand is read with brace matching, so it may nest."""
+        pattern = re.compile(r"\\sqrt\s*\[([^\]]*)\]\s*\{")
+        parts: list[str] = []
+        i = 0
+        while match := pattern.search(latex, i):
+            parts.append(latex[i : match.start()])
+            radicand, i = self._extract_brace_content(latex, match.end() - 1)
+            parts.append(f"root({match.group(1).strip()}, {radicand})")
+        parts.append(latex[i:])
+        return "".join(parts)
+
+    @staticmethod
+    def _upright_or_operator(match: re.Match[str]) -> str:
+        """Render \\mathrm{X}: a single letter stays upright (the differential d), a word becomes an operator name."""
+        name = match.group(1)
+        return f"upright({name})" if len(name) == 1 else f'op("{name}")'
+
     def _unwrap_function_arguments(self, typst: str, names: list[str]) -> str:
         """Drop the grouping braces LaTeX writes after a function name: sin{(t)} becomes sin(t).
 
         Typst shows those braces literally. A non-parenthesised argument gets a space
-        (sin x), so the name is not read as part of one identifier.
+        (sin x), so the name is not read as part of one identifier. op("Name") is accepted as a name too.
         """
-        pattern = re.compile(r"\b(" + "|".join(sorted(names, key=len, reverse=True)) + r")\s*\{")
+        alternatives = [re.escape(name) for name in sorted(names, key=len, reverse=True)]
+        alternatives.append(r'op\("[A-Za-z]+"\)')
+        pattern = re.compile(r"\b(" + "|".join(alternatives) + r")\s*\{")
         parts: list[str] = []
         i = 0
         while match := pattern.search(typst, i):
@@ -250,6 +273,7 @@ class SymPyToTypst:
         # Macro replacements (order matters for nested patterns)
         # Use brace-aware replacement for macros with arguments
         typst = self._replace_binom(typst)
+        typst = self._replace_root_index(typst)
         typst = _DIFFERENTIAL_FRAC.sub(self._differential_fraction, typst)
         typst = self._replace_macro(typst, "frac", "({0})/({1})")
         typst = self._replace_macro(typst, "sqrt", "sqrt({0})")
@@ -259,6 +283,10 @@ class SymPyToTypst:
             typst = self._replace_macro(typst, accent, accent + "({0})")
         typst = self._replace_macro(typst, "mathbf", "bold({0})")
         typst = self._replace_macro(typst, "text", '"{0}"')
+
+        # Operator names: \operatorname{Abs} → op("Abs"); \mathrm{d} → upright(d), \mathrm{max} → op("max")
+        typst = re.sub(r"\\operatorname\s*\{([A-Za-z]+)\}", r'op("\1")', typst)
+        typst = re.sub(r"\\mathrm\s*\{([A-Za-z]+)\}", self._upright_or_operator, typst)
 
         # Function names: remove backslash and convert to lowercase (Typst uses plain text)
         # e.g., \sin, \cos, \log → sin, cos, log
@@ -388,7 +416,8 @@ class SymPyToTypst:
             parts.append(typst[i : match.start()])
             marker = match.group(0)[0]
             content, i = self._extract_brace_content(typst, match.end() - 1)
-            content = content.strip()
+            # Nested scripts such as x^{a^{b}} need their inner braces unwrapped before the outer group is wrapped
+            content = self._unwrap_scripts(content).strip()
             if re.fullmatch(r'"[^"]*"|[A-Za-z0-9]', content):
                 parts.append(marker + content)
             else:
