@@ -107,7 +107,7 @@ class TestPresentationBuilder:
 
         assert "SIR Model" in config["title"]
         assert config["format"] == "talk"
-        assert config["backend"] == "marp"
+        assert "backend" not in config  # the Marp backend was removed; the builder renders reveal.js only
         assert len(config["slides"]) == 2  # Title + 1 formula
 
     def test_build_formulas_json(self):

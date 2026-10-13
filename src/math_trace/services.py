@@ -242,7 +242,6 @@ class PresentationBuilder:
         config = {
             "title": f"{paper_metadata.title} (Formula Extraction)",
             "format": "talk",
-            "backend": "marp",
             "metadata": {
                 "author": "Auto-generated from paper",
                 "date": "2026",
