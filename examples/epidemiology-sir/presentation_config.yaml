@@ -62,7 +62,7 @@ slides:
       - R₀ > 1: epidemic grows (exponential phase)
       - R₀ = 1: endemic equilibrium (herd immunity)
       - R₀ < 1: disease dies out
-    formulas: ["R_0"]
+    formulas: ["R0"]
     notes: "R₀ is the most important single number for understanding epidemic potential"
 
   - title: "Model Assumptions"
