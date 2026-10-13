@@ -349,8 +349,30 @@ class SymPyToTypst:
         # This prevents Typst from interpreting ES as E*S
         # Do this AFTER all LaTeX command replacements
         typst = self._quote_identifiers(typst)
+        typst = self._unwrap_scripts(typst)
 
         return typst
+
+    def _unwrap_scripts(self, typst: str) -> str:
+        """Render LaTeX script braces the way Typst reads them: x^{2} becomes x^2, x_{"ic"} becomes x_"ic".
+
+        Typst shows braces after ^ and _ literally. A single letter or digit needs no grouping, a quoted
+        string stays quoted, and anything longer is wrapped in parentheses.
+        """
+        pattern = re.compile(r"[_^]\{")
+        parts: list[str] = []
+        i = 0
+        while match := pattern.search(typst, i):
+            parts.append(typst[i : match.start()])
+            marker = match.group(0)[0]
+            content, i = self._extract_brace_content(typst, match.end() - 1)
+            content = content.strip()
+            if re.fullmatch(r'"[^"]*"|[A-Za-z0-9]', content):
+                parts.append(marker + content)
+            else:
+                parts.append(f"{marker}({content})")
+        parts.append(typst[i:])
+        return "".join(parts)
 
     def _quote_identifiers(self, typst: str) -> str:
         """Quote multi-letter identifiers and subscripts in Typst math mode.

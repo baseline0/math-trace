@@ -373,13 +373,13 @@ class TestLatexToTypstMacros:
         return SymPyToTypst()._latex_to_typst(latex)
 
     def test_accent_macro_becomes_typst_function(self):
-        assert self._convert(r"\hat{y}_{ic}") == r'hat(y)_{"ic"}'
+        assert self._convert(r"\hat{y}_{ic}") == r'hat(y)_"ic"'
 
     def test_mathbf_becomes_bold(self):
         assert self._convert(r"\mathbf{h}_j") == "bold(h)_j"
 
     def test_text_becomes_string_literal_and_is_not_requoted(self):
-        assert self._convert(r"W_{\text{self}}") == 'W_{"self"}'
+        assert self._convert(r"W_{\text{self}}") == 'W_"self"'
 
     def test_sum_and_integral_stay_bare_symbol_names(self):
         assert self._convert(r"\sum_i") == "sum_i"
@@ -410,4 +410,21 @@ class TestTypstFunctionRendering:
         ],
     )
     def test_function_names_render_without_quotes_or_braces(self, latex: str, typst: str):
+        assert SymPyToTypst()._latex_to_typst(latex) == typst
+
+
+class TestTypstScriptRendering:
+    """Typst shows braces after ^ and _ literally, so script groups are unwrapped (TODO tech debt, 2026-10-13)."""
+
+    @pytest.mark.parametrize(
+        ("latex", "typst"),
+        [
+            (r"x^{2}", "x^2"),
+            (r"x^{-1}", "x^(-1)"),
+            (r"x_{ic}", 'x_"ic"'),
+            (r"x_{\text{self}}", 'x_"self"'),
+            (r"x^{\frac{1}{2}}", "x^((1)/(2))"),
+        ],
+    )
+    def test_script_braces_are_unwrapped(self, latex: str, typst: str):
         assert SymPyToTypst()._latex_to_typst(latex) == typst
