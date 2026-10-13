@@ -3,6 +3,11 @@ import 'just/fleet-clean.just'
 
 set default-list := true
 
+# Lean/Mathlib health check for a project (default: the Palomar Sidorenko clone). Read-only: never downloads a toolchain. Exits 1 when a required check fails.
+[group("build")]
+lean-health project="~/.cache/math-trace/palomar-sidorenko" report="generated/lean-health.json":
+    uv run python scripts/lean_health.py --project {{project}} --report {{report}} --elan "" --cache
+
 # Install the latest elan (Lean toolchain manager) into ~/.elan after checking its SHA-256 against GitHub's digest.
 [group("build")]
 install-elan:

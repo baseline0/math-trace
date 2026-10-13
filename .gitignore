@@ -101,3 +101,6 @@ coverage.xml
 
 # Python caches and environments (fleet standard)
 .ruff_cache/
+
+# Root-level generated reports (for example lean-health.json); the per-example rules above cover example outputs.
+/generated/
