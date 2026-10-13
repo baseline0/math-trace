@@ -370,7 +370,7 @@ Not ideal if:
 4. **Avoiding "Abandoned PyPI Project" Fate**
    - Risk: Feature creep (themes, live server, Jupyter, plugins)
    - Mitigation: **Scope lock** at publication—publish small stable API only
-   - Mitigation: **Version pinning policy** for SymPy and dependencies
+   - Mitigation: **Version pinning** for SymPy and dependencies: `uv.lock` holds the exact versions; the rule is in fleet-base STANDARDS.md (Pinning and Provenance)
    - Mitigation: **Sunset clause** (if we stop using it, archive as read-only)
    - Status: ✅ *Accepted; will codify in docs*
 
