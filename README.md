@@ -1,6 +1,6 @@
 # math-trace
 
-**Write publication-quality papers where every equation links back to code.**
+**math-trace makes mathematical references reproducible: each reference connects its equations, assumptions, implementation, tests, and generated results in one inspectable workflow.**
 
 ## Status & Badges
 
@@ -9,7 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://docs.astral.sh/ruff/)
 
-Formula-to-code traceability for researchers who want reproducible mathematics. SymPy → Typst → PDF, with optional Lean formalization and Palomar registry integration.
+Formula-to-code traceability for researchers who want reproducible mathematics. SymPy → Typst → PDF, with Lean formalization as a path for theorem-style references and optional Palomar registry integration.
 
 ## Quick Install & Try
 
