@@ -159,9 +159,13 @@ class SymPyToTypst:
                 while i < len(latex) and latex[i] == "{":
                     arg, i = self._extract_brace_content(latex, i)
                     args.append(arg)
-                    # Skip optional whitespace
-                    while i < len(latex) and latex[i] in " \t":
-                        i += 1
+                    # Skip whitespace only when another argument follows; otherwise keep it
+                    # so the space after the macro survives (RM-014).
+                    j = i
+                    while j < len(latex) and latex[j] in " \t":
+                        j += 1
+                    if j < len(latex) and latex[j] == "{":
+                        i = j
 
                 if args:
                     # Replace with template if we got all needed args
