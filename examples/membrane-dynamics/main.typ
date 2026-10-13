@@ -3,7 +3,7 @@
 #set heading(numbering: "1.")
 
 // Load generated formulas
-#let formulas = include "generated/formulas.typ"
+#import "generated/formulas.typ": rate
 
 = A minimal stochastic P-system
 
@@ -25,7 +25,7 @@ Let $n_a(t)$ be the number of `a` objects at time $t$. The rate of the
 reaction $2a → b$ is given by:
 
 #figure(
-  align(center, text(size: 12pt, formulas)),
+  align(center, text(size: 12pt, rate)),
   caption: [Rate law for rule $2a → b$ derived from mass-action kinetics (see model.py:25)],
 ) <eq-rate>
 
@@ -52,7 +52,7 @@ Palomar formalization registry.
 == Stochastic simulation
 
 We simulate the system under stochastic mass-action kinetics using the
-Gillespie algorithm with fixed time steps. Figure 1 shows a representative
+Gillespie algorithm with fixed time steps. @fig-sim shows a representative
 trajectory for $k = 0.01$, $n_a(0) = 50$.
 
 #figure(
