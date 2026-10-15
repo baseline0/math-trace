@@ -105,3 +105,58 @@ def test_the_epidemiology_reference_is_registered_with_its_contract_tests() -> N
 
     assert reference.build and reference.contract_tests
     assert "generated/sir_equations.json" in reference.outputs
+
+
+def _expected(**overrides: object) -> rc.ExpectedHashes:
+    base: dict[str, object] = {"python": "3.13", "uv_lock_sha256": "lock", "outputs": {"out.json": "h"}}
+    base.update(overrides)
+    return rc.ExpectedHashes(**base)  # type: ignore[arg-type]
+
+
+def test_outputs_and_uv_lock_matching_the_recorded_hashes_pass() -> None:
+    report = _passing_report(uv_lock_sha256="lock", expected=_expected())
+
+    assert rc.verdict(report) == []
+
+
+def test_a_changed_output_is_named_in_the_reason() -> None:
+    report = _passing_report(
+        uv_lock_sha256="lock",
+        outputs_run_1={"out.json": "changed"},
+        outputs_run_2={"out.json": "changed"},
+        expected=_expected(),
+    )
+
+    assert rc.verdict(report) == ["output differs from the recorded hash: out.json"]
+
+
+def test_a_changed_uv_lock_hash_is_named_in_the_reason() -> None:
+    report = _passing_report(uv_lock_sha256="other", expected=_expected())
+
+    reasons = rc.verdict(report)
+
+    assert len(reasons) == 1
+    assert reasons[0].startswith("uv.lock changed: recorded sha256 lock, now other")
+
+
+def test_a_python_change_is_named_and_not_reported_as_output_drift() -> None:
+    report = _passing_report(
+        python="3.12",
+        uv_lock_sha256="lock",
+        outputs_run_1={"out.json": "changed"},
+        outputs_run_2={"out.json": "changed"},
+        expected=_expected(),
+    )
+
+    reasons = rc.verdict(report)
+
+    assert len(reasons) == 1
+    assert reasons[0].startswith("python version changed: recorded 3.13, running 3.12")
+
+
+def test_epidemiology_sir_without_an_expected_file_is_unchanged() -> None:
+    assert rc.REFERENCES["epidemiology-sir"].expected is None
+
+    report = _passing_report(uv_lock_sha256="anything")
+
+    assert rc.verdict(report) == []

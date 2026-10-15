@@ -5,7 +5,9 @@ contain, and the tests that hold its contract. The check:
 1. confirms the required files exist;
 2. runs the build twice, and hashes every output after each run;
 3. runs the contract tests;
-4. records provenance: the source revision, whether it is a tag, whether the tree is dirty, and the Python version.
+4. records provenance: the source revision, whether it is a tag, whether the tree is dirty, and the Python version;
+5. when the reference registers an expected-hashes file, compares the outputs, the uv.lock hash, and the Python version
+   with it. A Python change is named as a version change, not reported as output drift.
 
 It passes only when all four hold. The report is JSON, and the exit status is 0 on a pass and 1 on a fail, so a
 failure is readable in the report, not an opaque traceback.
@@ -39,6 +41,7 @@ class Reference:
     required: tuple[str, ...]
     outputs: tuple[str, ...]  # glob patterns, relative to `directory`
     contract_tests: tuple[str, ...]  # relative to the repo root
+    expected: str | None = None  # expected-hashes file, relative to `directory`; None means no recorded hashes
 
 
 REFERENCES: dict[str, Reference] = {
@@ -77,6 +80,7 @@ REFERENCES: dict[str, Reference] = {
         ),
         outputs=("generated/gap_table.json",),
         contract_tests=("tests/integration/test_sidorenko_turan_contract.py",),
+        expected="expected-hashes.json",
     ),
 }
 
@@ -86,6 +90,15 @@ class StepResult:
     argv: tuple[str, ...]
     returncode: int
     seconds: float
+
+
+@dataclass(frozen=True)
+class ExpectedHashes:
+    """Recorded hashes a build is compared with: the Python version, the uv.lock hash, and each output's hash."""
+
+    python: str
+    uv_lock_sha256: str
+    outputs: dict[str, str]
 
 
 @dataclass
@@ -103,6 +116,9 @@ class Report:
     tests_returncode: int | None = None
     deterministic: bool = False
     failures: list[str] = field(default_factory=list)
+    uv_lock_sha256: str = ""
+    expected: ExpectedHashes | None = None
+    expected_problem: str | None = None  # the registered expected file is absent or unreadable
 
     @property
     def result(self) -> str:
@@ -143,7 +159,66 @@ def verdict(report: Report) -> list[str]:
         reasons.append("the build produced no outputs")
     if not report.deterministic:
         reasons.append("two builds from the same checkout produced different outputs")
+    if report.expected_problem:
+        reasons.append(report.expected_problem)
+    if report.expected is not None:
+        reasons.extend(expected_reasons(report, report.expected))
     return reasons
+
+
+def expected_reasons(report: Report, expected: ExpectedHashes) -> list[str]:
+    """Why this build differs from the recorded hashes. A Python change is named alone, not reported as output drift."""
+    reasons: list[str] = []
+    if report.python != expected.python:
+        reasons.append(
+            f"python version changed: recorded {expected.python}, running {report.python}; "
+            "the expected hashes depend on the Python and library versions, so re-record them on this Python"
+        )
+    else:
+        for name in sorted(set(expected.outputs) | set(report.outputs_run_1)):
+            if expected.outputs.get(name) != report.outputs_run_1.get(name):
+                reasons.append(f"output differs from the recorded hash: {name}")
+    if report.uv_lock_sha256 != expected.uv_lock_sha256:
+        reasons.append(
+            f"uv.lock changed: recorded sha256 {expected.uv_lock_sha256 or 'absent'}, "
+            f"now {report.uv_lock_sha256 or 'absent'}; the dependency pins moved, so re-record the expected hashes"
+        )
+    return reasons
+
+
+def lock_sha256(repo: Path) -> str:
+    """SHA-256 of the repository's uv.lock, or "" when there is none."""
+    path = repo / "uv.lock"
+    return file_sha256(path) if path.is_file() else ""
+
+
+def load_expected(path: Path) -> ExpectedHashes:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return ExpectedHashes(
+        python=str(data["python"]),
+        uv_lock_sha256=str(data["uv_lock_sha256"]),
+        outputs={str(k): str(v) for k, v in data["outputs"].items()},
+    )
+
+
+def _read_expected(path: Path, reference: Reference) -> tuple[ExpectedHashes | None, str | None]:
+    """The recorded hashes, or the named reason they cannot be read. A registered file must exist."""
+    shown = f"{reference.directory}/{reference.expected}"
+    if not path.is_file():
+        return None, f"expected hashes file missing: {shown}"
+    try:
+        return load_expected(path), None
+    except (ValueError, KeyError, TypeError, AttributeError) as error:
+        return None, f"expected hashes file unreadable: {shown} ({error})"
+
+
+def expected_payload(report: Report) -> dict[str, object]:
+    """The expected-hashes file for a passing run: the Python version, the uv.lock hash, and the first run's outputs."""
+    return {
+        "python": report.python,
+        "uv_lock_sha256": report.uv_lock_sha256,
+        "outputs": report.outputs_run_1,
+    }
 
 
 def _git(repo: Path, *args: str) -> str:
@@ -165,8 +240,8 @@ def run_step(argv: tuple[str, ...], cwd: Path) -> StepResult:
     return StepResult(argv=argv, returncode=done.returncode, seconds=round(time.monotonic() - started, 1))
 
 
-def check(name: str, repo: Path) -> Report:
-    """Run the full reviewer path for one registered reference."""
+def check(name: str, repo: Path, *, use_expected: bool = True) -> Report:
+    """Run the full reviewer path for one registered reference. `use_expected=False` skips the recorded-hash comparison."""
     reference = REFERENCES[name]
     revision, tag, dirty = provenance(repo)
     report = Report(
@@ -175,9 +250,12 @@ def check(name: str, repo: Path) -> Report:
         tag=tag,
         dirty=dirty,
         python=platform.python_version(),
+        uv_lock_sha256=lock_sha256(repo),
     )
     report.missing_required = missing_required(reference, repo)
     base = repo / reference.directory
+    if use_expected and reference.expected is not None:
+        report.expected, report.expected_problem = _read_expected(base / reference.expected, reference)
     report.inputs = {name_: file_sha256(base / name_) for name_ in reference.required if (base / name_).is_file()}
     if not report.missing_required:
         report.steps = [run_step(argv, base) for argv in reference.build]
@@ -202,12 +280,20 @@ def run(
     reference: str = typer.Option(..., "--reference", help="A registered reference name."),
     repo: Path = typer.Option(..., "--repo", help="The repository root."),
     report: Path = typer.Option(..., "--report", help="Where to write the JSON report."),
+    record_expected: bool = typer.Option(  # typer-explicit: allow-optional: a switch that only the recording run sets
+        False,
+        "--record-expected",
+        help="After a passing build, write the reference's expected-hashes file. Skips the recorded-hash comparison.",
+    ),
 ) -> None:
     """Rebuild a registered reference twice, check it, write the report, and exit 1 on any failure."""
     if reference not in REFERENCES:
         typer.echo(f"unknown reference {reference!r}; known: {', '.join(sorted(REFERENCES))}", err=True)
         raise typer.Exit(2)
-    result = check(reference, repo)
+    if record_expected and REFERENCES[reference].expected is None:
+        typer.echo(f"{reference} has no expected-hashes file to record", err=True)
+        raise typer.Exit(2)
+    result = check(reference, repo, use_expected=not record_expected)
     payload = asdict(result) | {"result": result.result}
     report.parent.mkdir(parents=True, exist_ok=True)
     report.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -216,6 +302,10 @@ def run(
         typer.echo(f"  - {reason}")
     if result.failures:
         raise typer.Exit(1)
+    if record_expected:
+        target = repo / REFERENCES[reference].directory / str(REFERENCES[reference].expected)
+        target.write_text(json.dumps(expected_payload(result), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        typer.echo(f"recorded expected hashes: {target}")
 
 
 if __name__ == "__main__":
