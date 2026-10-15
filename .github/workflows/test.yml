@@ -46,10 +46,10 @@ jobs:
           ref: main
           token: ${{ secrets.FLEET_READ_TOKEN }}
 
-      - name: Install just
-        run: |
-          uv tool install rust-just
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Set up just
+        uses: extractions/setup-just@v3
+        with:
+          just-version: "1.40.0"
 
       - name: Install fleet CLI from the checked-out fleet-base
         run: |
