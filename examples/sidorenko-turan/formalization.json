@@ -1,0 +1,26 @@
+{
+  "source": "Palomar PALOMAR-2026-10-13-000012, xliu2022/improved-sidorenko-lean",
+  "source_commit": "ba6f109bf01436ca15e55fdf5d35dbea85ffd9c9",
+  "toolchain": "leanprover/lean4:v4.35.0-rc2",
+  "mathlib": "065356127 (from the committed lake-manifest.json)",
+  "checks": {
+    "build": {
+      "status": "passed",
+      "evidence": "LXD rebuild 2026-10-13, run 20261013T213113Z: lake build exit 0, 3,119 jobs",
+      "note": "38 linter warnings; 3 sorry warnings are the deliberate statement placeholders in Challenge.lean"
+    },
+    "axioms": {
+      "status": "passed",
+      "evidence": "run 20261013T213113Z: the three main theorems depend only on propext, Classical.choice, Quot.sound"
+    },
+    "statement_match": {
+      "status": "open",
+      "evidence": "run 20261013T214201Z: Comparator did not run; bwrap could not mount /proc (unprivileged LXD container without security.nesting)",
+      "note": "Only the author's Comparator run, on record, checks that Solution.lean states what Challenge.lean asks"
+    }
+  },
+  "companion": {
+    "script": "build_table.py",
+    "checks": "arithmetic of the displayed constant and gap; not the statement match"
+  }
+}

@@ -67,6 +67,17 @@ REFERENCES: dict[str, Reference] = {
             "tests/unit/test_sir_presentation_config.py",
         ),
     ),
+    "sidorenko-turan": Reference(
+        directory="examples/sidorenko-turan",
+        build=(("uv", "run", "python", "build_table.py"),),
+        required=(
+            "build_table.py",
+            "lean_statement.lean",
+            "formalization.json",
+        ),
+        outputs=("generated/gap_table.json",),
+        contract_tests=("tests/integration/test_sidorenko_turan_contract.py",),
+    ),
 }
 
 
