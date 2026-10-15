@@ -1,4 +1,6 @@
 # Shared commit recipe from fleet-base. Literal path: just does not interpolate variables into import paths.
+import 'just/repo-push.just'
+
 import 'just/fleet-clean.just'
 
 set default-list := true
