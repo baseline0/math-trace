@@ -122,10 +122,11 @@ e2e-test:
     @echo ""
     uv run pytest tests/e2e/test_arxiv_pipeline.py -v -s
 
+# NOT A GATE: mypy is advisory and currently reports known errors, so this recipe exits non-zero until they are fixed. `just check-types` (pyright ratchet) is the type gate.
 [group("verify")]
 typecheck:
-    @echo "🔎 Type checking..."
-    uv run mypy src/ tests/ --ignore-missing-imports --no-error-summary 2>&1 | grep -v "numpy" | grep -v "error:" || echo "✅ Type check passed"
+    @echo "🔎 Type checking (mypy, advisory; not a gate: use just check-types)..."
+    uv run mypy src/ tests/ --ignore-missing-imports
 
 # Renamed from `clean`: removes generated example outputs (PDF, JSON, generated slides), which are not caches. The shared clean (fleet-clean.just) removes caches only.
 [group("clean")]
