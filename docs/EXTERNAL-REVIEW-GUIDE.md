@@ -1,194 +1,106 @@
-# External Review Guide
+# External Review Guide: the Sidorenko Flagship Gate
 
-**What We're Asking You To Do**
+**What we are asking you to do**
 
-Verify that math-trace can be built and tested reproducibly from a fresh checkout on your local machine. This is the final gate before releasing to PyPI.
+Run one command on a fresh clone of the release tag, read the report it writes, and sign off on that report. The command is `just reference-check`, which defaults to the flagship reference `sidorenko-turan`. Passing it is the v1.0.0 gate.
 
----
-
-## What Is math-trace?
-
-math-trace is a Python framework for tracing equations from source code through publication:
-
-```
-Python (SymPy) → LaTeX → Typst → PDF + JSON provenance
-```
-
-**Example workflow**:
-1. Define formulas in `templates/epidemiology/src/model.py` (SymPy)
-2. Run `just paper` → generates PDF with equations, figures, and source traceability
-3. Every equation tagged with filename:line for verification
+The reference reproduces one result: a Turán-density bound for r-uniform hypergraphs with r ≥ 3. The paper proves that bound. It is not a proof of Sidorenko's conjecture. The [README](../README.md) gives the statement and the background.
 
 ---
 
-## What You'll Verify
+## What the gate checks
 
-**Scope**: one example paper (`examples/membrane-dynamics`), 144 unit tests, publication pipeline. The other templates are out of scope for this review until a per-template build exists.
+`just reference-check` runs the registry entry for `sidorenko-turan` in [`src/math_trace/reference_check.py`](../src/math_trace/reference_check.py). It establishes the following, all from one checkout:
 
-| Component | What to check |
-| --- | --- |
-| **Model definitions** | membrane-dynamics formulas export SymPy cleanly |
-| **Test suite** | 144 unit tests pass (happy-path coverage) |
-| **Paper generation** | `just paper` builds `examples/membrane-dynamics/main.pdf` without errors |
-| **Documentation** | README, CONTRIBUTING, AGMAI-READY, ADRs complete |
-| **Release artifacts** | LICENSE, CITATION.cff, CHANGELOG, Justfile present |
-| **Code quality** | Lint, format, type checks pass |
+1. The required files exist: [`build_table.py`](../examples/sidorenko-turan/build_table.py), [`lean_statement.lean`](../examples/sidorenko-turan/lean_statement.lean), and [`formalization.json`](../examples/sidorenko-turan/formalization.json).
+2. The build runs twice. Every output (`generated/gap_table.json`) is hashed with SHA-256. The two runs must give identical hashes, and the output must not be empty.
+3. The contract tests pass: [`tests/integration/test_sidorenko_turan_contract.py`](../tests/integration/test_sidorenko_turan_contract.py). They compare each displayed constant and gap with an independent float evaluation, and check that the gap is positive and decreases in m.
+4. The outputs match the recorded hashes in [`expected-hashes.json`](../examples/sidorenko-turan/expected-hashes.json). That file records the Python version (3.13.15), the SHA-256 of `uv.lock`, and the hash of `gap_table.json`.
+5. Provenance is written to the report: the source revision, the tag if HEAD has one, whether the tree is dirty, the Python version, and the hash of each required input.
 
----
+The gate passes only if all five hold. A dirty tree is recorded but does not fail the check, so review a clean clone (`git status` empty).
 
-## How Long Will This Take?
+## What the gate does not check
 
-**Estimate**: 1-2 hours
+The gate does not rebuild the Lean project and does not re-run the Comparator. The following results are recorded in [`formalization.json`](../examples/sidorenko-turan/formalization.json). They are not reproduced by this command, and you do not need to reproduce them to sign off.
 
-- Setup: 10 min (uv sync, install Typst)
-- Tests: 2 min (144 tests)
-- Template builds: 20 min (5 × `just paper`)
-- Code checks: 5 min (lint, format, type)
-- Documentation review: 20 min
-- Sign-off: 5 min
+- **Lean build and axioms** (`build`, `axioms`): recorded from run `20261013T213113Z`. The upstream project `xliu2022/improved-sidorenko-lean` at commit `ba6f109`, toolchain `leanprover/lean4:v4.35.0-rc2`, Mathlib `065356127`. The three main theorems depend only on `propext`, `Classical.choice`, and `Quot.sound`.
+- **Lean statement match** (`statement_match`): recorded from run `20261015T204628Z`. The upstream repository's own Comparator judge printed "Your solution is okay!". **That run used network access** (`--allow-network`), so it is not offline (Phase B) evidence. Do not report it as an offline result. Re-running it is a separate task, not part of this gate.
+- **Scientific content**: the gate checks transcription and arithmetic. Whether the paper's mathematics is right is for peer review.
 
 ---
 
-## Step-by-Step Instructions
+## Steps
 
-### 1. Clone and Setup
+### 1. Fresh clone of the tag
 
 ```bash
 git clone https://github.com/baseline0/math-trace.git
 cd math-trace
-git checkout <commit-or-tag-under-review>
-
-# One-command setup
-just setup
+git checkout <tag>        # the release tag under review
+git status                # should print nothing
 ```
 
-Expected time: ~10 minutes (first time only; installs uv, Python 3.13, Typst)
-
-### 2. Run Unit Tests
+### 2. Install the locked dependencies
 
 ```bash
-just test
+uv sync --frozen
 ```
 
-Expected result:
-```
-======================== 144 passed, 8 skipped in 1.96s ========================
-```
+`uv` fetches Python 3.13 from `.python-version`. The expected hashes were recorded on Python 3.13.15. A different 3.13 patch version makes the gate fail with `python version changed`. That is a finding to report, not a reason to edit `expected-hashes.json`.
 
-Expected time: ~2 minutes
-
-### 3. Build the Example Paper
+### 3. Run the gate
 
 ```bash
-just paper
+just reference-check
+echo $?                   # 0 = pass, 1 = fail
 ```
 
-Expected result: `examples/membrane-dynamics/main.pdf` is generated without errors.
+On success the last line names the report. On failure the command prints one line per failed check, for example `contract tests exited 1`, and exits 1. The report is written in both cases.
 
-### 4. Code Quality Checks
+### 4. Read the report
+
+Open `examples/sidorenko-turan/generated/reference-report.json`. Its `result` field is `pass` or `fail`, and `failures` lists each reason. The possible reasons are: missing required files, a build step that exited non-zero, failing contract tests, no outputs, outputs that differ between two builds, and a mismatch with the recorded hashes.
+
+### 5. Sign off
+
+Send your sign-off on the report (the `result`, the `failures` list, and the `source_revision` it records) by email or as a PR comment to the maintainer. The v1.0.0 tag is cut only after this sign-off.
+
+---
+
+## If something fails
+
+- **The command exits 1.** Keep the report and the full terminal output. Send both. Do not edit files to make the check pass.
+- **Python version or `uv.lock` mismatch.** The report names the recorded and the running value. Report it. Re-recording the hashes is the maintainer's decision.
+- **Contract tests fail.** The report's `failures` names the failing test file. Send the pytest output with the report.
+- **Setup fails** (`uv` cannot install Python 3.13): report the error and your OS. Do not change `.python-version`.
+
+---
+
+## Optional: the secondary example
+
+`epidemiology-sir` is a registered secondary example. It is not part of the v1.0.0 gate.
 
 ```bash
-just check         # Linting (should pass)
-just fmt --check   # Format check (should pass)
-just typecheck     # Type check (should pass)
+just reference-check epidemiology-sir
 ```
 
-Expected result: No errors.
-
-### 5. Review Documentation
-
-Open in your editor or browser:
-- `README.md` — Overview and quick start
-- `CONTRIBUTING.md` — How to add new templates
-- `AGMAI-READY.md` — Public contract and guarantees
-- `docs/adr/` — Architecture decisions
-- `CITATION.cff` — How to cite
-
-### 6. Sign Off
-
-Complete the checklist in `docs/REPRODUCIBILITY-CHECKLIST.md` and return it with your recommendation.
+An unknown name exits 2 and lists the registered names.
 
 ---
 
-## What Could Go Wrong? Troubleshooting
+## What we are not asking you to do
 
-### Setup fails
-
-**Problem**: `just setup` fails on Typst installation
-**Solution**: Typst is optional. You can skip PDF generation and just verify formulas export cleanly.
-
-**Problem**: Python 3.13 not available
-**Solution**: The repo requires Python 3.13+. Upgrade your Python or ask us to backport to 3.11.
-
-### Tests fail
-
-**Problem**: Some tests fail on your system
-**Solution**: Report which tests failed. We'll investigate (may be environment-specific).
-
-### PDF doesn't build
-
-**Problem**: `just paper` fails with Typst error
-**Solution**:
-- Verify Typst installed: `typst --version`
-- PDF build is optional; formulas export is the critical path
-- Skip PDF and verify `generated/formulas.typ` contains valid Typst
-
-### Missing dependencies
-
-**Problem**: Import errors when running `just paper`
-**Solution**: Run `uv sync` again to refresh dependencies.
+- Verify scientific validity or empirical adequacy.
+- Re-run the Lean build, the axiom check, or the Comparator. Those are recorded, as described above.
+- Run performance benchmarks.
+- Test on Python versions other than the one recorded in `expected-hashes.json`, unless the gate requires it.
+- Modify code, hashes, or the formalization record, or commit changes.
 
 ---
 
-## What We're NOT Asking You To Do
+## Questions
 
-❌ Verify scientific validity (that's peer review's job)
-❌ Verify empirical adequacy (that equations match real-world data)
-❌ Run performance benchmarks
-❌ Test on every Python version (3.13+ is our support scope)
-❌ Modify code or commit changes
-
----
-
-## What Reproducibility Means Here
-
-**Reproducibility = "I can build this from a fresh checkout and get the same outputs"**
-
-Not:
-- Scientific reproducibility (whether results match reality)
-- Numerical reproducibility (exact bit-for-bit matches)
-- Implementation reproducibility (whether the approach is optimal)
-
-We're asking: "Does the code work as intended on your machine?"
-
----
-
-## Success Criteria
-
-✅ `just paper` generates `examples/membrane-dynamics/main.pdf`
-✅ 144 tests pass
-✅ Documentation is complete
-✅ Code quality checks pass
-✅ You can cite math-trace using CITATION.cff
-
----
-
-## When You're Done
-
-1. Complete `docs/REPRODUCIBILITY-CHECKLIST.md`
-2. Email or PR with your sign-off
-3. We'll cut the release tag and release to PyPI
-
----
-
-## Questions?
-
-- **Technical**: Open an issue at https://github.com/baseline0/math-trace/issues
-- **Scope**: Email the maintainer (Mark Alexiuk, malexiuk@gmail.com)
-- **Logistics**: Tag in a PR or discussion
-
----
-
-**Thank you for verifying math-trace!** 🙏
-
-Your sign-off helps us confidently release to the community.
+- **Technical**: open an issue at https://github.com/baseline0/math-trace/issues
+- **Scope**: email the maintainer, Mark Alexiuk, malexiuk@gmail.com
+- **Logistics**: tag in a PR or discussion
