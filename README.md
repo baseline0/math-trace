@@ -63,6 +63,18 @@ math-trace connects:
 
 One edit to `model.py` updates your paper automatically.
 
+## Flagship reference: a Turán-density bound
+
+`sidorenko-turan` (`examples/sidorenko-turan/`) reproduces one result: for every finite r-uniform forbidden hypergraph F with r ≥ 3 and m ≥ 1 edges, the Turán density of F is at most 1 − c_r / m^((r−1)/r), with c_r given explicitly. The paper proves a **Turán-density bound**. It is not a proof of Sidorenko's conjecture, although the title uses that name.
+
+What is checked, and by what:
+
+- **Lean build and axioms:** the upstream repository (`xliu2022/improved-sidorenko-lean`, commit `ba6f109`) builds with Lean v4.35.0-rc2 and depends only on the three standard axioms.
+- **Statement match:** the author's Comparator judge passes on that commit (run recorded in `examples/sidorenko-turan/formalization.json`).
+- **Arithmetic:** `build_table.py` evaluates the displayed constant and gap exactly, and the contract tests check each row against an independent float evaluation.
+
+The Comparator run used network access, so it is not evidence of the offline (Phase B) configuration. The reproducibility review that gates v1.0.0 has not started.
+
 ### Requirements
 
 **Core**:

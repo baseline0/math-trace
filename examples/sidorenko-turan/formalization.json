@@ -14,9 +14,14 @@
       "evidence": "run 20261013T213113Z: the three main theorems depend only on propext, Classical.choice, Quot.sound"
     },
     "statement_match": {
-      "status": "open",
-      "evidence": "run 20261013T214201Z: Comparator did not run; bwrap could not mount /proc (unprivileged LXD container without security.nesting)",
-      "note": "Only the author's Comparator run, on record, checks that Solution.lean states what Challenge.lean asks"
+      "status": "passed",
+      "evidence": "run 20261015T204628Z: the repository's own Comparator judge (scripts/verify-comparator.sh, unmodified at ba6f109) printed 'Your solution is okay!'; con-ron, nanoda, and the Lean default kernel each accepted the solution",
+      "container": {
+        "nesting": true,
+        "network": "provision-only",
+        "image_fingerprint": "2781bbfeee5d7a2a52058d5c0f0ba7b6ef7105158d9ccdb787ecf37c439eff48"
+      },
+      "note": "Ran with network access (--allow-network), so this is not Phase B evidence. It is the author's judge on the pinned commit, run in our container."
     }
   },
   "companion": {
