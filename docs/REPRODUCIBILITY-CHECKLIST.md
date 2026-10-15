@@ -161,10 +161,9 @@ uv run ruff format --check src tests examples templates   # format check without
 just typecheck                                            # mypy; see the note below
 ```
 
-**Note**: `just typecheck` pipes mypy through `grep -v "error:"` and ends with `|| echo`, so its exit status is `0`
-whatever mypy reports. Read its output for errors. Do not rely on its exit status.
+**Note**: `just typecheck` runs mypy and exits with its status, currently `1` with 45 errors. It is not a gate; `just check-types` (pyright ratchet) is the gate.
 
-**Acceptance**: `just check` and the format check exit `0`. The `just typecheck` output shows no mypy errors.
+**Acceptance**: `just check`, the format check, and `just check-types` exit `0`.
 
 ---
 
@@ -201,7 +200,7 @@ Verify these exist at the repository root:
 - [ ] Each reference's section above was followed
 - [ ] Each registered reference passes Step 3
 - [ ] Each reference's limitations are stated in the README
-- [ ] Repository gates pass (`just check`, format check, `just typecheck` output)
+- [ ] Repository gates pass (`just check`, format check, `just check-types`)
 - [ ] Release artifacts are present
 
 ### Known Limitations Acknowledged
