@@ -571,21 +571,21 @@ async def arxiv_extract(paper_url_or_id: str):
     except ValueError as e:
         logger.error(f"Invalid arXiv ID: {e}")
         return ApiResponse.error(
-            error="Invalid arXiv ID format",
+            "Invalid arXiv ID format",
             message=str(e),
             code=400,
         ).to_dict()
     except FileNotFoundError as e:
         logger.error(f"Paper not found: {e}")
         return ApiResponse.error(
-            error="Paper not found in cache",
+            "Paper not found in cache",
             message=str(e),
             code=404,
         ).to_dict()
     except Exception as e:
         logger.error(f"Extraction failed: {e}")
         return ApiResponse.error(
-            error="Extraction failed",
+            "Extraction failed",
             message=str(e),
             code=500,
         ).to_dict()
@@ -614,7 +614,7 @@ async def arxiv_get_paper(paper_id: str):
     except FileNotFoundError:
         logger.warning(f"Paper not cached: {paper_id}")
         return ApiResponse.error(
-            error="Paper not cached",
+            "Paper not cached",
             message=f"No cached data for {paper_id}",
             code=404,
         ).to_dict()
@@ -622,7 +622,7 @@ async def arxiv_get_paper(paper_id: str):
     except Exception as e:
         logger.error(f"Error loading paper {paper_id}: {e}")
         return ApiResponse.error(
-            error="Error loading paper",
+            "Error loading paper",
             message=str(e),
             code=500,
         ).to_dict()
