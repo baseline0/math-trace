@@ -105,7 +105,6 @@ cd math-trace
 uv sync --frozen
 
 # Build the example paper (needs Typst on PATH)
-cd examples/membrane-dynamics
 just paper
 just view-paper
 ```
@@ -386,8 +385,7 @@ just model       # Export formulas from SymPy
 just formulas    # Convert LaTeX → Typst
 just simulate    # Run stochastic simulation
 just figures     # Generate matplotlib figures
-just pdf         # Compile Typst to PDF
-just paper       # Full pipeline (model → figures → pdf)
+just paper       # Full pipeline (formulas → figures → pdf)
 ```
 
 #### Testing

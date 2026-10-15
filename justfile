@@ -23,7 +23,7 @@ reference-check reference="sidorenko-turan":
 [group("build")]
 model:
     @echo "📐 Exporting formulas from Python model..."
-    cd examples/membrane-dynamics && uv run python model.py
+    cd examples/membrane-dynamics && uv run python src/model.py
 
 [group("build")]
 formulas: model
@@ -41,12 +41,12 @@ formulas: model
 [group("build")]
 simulate: model
     @echo "📊 Running stochastic simulation..."
-    cd examples/membrane-dynamics && uv run python simulate.py
+    cd examples/membrane-dynamics && uv run python src/simulate.py
 
 [group("build")]
 figures: simulate
     @echo "🎨 Generating figures..."
-    cd examples/membrane-dynamics && uv run python -c \
+    cd examples/membrane-dynamics && PYTHONPATH=src uv run python -c \
         'from simulate import simulate; import matplotlib; matplotlib.use("Agg"); \
          import matplotlib.pyplot as plt; \
          ts, na = simulate(k_val=0.01, na0=50, steps=200, dt=0.1, seed=42); \
@@ -113,7 +113,7 @@ test-formulas:
 [group("verify")]
 test-model:
     @echo "🔍 Testing model definitions..."
-    cd examples/membrane-dynamics && uv run python model.py
+    cd examples/membrane-dynamics && uv run python src/model.py
 
 [group("verify")]
 e2e-test:
