@@ -99,16 +99,15 @@ Formula-to-code traceability for researchers who want reproducible mathematics. 
 ### Quick Install & Try
 
 ```bash
-# Install from PyPI
-pip install math-trace
-
-# Or clone to use examples
+# Install from a clone (math-trace is not on PyPI yet: no release tag or GitHub release exists)
 git clone https://github.com/baseline0/math-trace.git
-cd math-trace/examples/membrane-dynamics
+cd math-trace
+uv sync --frozen
 
-# Build the paper (30 seconds)
+# Build the example paper (needs Typst on PATH)
+cd examples/membrane-dynamics
 just paper
-open main.pdf
+just view-paper
 ```
 
 **What you get**: A publication-ready PDF with equations, theorems, and simulation figures—all traced back to `model.py`.
@@ -120,7 +119,7 @@ Every formula in your paper is:
 - **Marked with source location** — Every equation tagged with filename:line for easy reference
 - **Tested** — Core conversion pipeline validated (see `tests/unit/test_guarantees.py`)
 - **Reproducible** — Same equation produces same LaTeX output every time
-- **Publication-ready** — Generates Typst PDF from a fresh Python 3.13 environment in seconds
+- **Publication-ready** — `just paper` generates a Typst PDF
 
 ⚠️ **What this does NOT mean**: math-trace verifies your equations are **transcribed correctly from code**. It does NOT verify scientific validity, empirical adequacy, or physical realism—that's peer review's job.
 
@@ -152,16 +151,16 @@ One edit to `model.py` updates your paper automatically.
 
 **Core**:
 - Python 3.13 (`requires-python` is `>=3.13` in `pyproject.toml`)
-- `pip install math-trace` (or `just setup` for one-command installation)
+- `uv sync --frozen` from a clone (not on PyPI yet), or `just setup` for one-command installation
 
 **Optional**:
-- Typst ≥0.10 (required for PDF generation; `just install-typst` to set up)
+- Typst (required for PDF generation; `just install-typst` to set up)
 - Lean 4 (required only for optional formal proofs)
 
 **Supported Platforms**:
-- **macOS** (Intel and Apple Silicon)
-- **Linux** (Ubuntu 20.04+, other distributions)
-- **Windows** (via WSL2; native cmd.exe not supported)
+- **Linux**: the only platform CI runs on (`ubuntu-latest`)
+- **Windows**: `scripts/check-env.sh` recommends WSL2; not tested natively
+- **macOS**: not tested by CI; `scripts/check-env.sh` has a macOS branch, which nothing here verifies
 
 ### Example: Stochastic P Systems
 
@@ -235,7 +234,7 @@ Palomar Registry (optional: publish formalization)
 
 #### For Users: Just Use It
 
-See [Getting Started Guide](docs/getting-started-external.md) for:
+See [Getting Started Guide](docs/guides/getting-started-external.md) for:
 - Installation (1 minute)
 - Running the example (2 minutes)
 - Adapting to your domain (2 minutes)
@@ -271,7 +270,7 @@ See [Contributing Guide](CONTRIBUTING.md) to:
 
 #### Full Workflow
 
-**1. Clone template** (or use `pip install math-trace` + example from GitHub)
+**1. Clone the example**
 
 ```bash
 git clone https://github.com/baseline0/math-trace.git
@@ -305,14 +304,15 @@ just paper     # Generates main.pdf
 ```bash
 # Edit lean/Challenge.lean with your theorem
 # (See examples/membrane-dynamics/lean/ for structure)
-just lean      # Compile Lean proofs
 ```
+
+No recipe compiles the Lean files yet. `just lean-health` only checks an existing Lean/Mathlib install (read-only).
 
 ### Project Structure
 
 ```
 math-trace/
-├── Justfile                    # Build recipes (just paper, just test, just help)
+├── justfile                    # Build recipes (just paper, just test, just help)
 ├── pyproject.toml              # Dependencies and package config
 ├── README.md                   # This file
 │
@@ -322,19 +322,21 @@ math-trace/
 │
 ├── examples/
 │   ├── membrane-dynamics/      # Complete end-to-end example (clone & just paper)
-│   └── epidemiology/           # (Stub) Reference config for SIR/SEIR models
+│   ├── epidemiology-sir/       # SIR model, a secondary registered reference
+│   └── sidorenko-turan/        # Flagship registered reference (just reference-check)
 │
 ├── templates/                  # Fork-friendly domain templates
 │   ├── simple-physics/         # Classical mechanics template
 │   └── biochemistry/           # Enzyme kinetics template
 │
 ├── tests/                      # Test suite (pytest)
-│   ├── test_model_export.py    # Formula generation tests
+│   ├── unit/                   # Unit tests (just test)
+│   ├── integration/            # Integration tests (just test-integration)
+│   ├── e2e/                    # End-to-end arXiv pipeline (just e2e-test)
 │   └── examples/               # End-to-end workflow examples
 │
 ├── docs/
-│   ├── adr/                    # Architecture decisions
-│   └── ARCHITECTURE.md         # System design and flexibility
+│   └── adr/                    # Architecture decisions
 │
 └── LICENSE                     # MIT license
 ```
@@ -391,7 +393,7 @@ just paper       # Full pipeline (model → figures → pdf)
 #### Testing
 
 ```bash
-just test              # Run full test suite
+just test              # Run unit tests (tests/unit)
 just test-formulas     # Test formula generation
 just test-model        # Test model definitions
 just typecheck         # Type check Python code
@@ -407,22 +409,23 @@ uv run pre-commit install --install-hooks
 ```
 
 **Hook stages**:
-- **Pre-commit** (runs on `git commit`): Fast checks (~3 seconds)
+- **Pre-commit** (runs on `git commit`, stage `pre-commit`):
   - Whitespace and formatting (ruff, trailing whitespace, etc.)
   - Python syntax validation
   - YAML/TOML validation
-  - Secret detection
-  - Autogenerated file regeneration
+  - Private-key detection, and a check for `.env`, `.key`, and `.pem` files in `src/` and `tests/`
+  - Autogenerated file regeneration (`scripts/regenerate-autogen.sh`)
 
-- **Pre-push** (runs on `git push`): Slow checks (~5 seconds)
-  - Unit tests (tests/unit + tests/e2e)
+- **Pre-push** (runs on `git push`, stage `pre-push`): `just test-unit`, which runs `tests/unit` only
+
+`pre-commit install` also installs the pre-push hook, because `default_install_hook_types` in `.pre-commit-config.yaml` lists both.
 
 **Manual control**:
 ```bash
 just regenerate        # Manually regenerate autogenerated files
 uv run pre-commit run --all-files  # Run all hooks on all files
-uv run pre-commit run --hook-stage commit   # Run only commit-stage hooks
-uv run pre-commit run --hook-stage push     # Run only push-stage hooks
+uv run pre-commit run --hook-stage pre-commit   # Run only commit-stage hooks
+uv run pre-commit run --hook-stage pre-push     # Run only push-stage hooks
 ```
 
 **Bypass hooks** (use carefully):
@@ -443,7 +446,7 @@ just clean-generated   # Remove generated files
 
 #### I just want to write a paper
 
-1. Follow [Getting Started Guide](docs/getting-started-external.md)
+1. Follow [Getting Started Guide](docs/guides/getting-started-external.md)
 2. Clone the example, edit `model.py`, run `just paper`
 3. Cite math-trace in your paper (see citation below)
 
@@ -482,13 +485,12 @@ If you use math-trace in your research, please cite:
   title = {math-trace: Formula-to-code traceability for research papers},
   year = {2026},
   url = {https://github.com/baseline0/math-trace},
-  howpublished = {\url{https://pypi.org/project/math-trace/}}
 }
 ```
 
 ### For Fleet Members
 
-This repository is part of the mathematical research fleet. For fleet-specific commands and infrastructure integration, see [CLAUDE.md](CLAUDE.md).
+This repository is part of the mathematical research fleet.
 
 ### References
 
