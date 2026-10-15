@@ -2,167 +2,185 @@
 
 **For External Reviewers**
 
-This checklist verifies that math-trace is reproducible from a fresh checkout on standard environments.
+This checklist verifies that a registered reference of math-trace rebuilds from a fresh checkout and passes its
+checks. It covers every reference registered in `REFERENCES` in `src/math_trace/reference_check.py`:
+
+| Reference | Role | Section |
+| --- | --- | --- |
+| `sidorenko-turan` | Flagship reference | [sidorenko-turan](#reference-sidorenko-turan) |
+| `epidemiology-sir` | Secondary example | [epidemiology-sir](#reference-epidemiology-sir) |
+
+A future reference is covered by registering it in `REFERENCES`, then adding a section here in the same form.
+
+The reviewer runs one command per reference, `just reference-check <name>`, and reads its exit status and report.
 
 ---
 
 ## Environment Requirements
 
-- **Python**: 3.13+ (test with `python --version`)
-- **OS**: Linux, macOS (Intel or Apple Silicon), or Windows (WSL2)
-- **Tools**: `uv` (package manager), `just` (task runner), `typst` (optional, for PDF generation)
-- **Network**: Internet access for initial setup only (uv sync downloads dependencies)
+- **Python**: 3.13 or later (`.python-version` pins 3.13; `pyproject.toml` requires `>=3.13`)
+- **OS**: Linux, macOS, or Windows (WSL2)
+- **Tools**: `uv` (dependency and Python manager) and `just` (task runner)
+- **Network**: Needed for the initial `uv sync` only. The reference builds do not fetch anything.
+
+Typst is not needed to reproduce the registered references. Their builds do not invoke it.
 
 ---
 
-## Step 1: Fresh Checkout
+## Shared Procedure
+
+Run these steps for each reference. The reference section gives the reference's own commands and status.
+
+### Step 1: Fresh Checkout
 
 ```bash
 git clone https://github.com/baseline0/math-trace.git
 cd math-trace
-git checkout <commit-or-tag-under-review>
+git checkout <tag-under-review>
 ```
 
-**Acceptance**: Repository clones without errors.
+**Acceptance**: The clone succeeds, and the checkout is the tag under review. The report's `tag` field shows that tag,
+and `dirty` is `false`.
 
----
-
-## Step 2: Environment Setup
+### Step 2: Install
 
 ```bash
-just setup
+uv sync
 ```
 
-This installs:
-- Python 3.13 (via uv)
-- Dependencies (uv sync)
-- Typst (for PDF compilation)
+**Acceptance**: `uv sync` completes. Then `uv run python --version` prints `3.13.x`.
 
-**Acceptance**: Setup completes without errors. Verify:
-```bash
-python --version      # Should show 3.13.x
-uv --version          # Should show recent version
-typst --version       # Should show 0.10+
-```
-
----
-
-## Step 3: Unit Test Suite
+### Step 3: Run the Reference Check
 
 ```bash
-just test
+just reference-check <name>
 ```
 
-**Acceptance Criteria**:
-- [ ] All 144 tests pass
-- [ ] No skipped tests (except marked `@pytest.mark.skip`)
-- [ ] No warnings or errors in output
-- [ ] Test execution time < 5 seconds
+The check does the following, in order:
 
-**Example output**:
-```
-======================== 144 passed, 8 skipped in 1.96s ========================
-```
+1. Confirms the reference's required files exist.
+2. Runs the reference's build twice and hashes every output after each run.
+3. Runs the reference's contract tests.
+4. Records provenance: the source revision, the tag if any, whether the tree is dirty, and the Python version.
+5. If the reference registers an expected-hashes file, compares the outputs, the `uv.lock` hash, and the Python version with it.
+
+It writes a JSON report to `examples/<name>/generated/reference-report.json`.
+
+**Acceptance**: Exit status `0`, and the report's `result` field is `"pass"`.
+
+### Step 4: Regenerate and Compare
+
+The check in Step 3 regenerates the outputs itself. To rebuild by hand, run the reference's build commands from its
+section, inside its directory.
+
+Compare the results with the recorded state:
+
+- **References with an expected-hashes file**: the report's `expected` field is not `null`, and `expected_problem` is
+  `null`. Every output hash matches, and the Python version and `uv.lock` hash match.
+- **References without one**: the report's `expected` field is `null`. The evidence is that two builds from the same
+  checkout produce identical outputs (`deterministic` is `true`) and the contract tests pass (`tests_returncode` is `0`).
+  The recorded hashes are not available for these references.
+
+### Step 5: README
+
+The repository README explains the reference's assumptions, its limitations, and how to read its results.
+
+**Acceptance**: The reviewer finds each assumption and limitation listed in the reference's section stated in the README,
+and finds nothing in the README that contradicts the report.
+
+### Step 6: Failure Messages
+
+A failed check exits `1`. The output names each reason on its own line, and the report's `failures` field holds the same
+list. Examples of the reasons the check can name:
+
+- `required files missing: ...`
+- `build step exited <code>: <command>`
+- `contract tests exited <code>`
+- `two builds from the same checkout produced different outputs`
+- `output differs from the recorded hash: <file>`
+- `python version changed: ...`
+- `uv.lock changed: ...`
+
+**Acceptance**: A failure prints named reasons and writes the report. A raw traceback from the check is a finding to
+report.
 
 ---
 
-## Step 4: Verify the Example Paper
+## Reference: sidorenko-turan
 
-The review covers the build `just paper` runs today: `examples/membrane-dynamics`. The per-template sections below
-are out of scope for this review. They stay as the checklist for the later per-template build.
+The flagship reference: a computable companion to a Turán-density theorem, with its Lean statement recorded in
+`formalization.json`.
+
+- **Directory**: `examples/sidorenko-turan`
+- **Build command** (run in the directory): `uv run python build_table.py`
+- **Output**: `generated/gap_table.json`
+- **Required files**: `build_table.py`, `lean_statement.lean`, `formalization.json`
+- **Expected hashes**: `examples/sidorenko-turan/expected-hashes.json` is present. It records the Python version, the
+  `uv.lock` hash, and the hash of `generated/gap_table.json`. The check compares against it.
+- **Contract tests**: `tests/integration/test_sidorenko_turan_contract.py` (5 tests)
+
+**What the check establishes**: The displayed constant and gap are reproduced by exact symbolic arithmetic.
+
+**What it does not establish**: That the Lean statement matches the paper's claim. `build_table.py` says so in its
+docstring. The statement-match evidence is recorded in `formalization.json`. That run used network access, so the
+file says it is not Phase B evidence.
+
+---
+
+## Reference: epidemiology-sir
+
+A SIR epidemic model, with a COVID scenario, a generated paper, and a presentation.
+
+- **Directory**: `examples/epidemiology-sir`
+- **Build commands** (run in the directory, in this order):
+  1. `uv run python build_paper.py`
+  2. `uv run python build_presentation.py --output generated/presentation.html`
+- **Outputs**: `generated/sir_equations.json`, `generated/covid_scenario.json`, `generated/figures/*.png`,
+  `generated/presentation.html`
+- **Required files**: `build_paper.py`, `build_presentation.py`, `presentation_config.yaml`, `src/model.py`,
+  `src/simulate.py`
+- **Expected hashes**: none registered. The check compares two builds with each other and runs the contract tests.
+- **Contract tests**:
+  - `tests/integration/test_epidemiology_sir_contract.py` (17 tests)
+  - `tests/unit/test_build_presentation.py` (10 tests)
+  - `tests/unit/test_sir_presentation_config.py` (1 test)
+
+**What the check establishes**: The build is deterministic and the contract tests pass.
+
+**What it does not establish**: That the model is a valid epidemiological model, or that its parameters fit any data.
+
+---
+
+## Repository Gates
+
+These are repository-wide, not specific to a reference. Run them from the checkout.
 
 ```bash
-just paper
+just check                                                # ruff lint; exits 0 when lint passes
+uv run ruff format --check src tests examples templates   # format check without rewriting files
+just typecheck                                            # mypy; see the note below
 ```
 
-### Epidemiology
-- [ ] `main.pdf` builds successfully
-- [ ] PDF contains 10+ sections (SIR model, scenarios, figures)
-- [ ] Formulas render (check for λ, β, γ symbols)
-- [ ] Simulation figures appear (trajectory plot)
-- [ ] **File size**: ~200-400 KB
+**Note**: `just typecheck` pipes mypy through `grep -v "error:"` and ends with `|| echo`, so its exit status is `0`
+whatever mypy reports. Read its output for errors. Do not rely on its exit status.
 
-### Quantum Systems
-- [ ] `main.pdf` builds successfully
-- [ ] PDF contains 7+ sections (particle-in-box, harmonic oscillator)
-- [ ] Energy eigenvalue equations visible
-- [ ] Wavefunction figures appear
-- [ ] **File size**: ~150-250 KB
-
-### Control Systems
-- [ ] `main.pdf` builds successfully
-- [ ] PDF contains 10+ sections (DC motor, PID controller)
-- [ ] Transfer function equations visible
-- [ ] Control plots appear
-- [ ] **File size**: ~200-350 KB
-
-### Graph Neural Networks
-- [ ] `main.pdf` builds successfully
-- [ ] PDF contains 10+ sections (message passing, attention)
-- [ ] Attention weight equations visible
-- [ ] Graph structure diagrams appear
-- [ ] **File size**: ~200-350 KB
-
-### Thermodynamics
-- [ ] `main.pdf` builds successfully
-- [ ] PDF contains 10+ sections (ideal gas, Carnot cycle)
-- [ ] Thermodynamic equations visible (PV=nRT, η=1-T_c/T_h)
-- [ ] Energy diagrams appear
-- [ ] **File size**: ~200-350 KB
+**Acceptance**: `just check` and the format check exit `0`. The `just typecheck` output shows no mypy errors.
 
 ---
 
-## Step 5: Code Quality Checks
+## Release Artifacts
 
-```bash
-just check         # Ruff linting
-just fmt --check   # Format validation
-just typecheck     # Type checking
-```
+Verify these exist at the repository root:
 
-**Acceptance Criteria**:
-- [ ] No ruff errors (linting passes)
-- [ ] No formatting issues
-- [ ] No type errors
-
----
-
-## Step 6: Formula Consistency Verification
-
-For each template, spot-check 2-3 equations:
-
-```bash
-cd templates/epidemiology/src
-python model.py  # Should export JSON with equations
-```
-
-**Check**:
-- [ ] JSON has `latex`, `description`, `source_line` fields for each equation
-- [ ] LaTeX is valid (no unmatched braces)
-- [ ] Source line references match model.py
-
----
-
-## Step 7: Documentation Review
-
-- [ ] README.md is present and complete
-- [ ] CONTRIBUTING.md explains template structure
-- [ ] AGMAI-READY.md defines guarantees clearly
-- [ ] docs/adr/ has architecture decisions
-- [ ] docs/ has getting-started guide
-
----
-
-## Step 8: Release Artifacts
-
-Verify these files exist at repository root:
-
-- [ ] `LICENSE` (MIT)
-- [ ] `pyproject.toml` (version 0.1.0, Python 3.13+)
-- [ ] `CITATION.cff` (bibtex citation metadata)
-- [ ] `CHANGELOG.md` (generated from conventional commits)
-- [ ] `Justfile` (build recipes for all templates)
-- [ ] `.pre-commit-config.yaml` (P0-P3 quality gates)
+- [ ] `LICENSE`
+- [ ] `pyproject.toml` (version `0.1.0`, `requires-python = ">=3.13"`)
+- [ ] `CITATION.cff`
+- [ ] `CHANGELOG.md`
+- [ ] `justfile`
+- [ ] `.pre-commit-config.yaml`
+- [ ] `README.md`, `CONTRIBUTING.md`, `AGMAI-READY.md`
+- [ ] `docs/adr/` (architecture decision records)
+- [ ] `docs/guides/getting-started-external.md`
 
 ---
 
@@ -171,26 +189,32 @@ Verify these files exist at repository root:
 **Reviewer**: ________________
 **Date**: ________________
 **Environment**: macOS / Linux / WSL2 | Python version: ______
+**Tag reviewed**: ________________
 
-### Reproducibility Assessment
+### Results
 
-- [ ] `just paper` builds `examples/membrane-dynamics/main.pdf` without errors
-- [ ] PDF renders correctly with equations and figures
-- [ ] 144 tests pass
-- [ ] Code quality checks pass (lint, format, type)
-- [ ] Documentation is complete and accurate
+| Reference | `just reference-check` exit | Report `result` | Notes |
+| --- | --- | --- | --- |
+| `sidorenko-turan` | | | |
+| `epidemiology-sir` | | | |
+
+- [ ] Each reference's section above was followed
+- [ ] Each registered reference passes Step 3
+- [ ] Each reference's limitations are stated in the README
+- [ ] Repository gates pass (`just check`, format check, `just typecheck` output)
+- [ ] Release artifacts are present
 
 ### Known Limitations Acknowledged
 
-- [ ] SymPy constraints: only equations expressible in SymPy
-- [ ] Numerical stability: not validated for long-duration runs
-- [ ] PDF compilation requires Typst installation
-- [ ] This verifies transcription, not scientific validity
+- [ ] The check verifies that a build reproduces its outputs and passes its contract tests. It does not verify
+      scientific validity.
+- [ ] A reference without an expected-hashes file is checked for determinism and contract tests only.
+- [ ] Each reference's own limitations, as listed in its section above.
 
 ### Recommendation
 
 **☐ APPROVED**
-Reproducibility verified. Math-trace is ready for release.
+Reproducibility verified for the references listed above.
 
 **☐ CONDITIONAL** (list issues below)
 Reproducibility verified with minor issues:
