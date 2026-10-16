@@ -92,9 +92,10 @@ class PaperDownloader:
         # Try to parse URL to get PDF link
         pdf_url = url
         if "arxiv.org" in url:
-            pdf_url = PaperDownloader._parse_arxiv_url(url)
-            if not pdf_url:
+            parsed_url = PaperDownloader._parse_arxiv_url(url)
+            if not parsed_url:
                 raise ValueError(f"Cannot parse arXiv URL: {url}")
+            pdf_url = parsed_url
 
         # Generate cache filename from URL
         cache_name = urlparse(pdf_url).path.split("/")[-1]
