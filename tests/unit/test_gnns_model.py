@@ -12,6 +12,7 @@ from math_trace.constants import REPO_ROOT
 # Load gnns model module
 gnns_model_path = REPO_ROOT / "templates" / "gnns" / "src" / "model.py"
 spec = importlib.util.spec_from_file_location("gnns_model", gnns_model_path)
+assert spec is not None and spec.loader is not None
 gnns_model = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gnns_model)
 

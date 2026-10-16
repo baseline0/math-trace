@@ -12,6 +12,7 @@ from math_trace.constants import REPO_ROOT
 # Load thermodynamics model module
 thermo_model_path = REPO_ROOT / "templates" / "thermodynamics" / "src" / "model.py"
 spec = importlib.util.spec_from_file_location("thermo_model", thermo_model_path)
+assert spec is not None and spec.loader is not None
 thermo_model = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(thermo_model)
 
