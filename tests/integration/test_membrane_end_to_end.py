@@ -125,7 +125,7 @@ class TestMonotonicity:
         k = 0.01
 
         # Check monotonicity for a range of n values
-        prev_rate = 0
+        prev_rate: float = 0
         for n in range(2, 20):
             current_rate = k * n * (n - 1) / 2
             assert current_rate > prev_rate, f"Rate not increasing: r({n - 1}) >= r({n})"

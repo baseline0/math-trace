@@ -164,8 +164,8 @@ class TestReproducibility:
         build_file = sir_example_dir / "build_paper.py"
 
         # Run build twice
-        outputs1 = {}
-        outputs2 = {}
+        outputs1: dict[str, str] = {}
+        outputs2: dict[str, str] = {}
 
         for run_num, outputs in [(1, outputs1), (2, outputs2)]:
             result = subprocess.run(

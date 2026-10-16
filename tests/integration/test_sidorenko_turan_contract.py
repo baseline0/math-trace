@@ -30,7 +30,7 @@ def gap_table():
 def float_gap(r: int, m: int) -> float:
     """c_r / m^((r-1)/r), evaluated in floats from the Lean definitions."""
     constant = (1 / (4 * r**2)) * (4 / r) ** (1 / r) * (1 - 1 / r) ** (2 - 2 / r)
-    return constant / math.pow(m, (r - 1) / r)
+    return float(constant / math.pow(m, (r - 1) / r))
 
 
 class TestLeanTranscription:

@@ -126,7 +126,7 @@ class TestSymPyConversion:
         paper_data = load_extracted_paper(TEST_PAPER_ID)
         equations = paper_data["equations"][:10]  # Test first 10
 
-        conversion_results = {"successful": [], "failed": []}
+        conversion_results: dict[str, list[dict[str, str]]] = {"successful": [], "failed": []}
 
         for eq in equations:
             result = convert_equation_to_sympy(eq["latex"], eq.get("context", ""))
