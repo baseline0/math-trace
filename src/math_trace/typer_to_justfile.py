@@ -34,6 +34,8 @@ class TyperToJustfile:
         commands = app.registered_commands
 
         for command in commands:
+            if command.callback is None:
+                continue
             recipe = TyperToJustfile._generate_recipe(
                 command.callback,
                 module_name,
