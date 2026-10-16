@@ -35,6 +35,10 @@ See Also:
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .formula import Formula
 
 
 class Converter(ABC):
@@ -64,7 +68,7 @@ class LatexExporter:
     Works with any Formula representation that provides to_dict().
     """
 
-    def export(self, formulas: dict[str, Formula]) -> str:  # noqa: F821
+    def export(self, formulas: dict[str, Formula]) -> str:
         """Export formulas to LaTeX.
 
         Args:

@@ -359,7 +359,8 @@ class SymPyToTypst:
         # Operators and symbols. Longest names first, with a word boundary, so that
         # \in does not rewrite the start of \int.
         for name in sorted(SYMBOL_MAP, key=len, reverse=True):
-            typst = re.sub(rf"\\{name}(?![A-Za-z])", lambda _m, n=name: SYMBOL_MAP[n], typst)
+            replacement = SYMBOL_MAP[name]
+            typst = re.sub(rf"\\{name}(?![A-Za-z])", lambda _m: replacement, typst)
         typst = re.sub(r"\\(left|right)(?![A-Za-z])", "", typst)
         typst = _SPACE_BETWEEN_LETTER_AND_GREEK.sub(" ", typst)
 
