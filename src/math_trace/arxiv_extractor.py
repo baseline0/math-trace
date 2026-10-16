@@ -76,8 +76,18 @@ def fetch_paper_metadata(paper_id: str) -> dict:
     if entry is None:
         raise ValueError(f"Paper not found: {paper_id}")
 
-    title = entry.find("atom:title", ns).text.strip()
-    authors = ", ".join([a.find("atom:name", ns).text for a in entry.findall("atom:author", ns)])
+    title_element = entry.find("atom:title", ns)
+    if title_element is None or title_element.text is None:
+        raise ValueError(f"Malformed arXiv response for {paper_id}: missing title")
+    title = title_element.text.strip()
+
+    author_names: list[str] = []
+    for author in entry.findall("atom:author", ns):
+        name_element = author.find("atom:name", ns)
+        if name_element is None or name_element.text is None:
+            raise ValueError(f"Malformed arXiv response for {paper_id}: author without name")
+        author_names.append(name_element.text)
+    authors = ", ".join(author_names)
 
     return {
         "paper_id": paper_id,
