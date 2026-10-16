@@ -63,7 +63,7 @@ The check passes only if all of these hold. A dirty tree is recorded in the repo
 
 The check does **not** establish:
 
-- that another checkout, machine, or platform produces the same hashes. Expected hashes are not recorded yet; deciding how to pin the Python and library versions is an open item.
+- that another checkout, machine, or platform produces the same hashes. `examples/sidorenko-turan/expected-hashes.json` records the output hashes, the exact Python version (3.13.15), and the `uv.lock` hash, and the check fails with a named reason when any of them differ. Other Python patch versions and other platforms have not been tested, so a mismatch there means re-recording, not assuming drift.
 - that the Lean build or the Comparator result holds today. Those are recorded in `formalization.json` (see the table above).
 - anything about the scientific content of the paper. The check confirms the transcription and arithmetic, not the mathematics.
 
@@ -85,7 +85,7 @@ The registry is code, so a new reference is a reviewed change, not a configurati
 - **Lean is recorded, not rebuilt here.** This repository holds two verbatim Lean definitions and the recorded evidence, not the full Lean project. Its build and axiom checks come from the upstream commit.
 - **The Comparator run used network access.** The offline (Phase B) configuration has not been shown to reproduce it.
 - **The companion table checks arithmetic only.** Matching the Lean statement to the paper is the Comparator's job, not `build_table.py`'s.
-- **Determinism is checked within one checkout.** Cross-checkout and cross-platform hashes are not recorded.
+- **Determinism is checked within one checkout, and recorded hashes are checked against the pinned Python and `uv.lock`.** Other Python patch versions and platforms are not covered.
 - **Deferred, not in v1:** Lean formalization of the other templates, PDF export, multi-paper comparison, LaTeX-to-SymPy conversion, interactive visualisations, and Palomar registry integration.
 
 ---
@@ -426,11 +426,7 @@ uv run pre-commit run --hook-stage pre-commit   # Run only commit-stage hooks
 uv run pre-commit run --hook-stage pre-push     # Run only push-stage hooks
 ```
 
-**Bypass hooks** (use carefully):
-```bash
-git commit --no-verify   # Skip pre-commit hooks (not recommended)
-git push --no-verify     # Skip pre-push hooks (not recommended)
-```
+If a hook is wrong, raise it with the maintainers rather than bypassing it.
 
 See `.pre-commit-config.yaml` for the full hook configuration.
 
