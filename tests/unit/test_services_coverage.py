@@ -45,7 +45,7 @@ class TestPaperDownloaderErrorHandling:
                 mock_open.return_value = mock_pdf
 
                 extractor = FormulaExtractor()
-                formulas = extractor.extract(str(pdf_path))
+                formulas = extractor.extract(pdf_path)
 
                 # Empty PDF should return empty list
                 assert formulas == []
@@ -63,7 +63,7 @@ class TestPaperDownloaderErrorHandling:
             extractor = FormulaExtractor()
             # Should handle gracefully (not crash)
             try:
-                formulas = extractor.extract(str(pdf_path))
+                formulas = extractor.extract(pdf_path)
                 # Either empty list or exception is acceptable
                 assert formulas == [] or formulas is None
             except Exception:

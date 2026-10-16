@@ -142,8 +142,8 @@ class TestEndToEnd:
 
     def test_ingest_workflow(self):
         """Test complete paper → formulas → config workflow."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmpdir = Path(tmpdir)
+        with tempfile.TemporaryDirectory() as tmpdir_name:
+            tmpdir = Path(tmpdir_name)
 
             # Create mock formulas
             formulas = [
