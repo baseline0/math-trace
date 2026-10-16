@@ -82,7 +82,7 @@ class ApiResponse(Generic[T]):  # noqa: UP046
 
         Only includes non-None fields for cleaner JSON.
         """
-        result = {"status": self.status}
+        result: dict[str, Any] = {"status": self.status}
 
         if self.data is not None:
             result["data"] = self.data

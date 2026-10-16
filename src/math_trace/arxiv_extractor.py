@@ -15,6 +15,7 @@ import tarfile
 import tempfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any
 
 import requests
 
@@ -96,7 +97,7 @@ def download_and_extract_equations(paper_id: str, max_equations: int = 50) -> tu
     response = requests.get(url, timeout=20)
     response.raise_for_status()
 
-    equations = []
+    equations: list[Equation] = []
 
     # Extract and parse
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -211,7 +212,7 @@ def load_extracted_paper(paper_id: str, cache_dir: Path | None = None) -> dict:
         raise FileNotFoundError(f"Paper not cached: {paper_id}")
 
     # Load metadata
-    metadata = json.loads((paper_dir / "metadata.json").read_text())
+    metadata: dict[str, Any] = json.loads((paper_dir / "metadata.json").read_text())
 
     # Load equations
     equations = []

@@ -52,7 +52,8 @@ def safe_json_load(file_path: Path) -> dict | None:
     Logs errors without raising (graceful degradation).
     """
     try:
-        return json.loads(file_path.read_text(encoding="utf-8"))
+        data: dict | None = json.loads(file_path.read_text(encoding="utf-8"))
+        return data
     except FileNotFoundError:
         logger.debug(f"JSON file not found: {file_path}")
         return None
