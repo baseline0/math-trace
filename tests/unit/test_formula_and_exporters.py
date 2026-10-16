@@ -14,18 +14,25 @@ from math_trace.exporters import LatexExporter
 from math_trace.formula import Formula, formula_to_json_dict
 
 
-def make_formula(**overrides) -> Formula:
-    base = {
-        "name": "michaelis_menten",
-        "latex": r"\frac{V_{max} S}{K_m + S}",
-        "description": "Enzyme kinetics",
-        "source_line": 42,
-        "assumptions": "S >= 0",
-        "units": "mol/s",
-        "verified": True,
-    }
-    base.update(overrides)
-    return Formula(**base)
+def make_formula(
+    *,
+    name: str = "michaelis_menten",
+    latex: str = r"\frac{V_{max} S}{K_m + S}",
+    description: str = "Enzyme kinetics",
+    source_line: int = 42,
+    assumptions: str = "S >= 0",
+    units: str = "mol/s",
+    verified: bool = True,
+) -> Formula:
+    return Formula(
+        name=name,
+        latex=latex,
+        description=description,
+        source_line=source_line,
+        assumptions=assumptions,
+        units=units,
+        verified=verified,
+    )
 
 
 # --- Formula contract --------------------------------------------------------------
