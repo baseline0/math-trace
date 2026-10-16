@@ -8,6 +8,8 @@ fraction (a known limitation of the regex converter) is marked as an expected
 failure so the gap stays visible.
 """
 
+from typing import Any
+
 import pytest
 
 from math_trace.exporters import LatexExporter
@@ -64,8 +66,10 @@ def test_optional_fields_default_to_empty_and_unverified():
 
 
 def test_formula_without_required_fields_is_rejected():
+    # Passed as kwargs so the type checker does not flag the deliberately invalid call.
+    missing_required: dict[str, Any] = {"name": "n", "latex": "x"}
     with pytest.raises(TypeError):
-        Formula(name="n", latex="x")  # missing description and source_line
+        Formula(**missing_required)  # missing description and source_line
 
 
 # --- LaTeX exporter ----------------------------------------------------------------
