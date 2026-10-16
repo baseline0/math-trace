@@ -30,8 +30,8 @@ class ApiResponse(Generic[T]):  # noqa: UP046
     data: T | None = None
     """Response payload (only present on success)."""
 
-    error: str | None = None
-    """Error message (only present on error)."""
+    error_message: str | None = None
+    """Error message (only present on error); serialized under the "error" key."""
 
     message: str | None = None
     """Additional context message."""
@@ -59,7 +59,7 @@ class ApiResponse(Generic[T]):  # noqa: UP046
         )
 
     @staticmethod
-    def error(error_msg: str, message: str | None = None, code: int = 400) -> ApiResponse:  # noqa: F811
+    def error(error_msg: str, message: str | None = None, code: int = 400) -> ApiResponse:
         """Create an error response.
 
         Args:
@@ -72,7 +72,7 @@ class ApiResponse(Generic[T]):  # noqa: UP046
         """
         return ApiResponse(
             status=API_STATUS_ERROR,
-            error=error_msg,
+            error_message=error_msg,
             message=message,
             code=code,
         )
@@ -87,8 +87,8 @@ class ApiResponse(Generic[T]):  # noqa: UP046
         if self.data is not None:
             result["data"] = self.data
 
-        if self.error is not None:
-            result["error"] = self.error
+        if self.error_message is not None:
+            result["error"] = self.error_message
 
         if self.message is not None:
             result["message"] = self.message
