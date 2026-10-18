@@ -96,7 +96,7 @@ def test_an_unknown_reference_is_refused_with_the_known_names(tmp_path: Path) ->
     )
 
     assert result.exit_code == 2
-    assert "known: epidemiology-sir" in result.output
+    assert "known: epidemiology-sir, sidorenko-turan" in result.output
     assert not (tmp_path / "r.json").exists()
 
 
@@ -105,6 +105,14 @@ def test_the_epidemiology_reference_is_registered_with_its_contract_tests() -> N
 
     assert reference.build and reference.contract_tests
     assert "generated/sir_equations.json" in reference.outputs
+
+
+def test_the_sidorenko_turan_reference_is_registered_with_its_contract_tests() -> None:
+    reference = rc.REFERENCES["sidorenko-turan"]
+
+    assert reference.build and reference.contract_tests
+    assert "generated/gap_table.json" in reference.outputs
+    assert reference.expected == "expected-hashes.json"
 
 
 def _expected(**overrides: object) -> rc.ExpectedHashes:

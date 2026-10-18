@@ -19,12 +19,12 @@ metadata:
     - research
 spec:
   type: library
-  lifecycle: active
-  owner: group:research
+  lifecycle: production
+  owner: mark-alexiuk
   system: mathematics
   dependsOn:
     - component:fleet-base
-    - component:agent-tooling
+    - component:fleet-agents
   providesApis: []
   consumesApis: []
   subcomponentOf: component:research
@@ -40,8 +40,8 @@ metadata:
     - latex
 spec:
   type: library
-  lifecycle: active
-  owner: group:research
+  lifecycle: production
+  owner: mark-alexiuk
   definition: |
     This API provides converters for transforming SymPy expressions
     into publication-ready LaTeX and Typst formats.
