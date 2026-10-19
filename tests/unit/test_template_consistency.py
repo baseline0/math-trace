@@ -11,6 +11,7 @@ Validates:
 import json
 import subprocess
 import sys
+from typing import Any
 
 import pytest
 
@@ -41,12 +42,13 @@ EQUATIONS_JSON = {
 }
 
 
-def _load_equations(template: str) -> dict:
+def _load_equations(template: str) -> dict[str, Any]:
     """Load a template's equations JSON, failing if it is missing."""
     json_file = TEMPLATE_DIR / template / EQUATIONS_JSON[template]
     assert json_file.exists(), f"{template}: {json_file.name} not found"
     with open(json_file) as f:
-        return json.load(f)
+        data: dict[str, Any] = json.load(f)
+    return data
 
 
 REQUIRED_FILES = {

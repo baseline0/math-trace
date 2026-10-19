@@ -10,6 +10,7 @@ import html
 import json
 import re
 from pathlib import Path
+from typing import Any
 
 import typer
 
@@ -233,7 +234,7 @@ def local_model_formulas(
                 "formulas": [],
             }
 
-        formulas = []
+        formulas: list[dict[str, Any]] = []
         MAX_FORMULAS_PER_FILE = 500
         for name, formula_obj in module.FORMULAS.items():
             if len(formulas) >= MAX_FORMULAS_PER_FILE:
