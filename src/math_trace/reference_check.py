@@ -25,6 +25,7 @@ import platform
 import subprocess
 import time
 from dataclasses import asdict, dataclass, field
+from enum import StrEnum
 from pathlib import Path
 
 import typer
@@ -275,25 +276,36 @@ def check(name: str, repo: Path, *, use_expected: bool = True) -> Report:
     return report
 
 
+class Toggle(StrEnum):
+    """Explicit boolean value for a command option: `--name true` or `--name false`."""
+
+    TRUE = "true"
+    FALSE = "false"
+
+
 @app.command()
 def run(
     reference: str = typer.Option(..., "--reference", help="A registered reference name."),
     repo: Path = typer.Option(..., "--repo", help="The repository root."),
     report: Path = typer.Option(..., "--report", help="Where to write the JSON report."),
-    record_expected: bool = typer.Option(  # typer-explicit: allow-optional: a switch that only the recording run sets
-        False,
+    record_expected: Toggle = typer.Option(
+        ...,
         "--record-expected",
-        help="After a passing build, write the reference's expected-hashes file. Skips the recorded-hash comparison.",
+        help=(
+            "true: after a passing build, write the reference's expected-hashes file and skip the "
+            "recorded-hash comparison; false: compare against the recorded hashes."
+        ),
     ),
 ) -> None:
     """Rebuild a registered reference twice, check it, write the report, and exit 1 on any failure."""
     if reference not in REFERENCES:
         typer.echo(f"unknown reference {reference!r}; known: {', '.join(sorted(REFERENCES))}", err=True)
         raise typer.Exit(2)
-    if record_expected and REFERENCES[reference].expected is None:
+    record = record_expected is Toggle.TRUE
+    if record and REFERENCES[reference].expected is None:
         typer.echo(f"{reference} has no expected-hashes file to record", err=True)
         raise typer.Exit(2)
-    result = check(reference, repo, use_expected=not record_expected)
+    result = check(reference, repo, use_expected=not record)
     payload = asdict(result) | {"result": result.result}
     report.parent.mkdir(parents=True, exist_ok=True)
     report.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -302,7 +314,7 @@ def run(
         typer.echo(f"  - {reason}")
     if result.failures:
         raise typer.Exit(1)
-    if record_expected:
+    if record:
         target = repo / REFERENCES[reference].directory / str(REFERENCES[reference].expected)
         target.write_text(json.dumps(expected_payload(result), indent=2, sort_keys=True) + "\n", encoding="utf-8")
         typer.echo(f"recorded expected hashes: {target}")

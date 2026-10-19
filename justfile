@@ -18,7 +18,7 @@ install-elan:
 # Reviewer path: rebuild a registered reference twice, check it, and write its JSON report. Exits 1 on any failure.
 [group("build")]
 reference-check reference="sidorenko-turan":
-    uv run python -m math_trace.reference_check --reference {{reference}} --repo {{justfile_directory()}} --report {{justfile_directory()}}/examples/{{reference}}/generated/reference-report.json
+    uv run python -m math_trace.reference_check --reference {{reference}} --repo {{justfile_directory()}} --report {{justfile_directory()}}/examples/{{reference}}/generated/reference-report.json --record-expected false
 
 [group("build")]
 model:

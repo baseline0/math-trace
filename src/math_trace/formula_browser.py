@@ -21,7 +21,7 @@ app = typer.Typer(help="Browse and select formulas from various sources")
 
 
 @app.command()
-def arxiv_papers(limit: int = typer.Option(20, help="Max papers to return")) -> list[dict]:
+def arxiv_papers(limit: int = typer.Option(..., "--limit", help="Max papers to return")) -> list[dict]:
     """List cached arXiv papers with equation counts.
 
     Returns: [{paper_id, title, authors, equation_count}, ...]
@@ -158,15 +158,15 @@ def local_models(pattern: str = "*/src/model.py", root: str = ".") -> list[dict]
 
 @app.command()
 def list_local_models(
-    pattern: str = typer.Option("*/src/model.py", help="Glob pattern for model files"),
-    root: str = typer.Option(".", help="Root directory to search"),
+    pattern: str = typer.Option(..., "--pattern", help="Glob pattern for model files, e.g. */src/model.py"),
+    root: str = typer.Option(..., "--root", help="Root directory to search, e.g. ."),
 ) -> list[dict]:
     """List Python files with FORMULAS dict (Typer CLI wrapper)."""
     return local_models(pattern=pattern, root=root)
 
 
 @app.command()
-def arxiv_equations(paper_id: str) -> dict:
+def arxiv_equations(paper_id: str = typer.Option(..., "--paper-id", help="Cached arXiv paper ID")) -> dict:
     """Get equations from cached arXiv paper.
 
     Returns: {paper_id, title, equations: [{index, latex, context, sympy_expr, status}, ...]}
@@ -198,7 +198,7 @@ def arxiv_equations(paper_id: str) -> dict:
 
 @app.command()
 def local_model_formulas(
-    path: str = typer.Argument(..., help="Path to model.py file"),
+    path: str = typer.Option(..., "--path", help="Path to model.py file"),
 ) -> dict:
     """Extract formulas from local model.py file.
 

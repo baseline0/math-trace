@@ -6,8 +6,8 @@ generated/presentation.html (or --output). The HTML loads reveal.js and MathJax 
 CDNs at pinned versions, so viewing it needs network access.
 
 Usage:
-  python build_presentation.py                          # writes generated/presentation.html
-  python build_presentation.py --output /tmp/deck.html  # write elsewhere
+  python build_presentation.py --output generated/presentation.html  # the reference build
+  python build_presentation.py --output /tmp/deck.html               # write elsewhere
 
 Design Intent:
 - The Typer command only parses arguments, maps errors to exit codes, and prints.
@@ -79,11 +79,11 @@ def next_steps_lines(output: Path) -> list[str]:
 
 @app.command()
 def main(
-    output: Path | None = typer.Option(None, help=f"Output HTML file (default: generated/{OUTPUT_NAME})"),
+    output: Path = typer.Option(..., "--output", help="Output HTML file, e.g. generated/presentation.html"),
 ) -> None:
     """Build the SIR presentation as a single Revealjs HTML file."""
     script_dir = Path(__file__).parent
-    model_path, config_path, default_output = default_paths(script_dir)
+    model_path, config_path, _ = default_paths(script_dir)
 
     errors = input_errors(model_path, config_path)
     if errors:
@@ -91,7 +91,7 @@ def main(
             typer.echo(message)
         raise typer.Exit(1)
 
-    output_path = output or default_output
+    output_path = output
     typer.echo("🎬 Building Revealjs presentation...")
 
     inputs = load_presentation_inputs(model_path, config_path)

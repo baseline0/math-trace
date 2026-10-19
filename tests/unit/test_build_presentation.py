@@ -102,7 +102,7 @@ def test_next_steps_point_at_the_file_and_mention_network_access(tmp_path: Path)
 def test_cli_missing_inputs_exit_1_with_messages(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(bp, "default_paths", lambda _: (tmp_path / "m.json", tmp_path / "c.yaml", tmp_path / "p.html"))
 
-    result = runner.invoke(bp.app, [])
+    result = runner.invoke(bp.app, ["--output", str(tmp_path / "deck.html")])
 
     assert result.exit_code == 1
     assert "not found. Run build_paper.py first." in result.output

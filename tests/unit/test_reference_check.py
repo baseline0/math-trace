@@ -92,7 +92,16 @@ def test_provenance_outside_a_git_repository_is_explicitly_unknown(tmp_path: Pat
 def test_an_unknown_reference_is_refused_with_the_known_names(tmp_path: Path) -> None:
     result = CliRunner().invoke(
         rc.app,
-        ["--reference", "no-such-reference", "--repo", str(tmp_path), "--report", str(tmp_path / "r.json")],
+        [
+            "--reference",
+            "no-such-reference",
+            "--repo",
+            str(tmp_path),
+            "--report",
+            str(tmp_path / "r.json"),
+            "--record-expected",
+            "false",
+        ],
     )
 
     assert result.exit_code == 2

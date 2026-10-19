@@ -99,7 +99,7 @@ docker compose exec math-trace python -m math_trace.ollama_arxiv_worker convert 
 
 ```bash
 # Mount local examples
-docker compose exec math-trace python -m math_trace.formula_browser list_local_models \
+docker compose exec math-trace python -m math_trace.formula_browser list-local-models \
   --pattern "*/src/model.py" \
   --root examples
 
