@@ -122,7 +122,7 @@ e2e-test:
     @echo ""
     uv run pytest tests/e2e/test_arxiv_pipeline.py -v -s
 
-# NOT A GATE: mypy is advisory and currently reports known errors, so this recipe exits non-zero until they are fixed. `just check-types` (pyright ratchet) is the type gate.
+# NOT A GATE: mypy is advisory and is not run in CI. It reports no errors today. `just check-types` (pyright ratchet) is the type gate.
 [group("verify")]
 typecheck:
     @echo "🔎 Type checking (mypy, advisory; not a gate: use just check-types)..."
