@@ -166,7 +166,7 @@ setup:
     @just install-typst
     @echo ""
     @echo "Step 3: Syncing Python dependencies..."
-    uv sync
+    uv sync --frozen
     @echo ""
     @echo "✅ Setup complete! Ready to build your first paper:"
     @echo "   cd examples/membrane-dynamics"

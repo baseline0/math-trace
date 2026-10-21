@@ -43,7 +43,7 @@ fi
 # Install Python dependencies
 echo ""
 echo "📚 Installing Python dependencies..."
-uv sync
+uv sync --frozen
 
 echo ""
 echo "✅ Setup complete!"
