@@ -100,9 +100,9 @@ repos:
         stages: [pre-commit]
 
       # ----- P0: Pre-push: Tests -----
-      - id: just-test-unit
-        name: "[P0] Pre-push: just test-unit (unit tests)"
-        entry: env -u VIRTUAL_ENV just test-unit
+      - id: just-fleet-test
+        name: "[P0] Pre-push: just fleet-test (unit tests)"
+        entry: env -u VIRTUAL_ENV just fleet-test
         language: system
         stages:
           - pre-push
