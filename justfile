@@ -2,6 +2,7 @@
 import 'just/repo-push.just'
 
 import 'just/fleet-clean.just'
+import 'just/fleet-checks.just'
 
 set default-list := true
 
