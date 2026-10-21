@@ -22,6 +22,7 @@ repos:
     hooks:
       # P3: Hygiene
       - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
         name: "[P3] Trim trailing whitespace"
       - id: end-of-file-fixer
         name: "[P3] Fix end of file"
