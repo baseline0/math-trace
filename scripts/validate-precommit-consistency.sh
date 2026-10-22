@@ -14,7 +14,7 @@
 
 set -e
 
-FLEET_ROOT="${FLEET_ROOT:?set FLEET_ROOT (see .env.example)}"
+: "${FLEET_ROOT:?set FLEET_ROOT (see .env.example)}"
 FIX_MODE="${1:---check}"
 
 # Color output
