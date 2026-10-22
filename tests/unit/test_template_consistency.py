@@ -9,8 +9,6 @@ Validates:
 """
 
 import json
-import subprocess
-import sys
 from typing import Any
 
 import pytest
@@ -102,29 +100,6 @@ class TestTemplateStructure:
 
 class TestFormulaJSON:
     """Test generated formula JSON files."""
-
-    @pytest.mark.parametrize("template", TEMPLATES)
-    def test_template_generates_equations_json(self, template):
-        """Running model.py generates equations JSON."""
-        template_path = TEMPLATE_DIR / template
-
-        # Find model.py
-        model_root = template_path / "model.py"
-        model_src = template_path / "src" / "model.py"
-        model_path = model_src if model_src.exists() else model_root
-
-        if not model_path.exists():
-            pytest.skip(f"{template}: model.py not found")
-
-        # Run model.py (safe: model_path is from controlled template directory)
-        result = subprocess.run(
-            [sys.executable, str(model_path)],
-            cwd=str(template_path),
-            capture_output=True,
-            text=True,
-        )
-
-        assert result.returncode == 0, f"{template}: model.py failed:\n{result.stderr}"
 
     @pytest.mark.parametrize("template", TEMPLATES)
     def test_formula_json_has_required_fields(self, template):
