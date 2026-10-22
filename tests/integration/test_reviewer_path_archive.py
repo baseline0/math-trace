@@ -1,4 +1,6 @@
-"""The reviewer path must work from a clean export of the committed tree, not only from a working copy.
+"""Integration: exports the real committed tree with git archive and runs a child Python, so it cannot be hermetic.
+
+The reviewer path must work from a clean export of the committed tree, not only from a working copy.
 
 The archive is `git archive HEAD`, so it holds exactly what a reviewer clones: no generated outputs, no local
 state. These checks run in CI. The full build is in tests/integration/test_reviewer_path_full.py.
@@ -17,8 +19,6 @@ import pytest
 
 from math_trace import reference_check as rc
 from math_trace.constants import REPO_ROOT
-
-pytestmark = pytest.mark.unit
 
 REPO = REPO_ROOT
 
