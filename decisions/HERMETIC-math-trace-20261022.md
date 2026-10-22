@@ -16,7 +16,7 @@ No file is OPEN. The test_template_consistency JSON checks read committed repo f
 
 - Unit, normal env: `.venv/bin/pytest tests/unit -q` exit 0, 291 passed.
 - Unit, `env -i PATH=/usr/bin:/bin` (HOME unset, no FLEET_ROOT): exit 0, 291 passed.
-- Integration collection: `.venv/bin/pytest tests/integration --collect-only -q` collects 148 tests in total; the 13 moved tests are included (reviewer archive: 11, template model runs: 7 collected from the two files together, 13 total). Not run.
+- Integration collection: `.venv/bin/pytest tests/integration --collect-only -q` collects 148 tests in total; the two moved files (reviewer archive and template model runs) together collect 13 of them. Not run.
 
 ## Commits
 
