@@ -63,13 +63,13 @@ predictions degrade:
   Violates during lockdowns, mask adoption, or behavior-change campaigns.
 
 - *Permanent recovered immunity:* No reinfection. Approximately valid for acute diseases
-  (<1 year); fails for endemic diseases with waning immunity (e.g., COVID variants).
+  (under 1 year); fails for endemic diseases with waning immunity (e.g., COVID variants).
 
 - *Exponential recovery:* All infected individuals have exponentially distributed
   infectious periods with mean 1/γ. Simplification; real recovery is more complex.
 
 - *No vital dynamics:* Ignores births and deaths during epidemic. Valid for acute
-  outbreaks (<1 year); breaks for endemic models.
+  outbreaks (under 1 year); breaks for endemic models.
 
 == Equation Derivation
 

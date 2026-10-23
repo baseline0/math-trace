@@ -32,7 +32,7 @@ The Schrödinger equation is the foundation of quantum mechanics. Yet most publi
   [*Problem:* Formula ↔ code divergence.
 
   A researcher publishes:
-  - Paper showing: $E_n = ℏω(n + 1/2)$
+  - Paper showing: $E_n = "ℏω"(n + 1/2)$
   - Code computing: `E_n = hbar * omega * (n + 1/2)`
 
   But the paper may derive E_n differently, or the code may have a typo. Only direct validation catches this.

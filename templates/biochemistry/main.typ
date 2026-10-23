@@ -37,7 +37,7 @@ The catalytic efficiency combines both speed and selectivity:
 
 // Catalytic efficiency formula included from generated/formulas.typ
 
-Enzymes with high $k_cat / K_m$ values are both fast and specific.
+Enzymes with high $k_"cat" / K_m$ values are both fast and specific.
 
 == Experimental Data
 
