@@ -105,3 +105,6 @@ coverage.xml
 # Root-level generated reports (for example lean-health.json); the per-example rules above cover example outputs.
 /generated/
 .env
+
+# Scratch and generated output: never committed
+/working/
