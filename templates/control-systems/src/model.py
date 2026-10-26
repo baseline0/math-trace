@@ -257,7 +257,7 @@ def simulate_feedback_system(
 
     for i in range(1, num_steps):
         # Measure output
-        y[i - 1] = float(system.output(x[i - 1], u[i - 1]))
+        y[i - 1] = system.output(x[i - 1], u[i - 1]).item()
 
         # Compute control signal
         u[i] = controller.update(y[i - 1], dt)
@@ -265,7 +265,7 @@ def simulate_feedback_system(
         # Update state
         x[i] = x[i - 1] + dt * (system.A @ x[i - 1] + system.B * u[i])
 
-    y[-1] = float(system.output(x[-1], u[-1]))
+    y[-1] = system.output(x[-1], u[-1]).item()
 
     return t, x, y, u
 
