@@ -131,6 +131,11 @@ ignore = ["E501", "SIM105", "N818", "RUF001", "RUF002", "RUF022"]
 "templates/quantum-systems/src/scenarios/harmonic_oscillator.py" = ["N806", "E731", "TID252", "F841"]
 # N806: uppercase local symbols (S, I, R, V_max, ...) mirror the equations; renaming risks collisions; TID252: template files use relative imports for their in-place layout; TODO: convert to absolute imports; F841: pre-existing unused locals (multi-value unpacking, diagnostics); removing them could change behaviour
 "templates/quantum-systems/src/tests/test_harmonic_oscillator.py" = ["N806", "TID252", "F841"]
+# N803/N806: uppercase arguments and locals (V, H, N) are the physics notation of the operators and potentials
+"templates/quantum-systems/src/model.py" = ["N803", "N806"]
+# N803/N806: uppercase symbols mirror the equations (S, I, R, V_0, C_v); TID252: template files use relative imports for their in-place layout
+"templates/*/src/scenarios/*.py" = ["N803", "N806", "TID252"]
+"templates/*/src/tests/*.py" = ["N803", "N806", "TID252"]
 # F401: conditional import: FormulaPipeline is an availability probe for the try/except fallback
 "templates/simple-physics/build_paper.py" = ["F401"]
 # N806: uppercase local symbols (S, I, R, V_max, ...) mirror the equations; renaming risks collisions
