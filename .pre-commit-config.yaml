@@ -166,6 +166,13 @@ repos:
         stages: [pre-commit]
   - repo: local
     hooks:
+      - id: template-equation-metadata
+        name: "[P1] Templates: model.py defines export_equation_metadata and equations.json matches it"
+        entry: uv run python -m math_trace.template_metadata
+        language: system
+        pass_filenames: false
+        files: '^templates/[^/]+/(src/model\.py|equations\.json)$'
+        stages: [pre-commit]
       - id: check-typer-explicit
         name: "[P1] typer commands take required --name value options (ratchet against baseline)"
         entry: fleet typer-explicit check --root . --baseline .typer-explicit-baseline.json
