@@ -306,6 +306,38 @@ def export_equation_metadata() -> dict[str, Any]:
             "description": "Continuous-time LTI stability criterion on the poles of A",
             "validation": "All eigenvalues of A in left half-plane",
         },
+        "mass_spring_damper_damping_ratio": {
+            "latex": "\\zeta = \\frac{c}{2\\sqrt{k m}}",
+            "code_ref": "src/scenarios/mass_spring_damper.py:damping_ratio()",
+            "line": 20,
+            "description": "Damping ratio of the mass-spring-damper: underdamped below 1, critical at 1, overdamped above 1",
+            "test_ref": "src/tests/test_mass_spring_damper.py",
+            "validation": "Regime classification and pole locations match the characteristic polynomial",
+        },
+        "mass_spring_damper_overshoot": {
+            "latex": "M_p = 100\\exp\\left(-\\frac{\\pi\\zeta}{\\sqrt{1-\\zeta^2}}\\right)",
+            "code_ref": "src/scenarios/mass_spring_damper.py:percent_overshoot()",
+            "line": 34,
+            "description": "Percent overshoot of the unit step response of an underdamped second-order system",
+            "test_ref": "src/tests/test_mass_spring_damper.py",
+            "validation": "Simulated overshoot matches the formula at zeta = 0.1 (72.92%)",
+        },
+        "bode_resonance_peak": {
+            "latex": "M_r = \\frac{1}{2\\zeta\\sqrt{1-\\zeta^2}}",
+            "code_ref": "src/scenarios/bode_plot_analysis.py:resonance_peak()",
+            "line": 46,
+            "description": "Peak magnitude of the second-order frequency response for zeta below 1/sqrt(2)",
+            "test_ref": "src/tests/test_bode_plot_analysis.py",
+            "validation": "Grid peak of the magnitude matches M_r within 0.01 dB",
+        },
+        "bode_bandwidth_3db": {
+            "latex": "\\omega_{bw} = \\omega_n\\sqrt{1-2\\zeta^2+\\sqrt{2-4\\zeta^2+4\\zeta^4}}",
+            "code_ref": "src/scenarios/bode_plot_analysis.py:bandwidth_3db()",
+            "line": 53,
+            "description": "-3 dB bandwidth of the second-order prototype",
+            "test_ref": "src/tests/test_bode_plot_analysis.py",
+            "validation": "Grid crossing of 1/sqrt(2) matches the formula to 0.1%",
+        },
     }
     # template_builder and the shared formula schema read "source_line".
     for info in metadata.values():
