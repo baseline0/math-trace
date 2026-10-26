@@ -14,6 +14,7 @@ import json
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 from scipy.integrate import trapezoid
@@ -403,6 +404,85 @@ def export_formulas() -> dict[str, Formula]:
     return formulas
 
 
+def export_equation_metadata() -> dict[str, Any]:
+    """Auto-generate equations.json: each entry links an equation to the code and test that check it."""
+    metadata = {
+        "time_independent_schrodinger": {
+            "latex": "-\\frac{\\hbar^2}{2m}\\frac{d^2\\psi}{dx^2} + V(x)\\psi = E\\psi",
+            "code_ref": "model.py:solve_tise_fdm()",
+            "line": 42,
+            "method": "Finite Difference Method (tridiagonal eigenvalue problem)",
+            "test_ref": "src/tests/test_harmonic_oscillator.py",
+            "validation": "Energy levels match analytical: E_n = ℏω(n + 1/2)",
+        },
+        "time_dependent_schrodinger": {
+            "latex": "i\\hbar\\frac{\\partial\\psi}{\\partial t} = -\\frac{\\hbar^2}{2m}\\frac{\\partial^2\\psi}{\\partial x^2} + V(x)\\psi",
+            "code_ref": "model.py:propagate_ssfm()",
+            "line": 117,
+            "method": "Split-Step Fourier Method (SSFM)",
+            "test_ref": "src/tests/test_harmonic_oscillator.py",
+            "validation": "Total energy conserved to 1e-6; probability preserved (∫|ψ|²=1)",
+        },
+        "normalization": {
+            "latex": "\\int |\\psi(x)|^2 dx = 1",
+            "code_ref": "model.py:normalize_wavefunction()",
+            "line": 202,
+            "test_ref": "src/tests/test_harmonic_oscillator.py",
+            "validation": "Normalized wavefunction satisfies ∫|ψ|²=1 to machine precision",
+        },
+        "expectation_value": {
+            "latex": "\\langle A \\rangle = \\int \\psi^*(x) \\hat{A} \\psi(x) dx",
+            "code_ref": "model.py:expectation_value()",
+            "line": 228,
+            "test_ref": "src/tests/test_harmonic_oscillator.py",
+            "validation": "Hermitian operators give real eigenvalues",
+        },
+        "energy_conservation": {
+            "latex": "E_{total} = \\langle T \\rangle + \\langle V \\rangle = \\text{constant}",
+            "code_ref": "model.py:total_energy()",
+            "line": 291,
+            "test_ref": "src/tests/test_harmonic_oscillator.py",
+            "validation": "|ΔE/E₀| < 1e-6 over 10000 time steps (SSFM)",
+        },
+        "rectangular_barrier_transmission": {
+            "latex": "T = \\left[1 + \\frac{V_0^2 \\sinh^2(\\kappa a)}{4E(V_0-E)}\\right]^{-1}, \\quad \\kappa = \\sqrt{2(V_0-E)}",
+            "code_ref": "src/scenarios/tunneling_barrier.py:transmission_closed_form()",
+            "line": 16,
+            "description": "Transmission probability through a rectangular barrier for E < V0 (ħ = m = 1)",
+            "test_ref": "src/tests/test_tunneling_barrier.py",
+            "validation": "Matches the plane-wave matching solve to 1e-9; T + R = 1",
+        },
+        "wkb_tunneling": {
+            "latex": "T \\approx e^{-2\\kappa a}",
+            "code_ref": "src/scenarios/tunneling_barrier.py:wkb_transmission()",
+            "line": 60,
+            "description": "WKB estimate of tunneling through a thick barrier",
+            "test_ref": "src/tests/test_tunneling_barrier.py",
+            "validation": "Agrees with the closed form to 2% for κa = 6",
+        },
+        "double_slit_fringe_spacing": {
+            "latex": "\\Delta y = \\frac{\\lambda L}{d}, \\quad \\lambda = \\frac{h}{mv}",
+            "code_ref": "src/scenarios/double_slit_interference.py:fringe_spacing()",
+            "line": 29,
+            "description": "Fringe spacing of the far-field two-slit pattern, with de Broglie wavelength",
+            "test_ref": "src/tests/test_double_slit_interference.py",
+            "validation": "Measured spacing matches λL/d for a narrow slit",
+        },
+        "double_slit_intensity": {
+            "latex": "I(y) = I_0 \\mathrm{sinc}^2\\left(\\frac{\\pi w y}{\\lambda L}\\right)\\cos^2\\left(\\frac{\\pi d y}{\\lambda L}\\right)",
+            "code_ref": "src/scenarios/double_slit_interference.py:intensity()",
+            "line": 34,
+            "description": "Far-field two-slit intensity: single-slit envelope times the double-slit interference term",
+            "test_ref": "src/tests/test_double_slit_interference.py",
+            "validation": "Central maximum is I_0; envelope vanishes at y = λL/w; visibility 1 for a narrow slit",
+        },
+    }
+    # template_builder and the shared formula schema read "source_line".
+    for info in metadata.values():
+        info["source_line"] = info["line"]
+    return metadata
+
+
 if __name__ == "__main__":
     formulas = export_formulas()
 
@@ -413,3 +493,9 @@ if __name__ == "__main__":
     with open(output_file, "w") as f:
         json.dump(json_data, f, indent=2)
     print(f"✓ Generated {output_file}")
+
+    equations_file = Path(__file__).parent.parent / "equations.json"
+    with open(equations_file, "w") as f:
+        json.dump(export_equation_metadata(), f, indent=2)
+        f.write("\n")
+    print(f"✓ Generated {equations_file}")
