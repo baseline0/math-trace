@@ -118,6 +118,6 @@ class TyperToJustfile:
 
 if __name__ == "__main__":
     # Test: generate justfile from our CLI
-    from math_trace.cli import app
+    from math_trace.reference_check import app
 
-    print(TyperToJustfile.generate(app, "math_trace.cli"))
+    print(TyperToJustfile.generate(app, "math_trace.reference_check"))

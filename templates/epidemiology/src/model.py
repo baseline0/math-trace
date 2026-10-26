@@ -490,6 +490,22 @@ def export_equation_metadata() -> dict[str, Any]:
             "test_ref": "tests/test_observables.py",
             "validation": "Predicted attack rate vs observed seroprevalence studies",
         },
+        "stochastic_seir_transitions": {
+            "latex": r"\Delta S \sim \mathrm{Poisson}\!\left(\frac{\beta \cdot S \cdot I}{N}\,\Delta t\right)",
+            "code_ref": "model.py:stochastic_seir_step()",
+            "line": 359,
+            "description": "Stochastic SEIR: Poisson-distributed S→E transitions per time step, capped by the compartment size",
+            "test_ref": "tests/test_sir_model.py",
+            "validation": "Integer counts sum to N at every step of every run",
+        },
+        "stochastic_seir_reproducibility": {
+            "latex": r"\text{seed } \mapsto \text{ensemble}",
+            "code_ref": "model.py:propagate_seir_stochastic()",
+            "line": 408,
+            "description": "Stochastic SEIR ensemble: a fixed seed reproduces every run exactly",
+            "test_ref": "tests/test_sir_model.py",
+            "validation": "Same seed yields identical ensemble arrays",
+        },
     }
     # template_builder and the shared formula schema read "source_line".
     for info in metadata.values():

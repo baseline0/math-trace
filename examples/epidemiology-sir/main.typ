@@ -164,10 +164,10 @@ Key outcomes:
   columns: (1fr, 1.5fr),
   [*Outcome*], [*Value*],
   [Peak infection day], [Day #covid_scenario.key_outcomes.peak_infection_day],
-  [Peak infection count], [#(covid_scenario.key_outcomes.peak_infection_count.toString() + " people")],
-  [Peak infection %], [#(covid_scenario.key_outcomes.peak_infection_percentage.toFixed(1) + "%")],
-  [Final attack rate], [#(covid_scenario.key_outcomes.final_attack_rate.toString() + " people")],
-  [Attack rate %], [#(covid_scenario.key_outcomes.final_attack_rate_percentage.toFixed(1) + "%")],
+  [Peak infection count], [#(str(covid_scenario.key_outcomes.peak_infection_count) + " people")],
+  [Peak infection %], [#(str(calc.round(covid_scenario.key_outcomes.peak_infection_percentage, digits: 1)) + "%")],
+  [Final attack rate], [#(str(covid_scenario.key_outcomes.final_attack_rate) + " people")],
+  [Attack rate %], [#(str(calc.round(covid_scenario.key_outcomes.final_attack_rate_percentage, digits: 1)) + "%")],
 )
 
 *Qualitative behavior:*

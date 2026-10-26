@@ -208,7 +208,7 @@ if __name__ == "__main__":
             print(f"  {key}: {val}")
 
     # Save report
-    output_path = Path(__file__).parent / "generated" / "covid_scenario.json"
+    output_path = Path(__file__).resolve().parents[1] / "generated" / "covid_scenario.json"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w") as f:
         json.dump(report, f, indent=2)

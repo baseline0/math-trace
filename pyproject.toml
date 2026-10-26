@@ -152,6 +152,8 @@ ignore = ["E501", "SIM105", "N818", "RUF001", "RUF002", "RUF022"]
 
 [tool.pyright]
 include = ["src", "tests"]
+# The membrane tests import the example's model and simulate modules by inserting this path into sys.path.
+extraPaths = ["examples/membrane-dynamics/src"]
 typeCheckingMode = "standard"
 pythonVersion = "3.13"
 

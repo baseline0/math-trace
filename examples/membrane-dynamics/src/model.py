@@ -54,7 +54,7 @@ FORMULAS = {
 }
 
 
-def export_json(output_path="membrane_equations.json"):
+def export_json(output_path: str | Path = "membrane_equations.json"):
     """Export formulas as JSON for other build steps."""
     data = {name: formula.to_dict() for name, formula in FORMULAS.items()}
     Path(output_path).write_text(json.dumps(data, indent=2))

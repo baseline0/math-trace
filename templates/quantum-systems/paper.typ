@@ -122,7 +122,7 @@ Factor the Hamiltonian: $Ĥ = T̂ + V̂$ (kinetic + potential).
 
 Three-step propagation per time step:
 1. Half-step potential (position space): $tilde(psi) = exp(-i V(x) Delta t / (2ℏ)) psi$
-2. Full-step kinetic (momentum space via FFT): $tilde(tilde(psi)) = exp(-i k^2 Delta t / (2m)) text(FFT)^(-1)(tilde(psi))$
+2. Full-step kinetic (momentum space via FFT): $tilde(tilde(psi)) = exp(-i k^2 Delta t / (2m)) text("FFT")^(-1)(tilde(psi))$
 3. Half-step potential (position space): $psi_(n+1) = exp(-i V(x) Delta t / (2ℏ)) tilde(tilde(psi))$
 
 *Why SSFM?*
@@ -184,7 +184,7 @@ For Hermitian operators: $angle(A)$ is real.
   fill: rgb("#f9f9f9"),
   inset: 10pt,
   [
-    $ E_(text(total)) = angle(T) + angle(V) = text(constant) $
+    $ E_(text("total")) = angle(T) + angle(V) = text("constant") $
 
     *Name:* Energy Conservation
     *Description:* Total energy unchanged during time evolution (for conservative systems)
@@ -211,7 +211,7 @@ The quantum harmonic oscillator has an **analytical solution**, making it ideal 
 
 *Analytical eigenvalues:* $E_n = ℏ omega (n + frac(1, 2))$
 
-*Analytical eigenfunctions:* $psi_n(x) propto e^(-x^2/2) H_n(x)$ (Hermite polynomials)
+*Analytical eigenfunctions:* $psi_n(x) ∝ e^(-x^2/2) H_n(x)$ (Hermite polynomials)
 
 *Numerical Results (FDM, 512 points):*
 

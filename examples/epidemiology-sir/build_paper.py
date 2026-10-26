@@ -57,6 +57,13 @@ def step_2_run_simulations():
         reports[name] = report
         print(f"✅ {name.upper()}: R₀={params.R0:.1f}, Peak={report['key_outcomes']['peak_infection_count']:,}")
 
+    # The Typst paper reads the COVID report; simulate.py's own save runs only under its __main__ block.
+    report_path = Path(__file__).parent / "generated" / "covid_scenario.json"
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(report_path, "w") as f:
+        json.dump(reports["covid"], f, indent=2)
+    print(f"✅ Report saved to {report_path}")
+
     return scenarios, reports
 
 
