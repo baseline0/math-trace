@@ -31,10 +31,9 @@ MODEL_FILE = Path("src") / "model.py"
 EQUATIONS_FILE = "equations.json"
 METADATA_FUNCTION = "export_equation_metadata"
 
-EXEMPT_TEMPLATES: dict[str, str] = {
-    "biochemistry": "writes biochemistry_equations.json and has no export_equation_metadata; migrate to the pattern",
-    "simple-physics": "writes physics_equations.json and has no export_equation_metadata; migrate to the pattern",
-}
+# Templates that do not yet follow the pattern, with the reason. Empty now: every template defines
+# export_equation_metadata() and writes equations.json. Add an entry only with a reason and a plan.
+EXEMPT_TEMPLATES: dict[str, str] = {}
 
 
 @dataclass(frozen=True)

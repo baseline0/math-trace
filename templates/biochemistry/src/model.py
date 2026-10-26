@@ -8,6 +8,7 @@ Edit this file to add your own equations.
 import importlib.util
 import json
 from pathlib import Path
+from typing import Any
 
 import sympy as sp
 
@@ -87,13 +88,16 @@ def export_formulas() -> dict[str, Formula]:
     return formulas
 
 
+def export_equation_metadata() -> dict[str, Any]:
+    """Auto-generate equations.json: each formula's LaTeX, description, source line, assumptions, and units."""
+    return {name: formula_to_json_dict(f) for name, f in export_formulas().items()}
+
+
 if __name__ == "__main__":
-    formulas = export_formulas()
+    metadata = export_equation_metadata()
 
-    # Export JSON (without verification metadata)
-    json_data = {name: formula_to_json_dict(f) for name, f in formulas.items()}
-
-    output_file = Path(__file__).parent.parent / "biochemistry_equations.json"
+    output_file = Path(__file__).parent.parent / "equations.json"
     with open(output_file, "w") as f:
-        json.dump(json_data, f, indent=2)
-    print(f"✅ Exported {len(formulas)} formulas to biochemistry_equations.json")
+        json.dump(metadata, f, indent=2)
+        f.write("\n")
+    print(f"✅ Exported {len(metadata)} formulas to equations.json")

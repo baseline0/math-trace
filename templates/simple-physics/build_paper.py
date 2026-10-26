@@ -66,7 +66,7 @@ def main() -> bool:
         return False
 
     return run_build_pipeline(
-        equations_json="physics_equations.json",
+        equations_json="equations.json",
         typst_file="main.typ",
         figure_generator=generate_figures,
         domain_name="physics",

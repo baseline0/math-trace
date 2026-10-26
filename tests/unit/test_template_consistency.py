@@ -27,11 +27,10 @@ TEMPLATES = [
 ]
 
 # Equations JSON each template's model.py exports and build_paper.py consumes.
-# Declared explicitly: older templates use a "<name>_equations.json" file,
-# newer ones a plain "equations.json".
+# Quantum's formula export is a separate file that its build reads; its equations.json comes from the metadata function.
 EQUATIONS_JSON = {
-    "simple-physics": "physics_equations.json",
-    "biochemistry": "biochemistry_equations.json",
+    "simple-physics": "equations.json",
+    "biochemistry": "equations.json",
     "quantum-systems": "quantum_systems_equations.json",
     "epidemiology": "equations.json",
     "control-systems": "equations.json",

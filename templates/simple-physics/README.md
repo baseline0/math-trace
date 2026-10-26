@@ -102,7 +102,7 @@ templates/simple-physics/
 ├── simulate.py              ← Edit: your simulation code
 ├── main.typ                 ← Edit: your paper narrative
 ├── build_paper.py           ← Build pipeline (run once)
-├── physics_equations.json   ← Auto-generated from model.py
+├── equations.json   ← Auto-generated from model.py
 ├── generated/
 │   ├── formulas.typ         ← Auto-generated Typst definitions
 │   └── figures/
