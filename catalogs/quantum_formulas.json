@@ -1,0 +1,93 @@
+{
+  "state_normalisation": {
+    "latex": "|\\alpha|^2 + |\\beta|^2 = 1 \\text{ for } \\alpha|0\\rangle + \\beta|1\\rangle",
+    "description": "A qubit state a|0> + b|1> has |a|^2 + |b|^2 = 1.",
+    "source_line": 94,
+    "assumptions": "single qubit, pure state",
+    "units": ""
+  },
+  "bloch_vector_x": {
+    "latex": "\\langle\\psi|X|\\psi\\rangle = \\sin\\theta\\cos\\phi",
+    "description": "The expectation of X in the Bloch-sphere state gives the x component sin(theta) cos(phi).",
+    "source_line": 102,
+    "assumptions": "pure single-qubit state with polar angle theta and azimuth phi",
+    "units": ""
+  },
+  "bloch_vector_y": {
+    "latex": "\\langle\\psi|Y|\\psi\\rangle = \\sin\\theta\\sin\\phi",
+    "description": "The expectation of Y in the Bloch-sphere state gives the y component sin(theta) sin(phi).",
+    "source_line": 110,
+    "assumptions": "pure single-qubit state with polar angle theta and azimuth phi",
+    "units": ""
+  },
+  "bloch_vector_z": {
+    "latex": "\\langle\\psi|Z|\\psi\\rangle = \\cos\\theta",
+    "description": "The expectation of Z in the Bloch-sphere state gives the z component cos(theta).",
+    "source_line": 118,
+    "assumptions": "pure single-qubit state with polar angle theta",
+    "units": ""
+  },
+  "born_rule_hadamard_plus": {
+    "latex": "p(0) = |\\langle 0|H|0\\rangle|^2 = \\tfrac12",
+    "description": "The Hadamard gate applied to |0> gives outcome 0 with probability one half.",
+    "source_line": 126,
+    "assumptions": "",
+    "units": "dimensionless (probability)"
+  },
+  "hadamard_unitary": {
+    "latex": "H^\\dagger H = I",
+    "description": "The Hadamard matrix is unitary, so the gate preserves norm and can be inverted.",
+    "source_line": 134,
+    "assumptions": "",
+    "units": ""
+  },
+  "pauli_squares": {
+    "latex": "X^2 = Y^2 = Z^2 = I",
+    "description": "Each Pauli matrix squares to the identity.",
+    "source_line": 141,
+    "assumptions": "",
+    "units": ""
+  },
+  "pauli_product": {
+    "latex": "XY = iZ",
+    "description": "The product of the Pauli matrices X and Y is i times Z.",
+    "source_line": 148,
+    "assumptions": "",
+    "units": ""
+  },
+  "rotation_z_unitary": {
+    "latex": "R_z(\\theta)^\\dagger R_z(\\theta) = I",
+    "description": "The z-rotation gate R_z(theta) is unitary for every angle theta.",
+    "source_line": 155,
+    "assumptions": "",
+    "units": ""
+  },
+  "bell_state_from_hadamard_and_cnot": {
+    "latex": "\\mathrm{CNOT}(H\\otimes I)|00\\rangle = \\tfrac{1}{\\sqrt2}(|00\\rangle + |11\\rangle)",
+    "description": "A Hadamard on the first qubit followed by a CNOT prepares the Bell state (|00> + |11>)/sqrt(2).",
+    "source_line": 162,
+    "assumptions": "two qubits, starting in |00>",
+    "units": ""
+  },
+  "grover_two_qubits_one_iteration": {
+    "latex": "\\sin^2\\big((2k+1)\\theta\\big) = 1 \\text{ with } \\sin\\theta = 1/\\sqrt{N},\\ N=4,\\ k=1",
+    "description": "With four items, one Grover iteration finds the marked item with certainty.",
+    "source_line": 172,
+    "assumptions": "N = 4 items, k = 1 iteration",
+    "units": "dimensionless (probability)"
+  },
+  "shor_factor_from_order": {
+    "latex": "\\gcd(a^{r/2}-1, N)\\cdot\\gcd(a^{r/2}+1, N) = N \\text{ for } N=15,\\ a=2,\\ r=4",
+    "description": "For N = 15 and a = 2, the order r = 4 yields the factors 3 and 5.",
+    "source_line": 181,
+    "assumptions": "N = 15, a = 2, r = 4",
+    "units": ""
+  },
+  "qft_unitary_n4": {
+    "latex": "F_N^\\dagger F_N = I,\\quad F_N = \\tfrac{1}{\\sqrt N}\\,[\\omega^{jk}],\\ \\omega = e^{2\\pi i/N},\\ N=4",
+    "description": "The quantum Fourier transform on four amplitudes is unitary.",
+    "source_line": 189,
+    "assumptions": "N = 4",
+    "units": ""
+  }
+}

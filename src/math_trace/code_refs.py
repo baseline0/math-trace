@@ -43,13 +43,18 @@ def symbol_line(source: str, symbol: str) -> int:
     return node.lineno
 
 
-def formula_call_lines(source: str) -> set[int]:
-    """Lines where a ``Formula(...)`` call starts in ``source``."""
+def call_lines(source: str, callee: str) -> set[int]:
+    """Lines where a call to the name ``callee`` starts in ``source``."""
     return {
         node.lineno
         for node in ast.walk(ast.parse(source))
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "Formula"
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == callee
     }
+
+
+def formula_call_lines(source: str) -> set[int]:
+    """Lines where a ``Formula(...)`` call starts in ``source``."""
+    return call_lines(source, "Formula")
 
 
 def resolve_code_ref(template_dir: Path, code_ref: str) -> int:

@@ -99,20 +99,24 @@ class Formula:
     def __post_init__(self) -> None:
         """Record the line that constructed this formula, so no line number is typed by hand."""
         if self.source_line is None:
-            self.source_line = _caller_line()
+            self.source_line = caller_line(sys._getframe(1))
 
     def to_dict(self) -> dict:
         """Convert to JSON-serializable dict."""
         return asdict(self)
 
 
-def _caller_line() -> int:
-    """Line of the first frame outside this module and the generated __init__ (the code that wrote Formula(...))."""
-    frame: FrameType | None = sys._getframe(1)
+def caller_line(start: FrameType) -> int:
+    """Line of the code that wrote a constructor call, walking up from ``start`` past this module and the generated __init__.
+
+    Pass the frame of the caller of ``__post_init__`` (``sys._getframe(1)`` inside it). That frame is the generated
+    __init__, which is skipped, so the walk lands on the module or function that wrote the call.
+    """
+    frame: FrameType | None = start
     while frame is not None and frame.f_code.co_filename in _INTERNAL_FILENAMES:
         frame = frame.f_back
     if frame is None:
-        raise RuntimeError("Formula was built outside any calling code, so it has no source line")
+        raise RuntimeError("the object was built outside any calling code, so it has no source line")
     return frame.f_lineno
 
 
