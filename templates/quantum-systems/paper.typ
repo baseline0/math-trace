@@ -1,4 +1,4 @@
-#import "@preview/charged-ieee:0.1.0": ieee
+#import "@preview/charged-ieee:0.1.4": ieee
 
 #show: ieee.with(
   title: "Quantum Systems: A Computational Framework for the Schrödinger Equation",
