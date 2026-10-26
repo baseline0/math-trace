@@ -2,38 +2,38 @@
   "ideal_gas_law": {
     "latex": "PV = nRT",
     "code_ref": "model.py:ideal_gas_pressure()",
-    "line": 32,
+    "line": 24,
     "description": "State equation for ideal gas; relates P, V, T, n",
-    "source_line": 32
+    "source_line": 24
   },
   "internal_energy": {
     "latex": "U = n C_v T",
     "code_ref": "model.py:internal_energy()",
-    "line": 71,
+    "line": 61,
     "description": "Internal energy (kinetic energy of molecules)",
-    "source_line": 71
+    "source_line": 61
   },
   "first_law": {
     "latex": "dU = \\delta Q - \\delta W",
     "code_ref": "model.py:first_law()",
-    "line": 108,
+    "line": 91,
     "description": "Energy conservation: heat in - work out = energy change",
-    "source_line": 108
+    "source_line": 91
   },
   "entropy": {
     "latex": "S = n C_v \\ln(T) + n R \\ln(V) + S_0",
     "code_ref": "model.py:entropy()",
-    "line": 154,
+    "line": 125,
     "description": "Entropy: measure of disorder; \u221d ln(T) and ln(V)",
-    "source_line": 154
+    "source_line": 125
   },
   "carnot_efficiency": {
     "latex": "\\eta_{\\text{Carnot}} = 1 - \\frac{T_c}{T_h}",
     "code_ref": "model.py:carnot_efficiency()",
-    "line": 189,
+    "line": 157,
     "description": "Carnot efficiency: maximum efficiency of a heat engine between two reservoirs",
     "validation": "\u03b7 = 0 at T_c = T_h; \u03b7 < 1 always (2nd Law)",
-    "source_line": 189
+    "source_line": 157
   },
   "polytropic_work": {
     "latex": "W = \\frac{P_2 V_2 - P_1 V_1}{1-n}, \\quad n \\neq 1",

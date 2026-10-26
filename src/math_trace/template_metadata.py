@@ -5,7 +5,10 @@ This module checks, for each template, that:
 
 1. src/model.py defines export_equation_metadata() at module level;
 2. equations.json exists beside the template's model;
-3. the JSON on disk equals what the function returns now, so a hand edit or a stale regeneration fails.
+3. the JSON on disk equals what the function returns now, so a hand edit or a stale regeneration fails;
+4. each recorded line points at the code it names: a dict entry's ``line`` is the def or class line of its
+   ``code_ref``, and a Formula entry's ``source_line`` is a line where a ``Formula(...)`` call starts.
+   See math_trace.code_refs.
 
 Templates that do not yet follow the pattern are listed in EXEMPT_TEMPLATES with the reason. An exemption that is
 no longer needed fails too, so the list cannot go stale.
@@ -25,6 +28,7 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any
 
+from math_trace.code_refs import CodeRefError, formula_call_lines, resolve_code_ref
 from math_trace.constants import REPO_ROOT
 
 MODEL_FILE = Path("src") / "model.py"
@@ -90,15 +94,44 @@ def check_template(template_dir: Path) -> list[Problem]:
 
     on_disk = json.loads(equations.read_text())
     generated = load_metadata(model)
+    problems: list[Problem] = []
     if on_disk != generated:
-        return [
+        problems.append(
             Problem(
                 name,
                 f"{EQUATIONS_FILE} differs from {METADATA_FUNCTION}(); "
                 f"regenerate with `python {MODEL_FILE}` in the template",
             )
-        ]
-    return []
+        )
+    problems.extend(line_problems(template_dir, on_disk))
+    return problems
+
+
+def line_problems(template_dir: Path, entries: dict[str, Any]) -> list[Problem]:
+    """Recorded lines that do not point at the code they name. Reads the source; does not import it."""
+    name = template_dir.name
+    model = template_dir / MODEL_FILE
+    call_lines = formula_call_lines(model.read_text())
+    problems: list[Problem] = []
+    for key, entry in entries.items():
+        if "code_ref" in entry:
+            try:
+                expected = resolve_code_ref(template_dir, entry["code_ref"])
+            except CodeRefError as error:
+                problems.append(Problem(name, f"{key}: {error}"))
+                continue
+            if entry["line"] != expected:
+                problems.append(
+                    Problem(
+                        name,
+                        f"{key}: line {entry['line']} but {entry['code_ref']} is defined at line {expected}",
+                    )
+                )
+        elif entry.get("source_line") not in call_lines:
+            problems.append(
+                Problem(name, f"{key}: source_line {entry.get('source_line')} is not where a Formula( call starts")
+            )
+    return problems
 
 
 def check_all(templates_root: Path) -> list[Problem]:

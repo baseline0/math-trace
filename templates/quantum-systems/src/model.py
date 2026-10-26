@@ -386,7 +386,6 @@ def export_formulas() -> dict[str, Formula]:
             name="schrodinger",
             latex=r"i\hbar\frac{\partial \Psi}{\partial t} = \hat{H}\Psi",
             description="Time-dependent Schrödinger equation",
-            source_line=14,
             assumptions="non-relativistic quantum mechanics",
             units="energy (eV)",
             verified=False,
@@ -395,7 +394,6 @@ def export_formulas() -> dict[str, Formula]:
             name="hamiltonian",
             latex=r"\hat{H} = \frac{\hat{p}^2}{2m} + V(\hat{x})",
             description="Quantum Hamiltonian: kinetic + potential energy operators",
-            source_line=21,
             assumptions="single particle, no spin",
             units="energy (eV)",
             verified=False,
@@ -410,7 +408,7 @@ def export_equation_metadata() -> dict[str, Any]:
         "time_independent_schrodinger": {
             "latex": "-\\frac{\\hbar^2}{2m}\\frac{d^2\\psi}{dx^2} + V(x)\\psi = E\\psi",
             "code_ref": "model.py:solve_tise_fdm()",
-            "line": 42,
+            "line": 43,
             "method": "Finite Difference Method (tridiagonal eigenvalue problem)",
             "test_ref": "src/tests/test_harmonic_oscillator.py",
             "validation": "Energy levels match analytical: E_n = ℏω(n + 1/2)",
@@ -418,7 +416,7 @@ def export_equation_metadata() -> dict[str, Any]:
         "time_dependent_schrodinger": {
             "latex": "i\\hbar\\frac{\\partial\\psi}{\\partial t} = -\\frac{\\hbar^2}{2m}\\frac{\\partial^2\\psi}{\\partial x^2} + V(x)\\psi",
             "code_ref": "model.py:propagate_ssfm()",
-            "line": 117,
+            "line": 118,
             "method": "Split-Step Fourier Method (SSFM)",
             "test_ref": "src/tests/test_harmonic_oscillator.py",
             "validation": "Total energy conserved to 1e-6; probability preserved (∫|ψ|²=1)",
@@ -426,21 +424,21 @@ def export_equation_metadata() -> dict[str, Any]:
         "normalization": {
             "latex": "\\int |\\psi(x)|^2 dx = 1",
             "code_ref": "model.py:normalize_wavefunction()",
-            "line": 202,
+            "line": 203,
             "test_ref": "src/tests/test_harmonic_oscillator.py",
             "validation": "Normalized wavefunction satisfies ∫|ψ|²=1 to machine precision",
         },
         "expectation_value": {
             "latex": "\\langle A \\rangle = \\int \\psi^*(x) \\hat{A} \\psi(x) dx",
             "code_ref": "model.py:expectation_value()",
-            "line": 228,
+            "line": 229,
             "test_ref": "src/tests/test_harmonic_oscillator.py",
             "validation": "Hermitian operators give real eigenvalues",
         },
         "energy_conservation": {
             "latex": "E_{total} = \\langle T \\rangle + \\langle V \\rangle = \\text{constant}",
             "code_ref": "model.py:total_energy()",
-            "line": 291,
+            "line": 292,
             "test_ref": "src/tests/test_harmonic_oscillator.py",
             "validation": "|ΔE/E₀| < 1e-6 over 10000 time steps (SSFM)",
         },
@@ -492,6 +490,7 @@ if __name__ == "__main__":
     output_file = Path(__file__).parent.parent / "quantum_systems_equations.json"
     with open(output_file, "w") as f:
         json.dump(json_data, f, indent=2)
+        f.write("\n")
     print(f"✓ Generated {output_file}")
 
     equations_file = Path(__file__).parent.parent / "equations.json"

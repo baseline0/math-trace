@@ -7,9 +7,14 @@ import pytest
 
 from math_trace import template_metadata as guard
 
+ENERGY = {"latex": "E = mc^2", "code_ref": "model.py:mass_energy", "line": 2}
 MODEL_WITH_METADATA = """
+def mass_energy():
+    return 1
+
+
 def export_equation_metadata():
-    return {"energy": {"latex": "E = mc^2", "line": 1}}
+    return {"energy": {"latex": "E = mc^2", "code_ref": "model.py:mass_energy", "line": 2}}
 """
 
 
@@ -29,9 +34,42 @@ def templates(tmp_path):
 
 
 def test_matching_equations_pass(templates):
-    template = make_template(templates, "demo", MODEL_WITH_METADATA, {"energy": {"latex": "E = mc^2", "line": 1}})
+    template = make_template(templates, "demo", MODEL_WITH_METADATA, {"energy": ENERGY})
 
     assert guard.check_template(template) == []
+
+
+def test_stale_line_for_code_ref_is_reported(templates):
+    stale = {**ENERGY, "line": 5}
+    template = make_template(templates, "demo", MODEL_WITH_METADATA, {"energy": stale})
+
+    messages = [p.message for p in guard.check_template(template)]
+
+    assert "energy: line 5 but model.py:mass_energy is defined at line 2" in messages
+
+
+def test_code_ref_to_missing_symbol_is_reported(templates):
+    missing = {**ENERGY, "code_ref": "model.py:no_such_function"}
+    template = make_template(templates, "demo", MODEL_WITH_METADATA, {"energy": missing})
+
+    messages = [p.message for p in guard.check_template(template)]
+
+    assert any(m.startswith("energy: no def or class 'no_such_function'") for m in messages)
+
+
+def test_formula_source_line_must_start_a_formula_call(templates):
+    model = """
+from math_trace.formula import Formula
+
+
+def export_equation_metadata():
+    return {"energy": {"latex": "E = mc^2", "source_line": 1}}
+"""
+    template = make_template(templates, "demo", model, {"energy": {"latex": "E = mc^2", "source_line": 1}})
+
+    problems = guard.check_template(template)
+
+    assert [p.message for p in problems] == ["energy: source_line 1 is not where a Formula( call starts"]
 
 
 def test_missing_metadata_function_is_reported(templates):
@@ -49,7 +87,7 @@ def test_missing_equations_file_is_reported(templates):
 
 
 def test_hand_edited_equations_file_is_reported(templates):
-    template = make_template(templates, "demo", MODEL_WITH_METADATA, {"energy": {"latex": "E = m c^2", "line": 1}})
+    template = make_template(templates, "demo", MODEL_WITH_METADATA, {"energy": {**ENERGY, "latex": "E = m c^2"}})
 
     assert "differs from export_equation_metadata()" in guard.check_template(template)[0].message
 
@@ -70,7 +108,7 @@ def test_exempt_template_without_function_passes(templates, monkeypatch):
 
 def test_exemption_that_is_no_longer_needed_is_reported(templates, monkeypatch):
     monkeypatch.setitem(guard.EXEMPT_TEMPLATES, "migrated", "writes its own JSON name")
-    template = make_template(templates, "migrated", MODEL_WITH_METADATA, {"energy": {"latex": "E = mc^2", "line": 1}})
+    template = make_template(templates, "migrated", MODEL_WITH_METADATA, {"energy": ENERGY})
 
     problems = guard.check_template(template)
 

@@ -247,31 +247,31 @@ def export_equation_metadata() -> dict[str, Any]:
         "message_aggregation": {
             "latex": r"m_i = \sum_{j \in N(i)} A_{ij} \mathbf{h}_j",
             "code_ref": "model.py:message_aggregate()",
-            "line": 31,
+            "line": 26,
             "description": "Neighbor aggregation via matrix multiplication",
         },
         "node_update": {
             "latex": r"\mathbf{h}'_i = \sigma(W_{\text{self}} \mathbf{h}_i + W_{\text{neigh}} \mathbf{m}_i + \mathbf{b})",
             "code_ref": "model.py:node_update()",
-            "line": 77,
+            "line": 63,
             "description": "Update node with self + aggregated neighbor info",
         },
         "attention_softmax": {
             "latex": r"\alpha_{ij} = \frac{\exp(a_{ij})}{\sum_k \exp(a_{ik})}",
             "code_ref": "model.py:attention_weights()",
-            "line": 119,
+            "line": 109,
             "description": "Softmax normalization for attention",
         },
         "graph_attention": {
             "latex": r"\mathbf{h}'_i = \sigma\left(\sum_j \alpha_{ij} W \mathbf{h}_j\right)",
             "code_ref": "model.py:graph_attention_layer()",
-            "line": 158,
+            "line": 145,
             "description": "Attention-weighted neighbor aggregation",
         },
         "cross_entropy_loss": {
             "latex": r"L = -\sum_i \sum_c y_{ic} \log(\hat{y}_{ic})",
             "code_ref": "model.py:classification_loss()",
-            "line": 206,
+            "line": 199,
             "description": "Node classification cross-entropy loss",
         },
         "gcn_normalised_adjacency": {

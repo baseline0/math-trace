@@ -2,44 +2,44 @@
   "time_independent_schrodinger": {
     "latex": "-\\frac{\\hbar^2}{2m}\\frac{d^2\\psi}{dx^2} + V(x)\\psi = E\\psi",
     "code_ref": "model.py:solve_tise_fdm()",
-    "line": 42,
+    "line": 43,
     "method": "Finite Difference Method (tridiagonal eigenvalue problem)",
     "test_ref": "src/tests/test_harmonic_oscillator.py",
     "validation": "Energy levels match analytical: E_n = \u210f\u03c9(n + 1/2)",
-    "source_line": 42
+    "source_line": 43
   },
   "time_dependent_schrodinger": {
     "latex": "i\\hbar\\frac{\\partial\\psi}{\\partial t} = -\\frac{\\hbar^2}{2m}\\frac{\\partial^2\\psi}{\\partial x^2} + V(x)\\psi",
     "code_ref": "model.py:propagate_ssfm()",
-    "line": 117,
+    "line": 118,
     "method": "Split-Step Fourier Method (SSFM)",
     "test_ref": "src/tests/test_harmonic_oscillator.py",
     "validation": "Total energy conserved to 1e-6; probability preserved (\u222b|\u03c8|\u00b2=1)",
-    "source_line": 117
+    "source_line": 118
   },
   "normalization": {
     "latex": "\\int |\\psi(x)|^2 dx = 1",
     "code_ref": "model.py:normalize_wavefunction()",
-    "line": 202,
+    "line": 203,
     "test_ref": "src/tests/test_harmonic_oscillator.py",
     "validation": "Normalized wavefunction satisfies \u222b|\u03c8|\u00b2=1 to machine precision",
-    "source_line": 202
+    "source_line": 203
   },
   "expectation_value": {
     "latex": "\\langle A \\rangle = \\int \\psi^*(x) \\hat{A} \\psi(x) dx",
     "code_ref": "model.py:expectation_value()",
-    "line": 228,
+    "line": 229,
     "test_ref": "src/tests/test_harmonic_oscillator.py",
     "validation": "Hermitian operators give real eigenvalues",
-    "source_line": 228
+    "source_line": 229
   },
   "energy_conservation": {
     "latex": "E_{total} = \\langle T \\rangle + \\langle V \\rangle = \\text{constant}",
     "code_ref": "model.py:total_energy()",
-    "line": 291,
+    "line": 292,
     "test_ref": "src/tests/test_harmonic_oscillator.py",
     "validation": "|\u0394E/E\u2080| < 1e-6 over 10000 time steps (SSFM)",
-    "source_line": 291
+    "source_line": 292
   },
   "rectangular_barrier_transmission": {
     "latex": "T = \\left[1 + \\frac{V_0^2 \\sinh^2(\\kappa a)}{4E(V_0-E)}\\right]^{-1}, \\quad \\kappa = \\sqrt{2(V_0-E)}",

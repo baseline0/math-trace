@@ -50,7 +50,13 @@ See Also:
     - examples/*/build_paper.py: Orchestration (unchanged when swapping)
 """
 
+import sys
 from dataclasses import asdict, dataclass
+from types import FrameType
+
+# Frames from this file and from the dataclass-generated __init__ (compiled from "<string>") are skipped when
+# locating the code that built the formula.
+_INTERNAL_FILENAMES = frozenset({__file__, "<string>"})
 
 
 @dataclass
@@ -78,8 +84,8 @@ class Formula:
     description: str
     """Human-readable description of the formula"""
 
-    source_line: int
-    """Line number in model.py where this formula is defined"""
+    source_line: int | None = None
+    """Line in model.py where the Formula( call starts. Left out, it is captured from the calling code."""
 
     assumptions: str = ""
     """Mathematical assumptions (e.g., 'assumes n ≥ 0')"""
@@ -90,9 +96,24 @@ class Formula:
     verified: bool = False
     """Whether formula has been manually reviewed and tested"""
 
+    def __post_init__(self) -> None:
+        """Record the line that constructed this formula, so no line number is typed by hand."""
+        if self.source_line is None:
+            self.source_line = _caller_line()
+
     def to_dict(self) -> dict:
         """Convert to JSON-serializable dict."""
         return asdict(self)
+
+
+def _caller_line() -> int:
+    """Line of the first frame outside this module and the generated __init__ (the code that wrote Formula(...))."""
+    frame: FrameType | None = sys._getframe(1)
+    while frame is not None and frame.f_code.co_filename in _INTERNAL_FILENAMES:
+        frame = frame.f_back
+    if frame is None:
+        raise RuntimeError("Formula was built outside any calling code, so it has no source line")
+    return frame.f_lineno
 
 
 def formula_to_json_dict(formula: Formula) -> dict:
