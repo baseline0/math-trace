@@ -242,7 +242,17 @@ def simulate_feedback_system(
 
     Returns:
         t, x, y, u: Time, states, outputs, control signals
+
+    Raises:
+        NotImplementedError: if the system has more than one input or output. The controller and the
+            control signal are scalar, so multi-input or multi-output systems are not supported here.
     """
+    if system.m != 1 or system.p != 1:
+        raise NotImplementedError(
+            f"simulate_feedback_system handles single-input, single-output systems only; "
+            f"got {system.m} inputs and {system.p} outputs"
+        )
+
     if x0 is None:
         x0 = np.zeros(system.n)
 
