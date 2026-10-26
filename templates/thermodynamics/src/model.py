@@ -272,6 +272,38 @@ def export_equation_metadata() -> dict[str, Any]:
             "description": "Carnot efficiency: maximum efficiency of a heat engine between two reservoirs",
             "validation": "η = 0 at T_c = T_h; η < 1 always (2nd Law)",
         },
+        "polytropic_work": {
+            "latex": "W = \\frac{P_2 V_2 - P_1 V_1}{1-n}, \\quad n \\neq 1",
+            "code_ref": "src/scenarios/polytropic_processes.py:polytropic_work()",
+            "line": 33,
+            "description": "Work done by an ideal gas along a polytrope P V^n = const",
+            "test_ref": "src/tests/test_polytropic_processes.py",
+            "validation": "Isobaric work equals P dV; adiabatic heat is zero",
+        },
+        "isothermal_work": {
+            "latex": "W = nRT\\ln\\frac{V_2}{V_1}",
+            "code_ref": "src/scenarios/polytropic_processes.py:polytropic_work()",
+            "line": 33,
+            "description": "Work done by an ideal gas on an isotherm (n = 1)",
+            "test_ref": "src/tests/test_polytropic_processes.py",
+            "validation": "Temperature unchanged along the path, so dU = 0",
+        },
+        "maxwell_entropy_volume": {
+            "latex": "\\left(\\frac{\\partial S}{\\partial V}\\right)_T = \\left(\\frac{\\partial P}{\\partial T}\\right)_V = \\frac{nR}{V}",
+            "code_ref": "src/scenarios/phase_diagrams.py:maxwell_check()",
+            "line": 38,
+            "description": "Maxwell relation for an ideal gas, checked by finite differences",
+            "test_ref": "src/tests/test_phase_diagrams.py",
+            "validation": "Finite-difference values agree with nR/V to 1e-6",
+        },
+        "maxwell_entropy_pressure": {
+            "latex": "\\left(\\frac{\\partial S}{\\partial P}\\right)_T = -\\left(\\frac{\\partial V}{\\partial T}\\right)_P = -\\frac{nR}{P}",
+            "code_ref": "src/scenarios/phase_diagrams.py:maxwell_check()",
+            "line": 38,
+            "description": "Second Maxwell relation for an ideal gas, checked by finite differences",
+            "test_ref": "src/tests/test_phase_diagrams.py",
+            "validation": "Finite-difference values agree with -nR/P to 1e-6",
+        },
     }
     # template_builder and the shared formula schema read "source_line".
     for info in metadata.values():

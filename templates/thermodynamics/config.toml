@@ -13,5 +13,7 @@ python = ">=3.13"
 packages = ["numpy", "scipy>=1.18", "matplotlib>=3.8"]
 
 [scenarios]
-["Ideal Gas"] = "Beginner: PVT relations, thermodynamic properties"
-["Carnot Cycle"] = "Intermediate: Efficiency, heat flow, work extraction"
+"Ideal Gas" = "Beginner: PVT relations, thermodynamic properties"
+"Carnot Cycle" = "Intermediate: Efficiency, heat flow, work extraction"
+"Polytropic Processes" = "Four polytropic paths: isobaric, isothermal, adiabatic, isochoric; work and heat"
+"Phase Diagrams" = "Ideal-gas P-V, T-S, P-T diagrams; Maxwell relations check (no phase transition)"
