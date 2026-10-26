@@ -4,6 +4,7 @@ A formula holds when its residual simplifies to zero. Matrix residuals hold when
 textbook and paper references; section pinpoints are not given here and should be confirmed against the source.
 """
 
+import math
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -137,7 +138,7 @@ FORMULAS: tuple[QuantumFormula, ...] = (
         name="shor_factor_from_order",
         latex=r"\gcd(a^{r/2}-1, N)\cdot\gcd(a^{r/2}+1, N) = N \text{ for } N=15,\ a=2,\ r=4",
         source=SHOR + "; " + NIELSEN_CHUANG + ", ch. 5",
-        residual=lambda: sp.gcd(2**2 - 1, 15) * sp.gcd(2**2 + 1, 15) - 15,
+        residual=lambda: sp.Integer(math.gcd(2**2 - 1, 15) * math.gcd(2**2 + 1, 15) - 15),
     ),
     QuantumFormula(
         name="qft_unitary_n4",

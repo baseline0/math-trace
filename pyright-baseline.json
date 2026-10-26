@@ -1,16 +1,6 @@
 {
-  "src/math_trace/arxiv_extractor.py": 5,
-  "src/math_trace/exporters.py": 2,
-  "src/math_trace/responses.py": 4,
-  "src/math_trace/server.py": 10,
-  "src/math_trace/typer_to_fastapi.py": 1,
-  "src/math_trace/typer_to_justfile.py": 2,
+  "src/math_trace/typer_to_justfile.py": 1,
   "tests/integration/test_membrane_end_to_end.py": 2,
-  "tests/unit/test_build_presentation.py": 1,
-  "tests/unit/test_formula_and_exporters.py": 1,
-  "tests/unit/test_gnns_model.py": 3,
   "tests/unit/test_guarantees.py": 1,
-  "tests/unit/test_model_export.py": 1,
-  "tests/unit/test_services_coverage.py": 2,
-  "tests/unit/test_thermodynamics_model.py": 3
+  "tests/unit/test_model_export.py": 1
 }
