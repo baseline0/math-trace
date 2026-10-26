@@ -323,6 +323,102 @@ def peak_infections(solution: np.ndarray) -> tuple[float, float]:
 
 
 # ============================================================================
+# Stochastic SEIR: Poisson Transitions
+# ============================================================================
+# For diseases with lower R₀ or small populations, stochastic effects
+# become important. Transitions use Poisson processes.
+
+
+def stochastic_seir_step(
+    S: int,
+    E: int,
+    I: int,
+    R: int,
+    beta: float,
+    sigma: float,
+    gamma: float,
+    N: int,
+    dt: float,
+    rng: np.random.Generator,
+) -> tuple[int, int, int, int]:
+    """
+    Single stochastic SEIR step using Poisson transitions.
+
+    Args:
+        S, E, I, R: Compartment counts
+        beta: Transmission rate
+        sigma: Exposed → Infectious rate
+        gamma: Recovery rate
+        N: Total population
+        dt: Time step
+        rng: Random generator, so runs are reproducible
+
+    Returns:
+        (S_new, E_new, I_new, R_new)
+    """
+    rate_S_to_E = beta * S * I / N
+    rate_E_to_I = sigma * E
+    rate_I_to_R = gamma * I
+
+    # Poisson works for dt << 1; a Gillespie scheme would be exact.
+    transitions_S_E = min(int(rng.poisson(rate_S_to_E * dt)), S)
+    transitions_E_I = min(int(rng.poisson(rate_E_to_I * dt)), E)
+    transitions_I_R = min(int(rng.poisson(rate_I_to_R * dt)), I)
+
+    S_new = S - transitions_S_E
+    E_new = E + transitions_S_E - transitions_E_I
+    I_new = I + transitions_E_I - transitions_I_R
+    R_new = R + transitions_I_R
+
+    return S_new, E_new, I_new, R_new
+
+
+def propagate_seir_stochastic(
+    S0: int,
+    E0: int,
+    I0: int,
+    R0: int,
+    t_max: float,
+    dt: float,
+    beta: float,
+    sigma: float,
+    gamma: float,
+    N: int,
+    num_runs: int = 1,
+    seed: int | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Propagate stochastic SEIR model over an ensemble of independent runs.
+
+    Args:
+        S0, E0, I0, R0: Initial compartment counts
+        t_max: Maximum time
+        dt: Time step
+        beta: Transmission rate
+        sigma: Incubation rate
+        gamma: Recovery rate
+        N: Total population
+        num_runs: Number of independent runs
+        seed: Random seed (optional)
+
+    Returns:
+        t: Time points
+        ensemble: Shape (num_runs, num_timepoints, 4) with [S, E, I, R] trajectories
+    """
+    rng = np.random.default_rng(seed)
+    t = np.arange(0, t_max, dt)
+    ensemble = np.zeros((num_runs, len(t), 4))
+
+    for run in range(num_runs):
+        S, E, I, R = S0, E0, I0, R0
+        for step in range(len(t)):
+            ensemble[run, step] = [S, E, I, R]
+            S, E, I, R = stochastic_seir_step(S, E, I, R, beta, sigma, gamma, N, dt, rng)
+
+    return t, ensemble
+
+
+# ============================================================================
 # Auto-Export: Equation Metadata (JSON)
 # ============================================================================
 
