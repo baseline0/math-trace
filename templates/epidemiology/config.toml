@@ -17,6 +17,7 @@ analytical_solution = true
 peer_reviewed_ref = "Kermack & McKendrick (1927), Anderson & May (1991)"
 
 [scenarios]
-["COVID-19 SIR"] = "Realistic parameters; R0=2.5, intervention effects"
-["Measles SEIR"] = "High R0≈12-18; vaccination threshold"
-["Ebola SEIR"] = "High case fatality; quarantine interventions"
+"COVID-19 SIR" = "Realistic parameters; R0=2.5, intervention effects"
+"Measles SEIR" = "High R0≈12-18; vaccination threshold"
+"Ebola SEIR" = "High case fatality; quarantine interventions"
+"Ebola Stochastic" = "R0=1.8, CFR=50%, 10-run ensemble with Poisson transitions"
