@@ -440,7 +440,7 @@ def export_equation_metadata() -> dict[str, Any]:
             "code_ref": "model.py:total_energy()",
             "line": 292,
             "test_ref": "src/tests/test_harmonic_oscillator.py",
-            "validation": "|ΔE/E₀| < 1e-6 over 10000 time steps (SSFM)",
+            "validation": "|ΔE/E₀| < 1e-6 over 1000 time steps (SSFM)",
         },
         "rectangular_barrier_transmission": {
             "latex": "T = \\left[1 + \\frac{V_0^2 \\sinh^2(\\kappa a)}{4E(V_0-E)}\\right]^{-1}, \\quad \\kappa = \\sqrt{2(V_0-E)}",
