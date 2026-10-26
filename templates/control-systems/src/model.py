@@ -246,6 +246,17 @@ def simulate_feedback_system(
     Raises:
         NotImplementedError: if the system has more than one input or output. The controller and the
             control signal are scalar, so multi-input or multi-output systems are not supported here.
+
+    Note on MIMO (future work):
+        Supporting m inputs and p outputs needs four changes, and each one is a separate decision:
+        1. A vector control signal u (length m). PIDController.update returns a scalar, so it needs
+           either one controller per input channel or a matrix-gain controller.
+        2. A vector measurement y (length p), so the controller sees the right output for each channel.
+        3. The state update x' = Ax + Bu with B of shape (n, m). The current `system.B * u[i]` only
+           broadcasts for m = 1.
+        4. Tests that a decoupled two-channel system matches two independent single-channel runs, before
+           any coupled case is trusted.
+        Until then, this function rejects MIMO systems up front (see the check at the top of the body).
     """
     if system.m != 1 or system.p != 1:
         raise NotImplementedError(
