@@ -128,36 +128,37 @@ Max Energy Error: 4.23e-07
 
 See `PARAMETERS.md` for detailed parameter guide.
 
-### Scenario 2: Double Slit Experiment (Intermediate)
+### Scenario 2: Double-Slit Interference (Intermediate)
 
-Demonstrates quantum interference.
+Far-field (Fraunhofer) interference of a monochromatic matter wave through two slits, with electrons at 2×10⁶ m/s:
 
-```python
-from src.scenarios.double_slit import *
-
-result = compute_double_slit_interference(slit_width=0.1, slit_sep=0.5)
-plot_interference_pattern(result)
+```bash
+uv run python -m src.scenarios.double_slit_interference
 ```
 
+**Model:** I(y) = I₀ · sinc²(πwy/λL) · cos²(πdy/λL), with the de Broglie wavelength λ = h/(mv).
+
 **Physics:**
-- Two-slit interference shows wave nature of particles
-- Fringe visibility depends on coherence (compare to V ≈ 0 measurement case)
+- The cos² term gives fringes with spacing Δy = λL/d
+- The sinc² envelope from the slit width w suppresses fringes outside the central lobe
+- Finite slit width pulls the outer fringes toward the centre, so the measured spacing is slightly below λL/d. For a narrow slit the envelope is flat and the two agree
 
-### Scenario 3: Quantum Tunneling (Advanced)
+**Scope:** this is the closed-form far-field pattern, not a time-dependent wave-packet simulation. The tests check the fringe spacing, envelope zeros, central maximum, and visibility (`src/tests/test_double_slit_interference.py`).
 
-Particle tunnels through barrier—classically forbidden.
+### Scenario 3: Quantum Tunneling (Intermediate)
 
-```python
-from src.scenarios.tunneling import *
+Transmission through a rectangular barrier (ħ = m = 1):
 
-T_numerical = compute_tunneling_transmission(barrier_width=0.2, barrier_height=2.0)
-T_wkb = wkb_transmission(...)  # Analytical WKB estimate
-print(f"Transmission: {T_numerical:.4f} (numerical) vs {T_wkb:.4f} (WKB)")
+```bash
+uv run python -m src.scenarios.tunneling_barrier
 ```
 
+**Model:** for E < V₀, T = [1 + V₀² sinh²(κa) / (4E(V₀ - E))]⁻¹ with κ = √(2(V₀ - E)).
+
 **Physics:**
-- Exponential suppression: T ~ exp(-2γ) where γ = ∫√(2m(V-E))
-- Critical for alpha decay, scanning tunneling microscopy
+- The particle tunnels although E < V₀, with transmission falling off exponentially in the barrier width
+- For a thick barrier, T ≈ exp(-2κa), the WKB estimate
+- The closed form agrees with an independent plane-wave matching solve to machine precision, and T + R = 1 holds for each case (`src/tests/test_tunneling_barrier.py`)
 
 ## Extending This Template
 
@@ -294,17 +295,11 @@ See `src/tests/test_harmonic_oscillator.py` for test implementations and `PARAME
 
 ### Out-of-Scope Scenarios
 
-**Double-Slit Interference (NOT SUPPORTED for this lane):**
-- Implementation exists in src/model.py::double_slit_potential()
-- Not validated under contract framework in this lane
-- Deferred to future reference-contract effort
-
-**Quantum Tunneling (NOT SUPPORTED for this lane):**
-- Implementation exists in src/model.py::tunneling_barrier()
-- Not validated under contract framework in this lane
-- Deferred to future reference-contract effort
-
-These scenarios are implemented in src/model.py for exploration, but do not have contract-level test coverage and are not recommended for publication without additional hardening.
+**Double-Slit Interference and Quantum Tunneling (unit-tested, not under the reference contract):**
+- Scenario modules: `src/scenarios/double_slit_interference.py`, `src/scenarios/tunneling_barrier.py`
+- Tests: `src/tests/test_double_slit_interference.py`, `src/tests/test_tunneling_barrier.py`
+- Potentials and solvers for these cases also exist in `src/model.py` (`double_slit_potential()`, `tunneling_barrier()`)
+- Not validated under the harmonic-oscillator contract, so they are not recommended for publication without that hardening
 
 ## Reproducibility & Citation
 

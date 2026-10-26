@@ -35,5 +35,41 @@
     "line": 332,
     "test_ref": "tests/test_energy_conservation.py",
     "validation": "|\u0394E/E\u2080| < 1e-6 over 10000 time steps (SSFM)"
+  },
+  "rectangular_barrier_transmission": {
+    "latex": "T = \\left[1 + \\frac{V_0^2 \\sinh^2(\\kappa a)}{4E(V_0-E)}\\right]^{-1}, \\quad \\kappa = \\sqrt{2(V_0-E)}",
+    "code_ref": "src/scenarios/tunneling_barrier.py:transmission_closed_form()",
+    "line": 16,
+    "description": "Transmission probability through a rectangular barrier for E < V0 (\u0127 = m = 1)",
+    "test_ref": "src/tests/test_tunneling_barrier.py",
+    "validation": "Matches the plane-wave matching solve to 1e-9; T + R = 1",
+    "source_line": 16
+  },
+  "wkb_tunneling": {
+    "latex": "T \\approx e^{-2\\kappa a}",
+    "code_ref": "src/scenarios/tunneling_barrier.py:wkb_transmission()",
+    "line": 60,
+    "description": "WKB estimate of tunneling through a thick barrier",
+    "test_ref": "src/tests/test_tunneling_barrier.py",
+    "validation": "Agrees with the closed form to 2% for \u03baa = 6",
+    "source_line": 60
+  },
+  "double_slit_fringe_spacing": {
+    "latex": "\\Delta y = \\frac{\\lambda L}{d}, \\quad \\lambda = \\frac{h}{mv}",
+    "code_ref": "src/scenarios/double_slit_interference.py:fringe_spacing()",
+    "line": 29,
+    "description": "Fringe spacing of the far-field two-slit pattern, with de Broglie wavelength",
+    "test_ref": "src/tests/test_double_slit_interference.py",
+    "validation": "Measured spacing matches \u03bbL/d for a narrow slit",
+    "source_line": 29
+  },
+  "double_slit_intensity": {
+    "latex": "I(y) = I_0 \\mathrm{sinc}^2\\left(\\frac{\\pi w y}{\\lambda L}\\right)\\cos^2\\left(\\frac{\\pi d y}{\\lambda L}\\right)",
+    "code_ref": "src/scenarios/double_slit_interference.py:intensity()",
+    "line": 34,
+    "description": "Far-field two-slit intensity: single-slit envelope times the double-slit interference term",
+    "test_ref": "src/tests/test_double_slit_interference.py",
+    "validation": "Central maximum is I_0; envelope vanishes at y = \u03bbL/w; visibility 1 for a narrow slit",
+    "source_line": 34
   }
 }
