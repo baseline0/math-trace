@@ -291,7 +291,7 @@ def export_equation_metadata() -> dict[str, Any]:
             "validation": "Analytic gradients match central finite differences",
         },
         "gcn_backward": {
-            "latex": "\\frac{\\partial L}{\\partial W_1} = (\\hat{A}X)^\\top\\left(\\hat{A}\\,\\frac{\\partial L}{\\partial Z}W_2^\\top \\odot \\mathbb{1}[\\hat{A}XW_1 > 0]\\right)",
+            "latex": "\\frac{\\partial L}{\\partial W_1} = (\\hat{A}X)^\\top\\left(\\hat{A}\\frac{\\partial L}{\\partial Z}W_2^\\top \\odot \\mathbb{1}[\\hat{A}XW_1 > 0]\\right)",
             "code_ref": "src/scenarios/cora_classification.py:loss_and_gradients()",
             "line": 73,
             "description": "Gradient of the training loss with respect to the first-layer weights, using the symmetry of A-hat",
