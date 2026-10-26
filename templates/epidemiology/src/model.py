@@ -491,7 +491,7 @@ def export_equation_metadata() -> dict[str, Any]:
             "validation": "Predicted attack rate vs observed seroprevalence studies",
         },
         "stochastic_seir_transitions": {
-            "latex": r"\Delta S \sim \mathrm{Poisson}\!\left(\frac{\beta \cdot S \cdot I}{N}\,\Delta t\right)",
+            "latex": r"\Delta S \sim \mathrm{Poisson}\left(\frac{\beta \cdot S \cdot I}{N} \cdot \Delta t\right)",
             "code_ref": "model.py:stochastic_seir_step()",
             "line": 359,
             "description": "Stochastic SEIR: Poisson-distributed S→E transitions per time step, capped by the compartment size",
