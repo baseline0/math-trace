@@ -274,6 +274,30 @@ def export_equation_metadata() -> dict[str, Any]:
             "line": 206,
             "description": "Node classification cross-entropy loss",
         },
+        "gcn_normalised_adjacency": {
+            "latex": "\\hat{A} = \\tilde{D}^{-1/2}(A + I)\\tilde{D}^{-1/2}",
+            "code_ref": "src/scenarios/cora_classification.py:normalised_adjacency()",
+            "line": 37,
+            "description": "Symmetric normalised adjacency with self-loops, the graph operator of a GCN layer",
+            "test_ref": "src/tests/test_cora_classification.py",
+            "validation": "A-hat is symmetric",
+        },
+        "gcn_layer": {
+            "latex": "H = \\mathrm{ReLU}(\\hat{A} X W_1), \\quad Z = \\hat{A} H W_2",
+            "code_ref": "src/scenarios/cora_classification.py:forward()",
+            "line": 64,
+            "description": "Two-layer graph convolutional network: aggregate neighbours, transform, ReLU, aggregate again",
+            "test_ref": "src/tests/test_cora_classification.py",
+            "validation": "Analytic gradients match central finite differences",
+        },
+        "gcn_backward": {
+            "latex": "\\frac{\\partial L}{\\partial W_1} = (\\hat{A}X)^\\top\\left(\\hat{A}\\,\\frac{\\partial L}{\\partial Z}W_2^\\top \\odot \\mathbb{1}[\\hat{A}XW_1 > 0]\\right)",
+            "code_ref": "src/scenarios/cora_classification.py:loss_and_gradients()",
+            "line": 73,
+            "description": "Gradient of the training loss with respect to the first-layer weights, using the symmetry of A-hat",
+            "test_ref": "src/tests/test_cora_classification.py",
+            "validation": "Matches central finite differences to 1e-7",
+        },
     }
     # template_builder and the shared formula schema read "source_line".
     for info in metadata.values():

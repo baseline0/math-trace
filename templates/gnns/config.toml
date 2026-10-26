@@ -7,3 +7,7 @@ description = "Message passing, graph attention, node classification"
 equations_count = 5
 code_lines = 350
 test_coverage = 0.80
+
+[scenarios]
+"Zachary's Karate Club" = "34-node graph, friendship-based faction prediction"
+"Cora Citation Network" = "2708-paper citation graph, semi-supervised node classification (two-layer GCN)"
