@@ -4,41 +4,53 @@
     "description": "Michaelis-Menten equation: reaction velocity vs substrate concentration",
     "source_line": 32,
     "assumptions": "Quasi-steady-state assumption (d[ES]/dt \u2248 0)",
-    "units": "\u03bcmol/min"
+    "units": "\u03bcmol/min",
+    "units_lhs": "umol / min",
+    "units_rhs": "umol / min"
   },
   "max_velocity": {
     "latex": "V_{max} = E_{0} k_{2}",
     "description": "Maximum velocity proportional to enzyme concentration",
-    "source_line": 40,
+    "source_line": 42,
     "assumptions": "[S] >> Km at saturation",
-    "units": "\u03bcmol/min"
+    "units": "\u03bcmol/min",
+    "units_lhs": "umol / min",
+    "units_rhs": "s^-1 * umol"
   },
   "michaelis_constant": {
     "latex": "K_{m} = \\frac{k_{2} + k_{-1}}{k_{1}}",
     "description": "Michaelis constant relates binding and turnover rates",
-    "source_line": 48,
+    "source_line": 53,
     "assumptions": "Pre-equilibrium binding",
-    "units": "mM"
+    "units": "mM",
+    "units_lhs": "mM",
+    "units_rhs": "s^-1 / (mM^-1 s^-1)"
   },
   "enzyme_mechanism": {
     "latex": "E + S \\rightarrow ES \\rightarrow E + P",
     "description": "Three-step enzyme mechanism (binding \u2192 catalysis \u2192 release)",
-    "source_line": 56,
+    "source_line": 63,
     "assumptions": "Reaction reaches steady state",
-    "units": "dimensionless"
+    "units": "dimensionless",
+    "units_lhs": "",
+    "units_rhs": ""
   },
   "turnover_number": {
     "latex": "k_{cat} = k_{2}",
     "description": "Turnover number: catalytic events per enzyme per second",
-    "source_line": 64,
+    "source_line": 71,
     "assumptions": "First-order reaction at catalytic step",
-    "units": "s^-1"
+    "units": "s^-1",
+    "units_lhs": "s^-1",
+    "units_rhs": "s^-1"
   },
   "specificity": {
     "latex": "k_{cat}/K_m = \\frac{k_{2}}{K_{m}}",
     "description": "Catalytic efficiency: how selective and fast the enzyme is",
-    "source_line": 72,
+    "source_line": 81,
     "assumptions": "Low substrate concentration regime",
-    "units": "mM^-1 s^-1"
+    "units": "mM^-1 s^-1",
+    "units_lhs": "mM^-1 s^-1",
+    "units_rhs": "s^-1 / mM"
   }
 }

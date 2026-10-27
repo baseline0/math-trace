@@ -4,34 +4,44 @@
     "description": "Hooke's law: restoring force proportional to displacement",
     "source_line": 31,
     "assumptions": "x is displacement, k is spring constant",
-    "units": "Force (N)"
+    "units": "Force (N)",
+    "units_lhs": "",
+    "units_rhs": ""
   },
   "equation_of_motion": {
     "latex": "0 = - k x",
     "description": "Newton's second law for harmonic oscillator",
     "source_line": 39,
     "assumptions": "m > 0, k > 0, no damping",
-    "units": "Force (N)"
+    "units": "Force (N)",
+    "units_lhs": "",
+    "units_rhs": ""
   },
   "angular_frequency": {
     "latex": "\\omega = \\sqrt{\\frac{k}{m}}",
     "description": "Angular frequency of oscillation",
     "source_line": 47,
     "assumptions": "m > 0, k > 0",
-    "units": "rad/s"
+    "units": "rad/s",
+    "units_lhs": "",
+    "units_rhs": ""
   },
   "general_solution": {
     "latex": "x = A \\cos{\\left(\\omega t + \\phi \\right)}",
     "description": "General solution: oscillation with amplitude A and phase \u03c6",
     "source_line": 55,
     "assumptions": "A is amplitude, \u03c6 is initial phase",
-    "units": "meters (m)"
+    "units": "meters (m)",
+    "units_lhs": "",
+    "units_rhs": ""
   },
   "total_energy": {
     "latex": "E = \\frac{A^{2} k}{2}",
     "description": "Total mechanical energy (constant)",
     "source_line": 63,
     "assumptions": "no dissipation",
-    "units": "Joules (J)"
+    "units": "Joules (J)",
+    "units_lhs": "",
+    "units_rhs": ""
   }
 }

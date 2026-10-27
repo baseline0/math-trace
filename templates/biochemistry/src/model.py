@@ -36,6 +36,8 @@ def export_formulas() -> dict[str, Formula]:
             assumptions="Quasi-steady-state assumption (d[ES]/dt ≈ 0)",
             units="μmol/min",
             verified=True,
+            units_lhs="umol / min",
+            units_rhs="umol / min",
         ),
         "max_velocity": Formula(
             name="max_velocity",
@@ -44,6 +46,9 @@ def export_formulas() -> dict[str, Formula]:
             assumptions="[S] >> Km at saturation",
             units="μmol/min",
             verified=True,
+            # E_0 is the total enzyme amount in the assay (μmol), so k_2 E_0 is μmol/s, the same dimensions as V_max.
+            units_lhs="umol / min",
+            units_rhs="s^-1 * umol",
         ),
         "michaelis_constant": Formula(
             name="michaelis_constant",
@@ -52,6 +57,8 @@ def export_formulas() -> dict[str, Formula]:
             assumptions="Pre-equilibrium binding",
             units="mM",
             verified=True,
+            units_lhs="mM",
+            units_rhs="s^-1 / (mM^-1 s^-1)",
         ),
         "enzyme_mechanism": Formula(
             name="enzyme_mechanism",
@@ -68,6 +75,8 @@ def export_formulas() -> dict[str, Formula]:
             assumptions="First-order reaction at catalytic step",
             units="s^-1",
             verified=True,
+            units_lhs="s^-1",
+            units_rhs="s^-1",
         ),
         "specificity": Formula(
             name="specificity",
@@ -76,6 +85,8 @@ def export_formulas() -> dict[str, Formula]:
             assumptions="Low substrate concentration regime",
             units="mM^-1 s^-1",
             verified=True,
+            units_lhs="mM^-1 s^-1",
+            units_rhs="s^-1 / mM",
         ),
     }
 

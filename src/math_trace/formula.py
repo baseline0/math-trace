@@ -96,6 +96,12 @@ class Formula:
     verified: bool = False
     """Whether formula has been manually reviewed and tested"""
 
+    units_lhs: str = ""
+    """Units of the left-hand side as a pint-parseable expression (e.g., 'umol / min'). Empty when not an equation."""
+
+    units_rhs: str = ""
+    """Units of the right-hand side, in the same form as units_lhs. Both sides must have the same dimensions."""
+
     def __post_init__(self) -> None:
         """Record the line that constructed this formula, so no line number is typed by hand."""
         if self.source_line is None:
@@ -126,7 +132,7 @@ def formula_to_json_dict(formula: Formula) -> dict:
     Filters out verification metadata (kept for validation, not distribution).
 
     Returns:
-        Dict with name, latex, description, source_line, assumptions, units
+        Dict with latex, description, source_line, assumptions, units, units_lhs and units_rhs
     """
     return {
         "latex": formula.latex,
@@ -134,4 +140,6 @@ def formula_to_json_dict(formula: Formula) -> dict:
         "source_line": formula.source_line,
         "assumptions": formula.assumptions,
         "units": formula.units,
+        "units_lhs": formula.units_lhs,
+        "units_rhs": formula.units_rhs,
     }

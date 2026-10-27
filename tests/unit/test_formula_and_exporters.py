@@ -45,7 +45,17 @@ def test_to_dict_includes_every_field():
 
     assert data["name"] == "michaelis_menten"
     assert data["verified"] is True
-    assert set(data) == {"name", "latex", "description", "source_line", "assumptions", "units", "verified"}
+    assert set(data) == {
+        "name",
+        "latex",
+        "description",
+        "source_line",
+        "assumptions",
+        "units",
+        "units_lhs",
+        "units_rhs",
+        "verified",
+    }
 
 
 def test_json_projection_drops_name_and_verification_metadata():
@@ -57,11 +67,24 @@ def test_json_projection_drops_name_and_verification_metadata():
     assert projected["source_line"] == 42
 
 
+def test_json_projection_carries_structured_units_for_both_sides():
+    formula = make_formula()
+    formula.units_lhs = "umol / min"
+    formula.units_rhs = "umol / min"
+
+    projected = formula_to_json_dict(formula)
+
+    assert projected["units_lhs"] == "umol / min"
+    assert projected["units_rhs"] == "umol / min"
+
+
 def test_optional_fields_default_to_empty_and_unverified():
     formula = Formula(name="n", latex="x", description="d", source_line=1)
 
     assert formula.assumptions == ""
     assert formula.units == ""
+    assert formula.units_lhs == ""
+    assert formula.units_rhs == ""
     assert formula.verified is False
 
 
