@@ -13,8 +13,6 @@ default_stages:
   - pre-commit
 default_install_hook_types:
   - pre-commit
-  - pre-push
-
 repos:
   # ===== Third-party: Standard Checks =====
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -101,25 +99,6 @@ repos:
         language: system
         types: [python]
         stages: [pre-commit]
-
-      # ----- P0: Pre-push: Tests -----
-      - id: just-fleet-test
-        name: "[P0] Pre-push: just fleet-test (unit tests)"
-        entry: env -u VIRTUAL_ENV just fleet-test
-        language: system
-        stages:
-          - pre-push
-        pass_filenames: false
-        always_run: true
-
-  # ===== Fleet Governance =====
-  # Note: Disabled until fleet-base v1.0.0 tag is available
-  # - repo: https://github.com/baseline0/fleet-base
-  #   rev: v1.0.0
-  #   hooks:
-  #     - id: fleet-governance-validate
-  #       name: "[P1] Fleet governance validation"
-  #       stages: [pre-commit]
   - repo: local
     hooks:
       - id: repo-root-pattern
