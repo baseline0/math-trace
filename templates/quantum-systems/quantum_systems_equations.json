@@ -4,13 +4,17 @@
     "description": "Time-dependent Schr\u00f6dinger equation",
     "source_line": 385,
     "assumptions": "non-relativistic quantum mechanics",
-    "units": "energy (eV)"
+    "units": "energy (eV)",
+    "units_lhs": "",
+    "units_rhs": ""
   },
   "hamiltonian": {
     "latex": "\\hat{H} = \\frac{\\hat{p}^2}{2m} + V(\\hat{x})",
     "description": "Quantum Hamiltonian: kinetic + potential energy operators",
     "source_line": 393,
     "assumptions": "single particle, no spin",
-    "units": "energy (eV)"
+    "units": "energy (eV)",
+    "units_lhs": "",
+    "units_rhs": ""
   }
 }
