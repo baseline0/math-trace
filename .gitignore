@@ -108,3 +108,6 @@ coverage.xml
 
 # Scratch and generated output: never committed
 /working/
+
+# The published deck folder, staged by scripts/stage_deck_site.py in the publish workflow: never committed
+/site/

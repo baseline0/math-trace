@@ -1,0 +1,41 @@
+# Manual publish of the reviewed SIR deck to GitHub Pages. Started by hand, and it waits for approval in "production".
+# The deck and its figures are gitignored outputs, so this workflow builds them from source first, then stages and checks
+# the site folder (scripts/stage_deck_site.py). It uploads site/ and nothing else.
+name: Publish SIR deck
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages-deck
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv python install 3.13
+      - run: uv lock --check && uv sync
+      - name: Build the deck and its figures from source
+        run: |
+          uv run python examples/epidemiology-sir/build_paper.py
+          uv run python examples/epidemiology-sir/build_presentation.py --output examples/epidemiology-sir/generated/presentation.html
+      - name: Stage and check the site folder
+        run: |
+          uv run python scripts/stage_deck_site.py stage --root . --site site
+          uv run python scripts/stage_deck_site.py check --site site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
