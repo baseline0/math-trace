@@ -157,15 +157,6 @@ repos:
         stages: [pre-commit]
   - repo: local
     hooks:
-      - id: fleet-clean-vendored
-        name: "[P1] just/fleet-clean.just matches fleet-base (hand edits fail)"
-        entry: just check-fleet-clean
-        language: system
-        pass_filenames: false
-        files: '^(just/fleet-clean\.just|justfile)$'
-        stages: [pre-commit]
-  - repo: local
-    hooks:
       - id: template-equation-metadata
         name: "[P1] Templates: model.py defines export_equation_metadata and equations.json matches it"
         entry: uv run python -m math_trace.template_metadata
@@ -179,6 +170,15 @@ repos:
         language: system
         pass_filenames: false
         files: '\.py$'
+        stages: [pre-commit]
+  - repo: local
+    hooks:
+      - id: vendored-fleet-clean
+        name: "[P1] just/fleet-clean.just matches fleet-base (hand edits fail)"
+        entry: just check-fleet-clean
+        language: system
+        pass_filenames: false
+        files: '^(just/fleet-clean\.just|justfile)$'
         stages: [pre-commit]
   - repo: local
     hooks:
@@ -220,7 +220,7 @@ repos:
     hooks:
       - id: vendored-current
         name: "[P1] vendored just modules are current with the latest fleet-base release (pre-push)"
-        entry: uv run --project ../fleet-base python -m fleet_base.vendor_just check --repo .
+        entry: uv run --project ../fleet-base python -m fleet_base.vendor_just check-current --repo .
         language: system
         pass_filenames: false
         always_run: true
