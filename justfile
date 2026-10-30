@@ -93,10 +93,19 @@ check:
 check-types:
     fleet ratchet --action check
 
+# Unit tests only (what CI and the pre-push gate run). Self-contained: depends on no other recipe.
+test-unit:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if uv run pytest --version >/dev/null 2>&1; then
+        uv run pytest -m unit --tb=short -v
+        exit 0
+    fi
+    echo "error: test-unit cannot run in this repo: install pytest as a dev dependency (uv add --dev pytest)" >&2
+    exit 1
+
 [group("verify")]
-test:
-    @echo "🧪 Running unit tests (CI-safe)..."
-    uv run pytest tests/unit -v --tb=short
+test: test-unit
 
 [group("verify")]
 test-integration:
@@ -435,10 +444,6 @@ help:
     @echo "  just clean-generated      — Remove generated files"
     @echo "  just view-paper — Open main.pdf in viewer"
     @echo "  just help       — Show this message"
-
-# Unit tests: the gate the pre-push hook runs (fleet hook standard, fleet_base.hook_standard R4)
-test-unit:
-    just test
 
 # ============================================================================
 # Shared fleet recipes, run by fleet-base's installed tool (run `just -f ~/projects/fleet-base/justfile install-fleet`; ADR-020).

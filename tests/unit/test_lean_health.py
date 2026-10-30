@@ -10,8 +10,6 @@ from types import ModuleType
 
 import pytest
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def health(request: pytest.FixtureRequest) -> ModuleType:

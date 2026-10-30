@@ -27,7 +27,6 @@ PRODUCTION_TEMPLATES = [
 ]
 
 
-@pytest.mark.integration
 class TestFormulaPipelineIntegrity:
     """Verify formulas survive full pipeline without corruption."""
 

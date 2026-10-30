@@ -65,7 +65,7 @@ check_untyped_defs = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["unit: deterministic, isolated, no external dependencies (runs in CI)", "integration: requires sibling repos or local setup (skip in CI, run locally)", "e2e: end-to-end tests of a whole workflow", "unit: deterministic, isolated, no network/services/sibling repos", "integration: cross-repo/service interaction; requires local setup", "host: runs on the real host (services, sibling repos, LXC); never in CI"]
+markers = ["unit: deterministic, isolated, no network/services/sibling repos", "integration: cross-repo/service interaction; requires local setup", "contract: checks artifacts against schemas owned by a sibling repo; requires that checkout", "e2e: end-to-end tests of a whole workflow", "host: runs on the real host (services, sibling repos, LXC); never in CI"]
 addopts = "-v --tb=short --strict-markers --cov=src/math_trace --cov-report=term-missing"
 
 [tool.ruff]

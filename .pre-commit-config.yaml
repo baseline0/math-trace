@@ -204,3 +204,12 @@ repos:
         pass_filenames: false
         files: '^(just/(fleet-clean|fleet-commit|repo-push|fleet-checks|fleet-test)\.just|justfile)$'
         stages: [pre-commit]
+  - repo: local
+    hooks:
+      - id: no-latex-guard
+        name: "[P1] No LaTeX: ADR-001 chose Typst (tests/unit/test_latex_guard.py)"
+        entry: uv run pytest tests/unit/test_latex_guard.py -q --no-cov -p no:cacheprovider
+        language: system
+        pass_filenames: false
+        files: '(\.py|\.tex|\.sh|\.ya?ml|\.toml)$|^justfile$'
+        stages: [pre-commit]

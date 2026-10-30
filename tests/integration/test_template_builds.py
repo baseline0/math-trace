@@ -184,7 +184,6 @@ class TestTemplateFullBuild:
         assert len(content) > 50, "README.md is too short to be useful"
 
 
-@pytest.mark.integration
 class TestFormulaExportConsistency:
     """Verify formula export produces consistent, valid output."""
 
