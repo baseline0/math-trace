@@ -16,7 +16,6 @@ from math_trace import reference_check as rc
 from math_trace.constants import REPO_ROOT
 
 pytestmark = [
-    pytest.mark.integration,
     pytest.mark.skipif(os.environ.get("MATH_TRACE_FULL_REVIEW") != "1", reason="set MATH_TRACE_FULL_REVIEW=1 to run"),
 ]
 

@@ -18,11 +18,7 @@ import os
 import re
 from pathlib import Path
 
-import pytest
-
 from math_trace.constants import REPO_ROOT
-
-pytestmark = pytest.mark.unit
 
 # Each entry is a repo-relative path that may contain LaTeX, with the reason it may.
 # An entry without a reason does not belong here; a stale entry fails the test below.

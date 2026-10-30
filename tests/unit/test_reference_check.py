@@ -13,8 +13,6 @@ from typer.testing import CliRunner
 
 from math_trace import reference_check as rc
 
-pytestmark = pytest.mark.unit
-
 
 def _passing_report(**overrides: object) -> rc.Report:
     base: dict[str, object] = {

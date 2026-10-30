@@ -12,8 +12,6 @@ from types import ModuleType
 
 import pytest
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def installer(request: pytest.FixtureRequest) -> ModuleType:
