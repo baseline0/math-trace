@@ -1,4 +1,4 @@
-# ADR-002: Python (SymPy) as Source of Truth for Mathematical Formulas
+# ADR-302: Python (SymPy) as Source of Truth for Mathematical Formulas
 
 ## Status
 Accepted

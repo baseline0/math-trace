@@ -1,11 +1,11 @@
-# ADR-002 and ADR-003: Implementation Notes
+# ADR-302 and ADR-303: Implementation Notes
 
-Detail removed from docs/adr/ADR-002-python-first-formulas.md and docs/adr/ADR-003-code-linked-traceability.md.
+Detail removed from docs/adr/ADR-302-python-first-formulas.md and docs/adr/ADR-303-code-linked-traceability.md.
 The decisions are in those ADRs; this file holds the rationale, examples, paths and commands.
 Line numbers from the original text are kept here as history, each tied to commit 925e5a4 (the commit that
 introduced the examples), so the references stay resolvable.
 
-## ADR-002: Rationale
+## ADR-302: Rationale
 
 ### Source of Truth Benefits
 1. **Testable**: Write unit tests to verify formula properties
@@ -29,7 +29,7 @@ Then:
 3. **Proof**: `lean/Challenge.lean` formalizes the definition
 4. **Traceability**: All reference `model.py:line`
 
-## ADR-002: Alternatives Considered
+## ADR-302: Alternatives Considered
 
 ### Formulas in LaTeX/Typst
 - Hard to verify and test
@@ -41,7 +41,7 @@ Then:
 - Harder to derive related formulas
 - Requires custom parsing
 
-## ADR-002: Implementation
+## ADR-302: Implementation
 
 1. Write all mathematical formulas in Python/SymPy in `model.py`
 2. Add `.to_latex()` method to each formula for export
@@ -73,20 +73,20 @@ FORMULAS = {
 }
 ```
 
-## ADR-002: Verification
+## ADR-302: Verification
 
 - Unit tests verify formula properties (monotonicity, bounds, etc.)
 - Integration tests verify export pipeline
 - Manual review: compare generated LaTeX with paper
 - Formal verification: Lean proof must match formula
 
-## ADR-002: References
+## ADR-302: References
 
 - [SymPy Documentation](https://docs.sympy.org/)
 - [SymPy LaTeX Printing](https://docs.sympy.org/latest/modules/printing/latex.html)
 - [Code-as-Docs Philosophy](../../README.md#code-as-docs)
 
-## ADR-003: Example: The Rate Law (was model.py:25 at 925e5a4)
+## ADR-303: Example: The Rate Law (was model.py:25 at 925e5a4)
 
 1. **Source of truth** (model.py, 925e5a4):
    ```python
@@ -121,7 +121,7 @@ FORMULAS = {
    }
    ```
 
-## ADR-003: Benefits
+## ADR-303: Benefits
 
 ### For Authors
 - Auto-detect inconsistencies: formula in paper vs. code
@@ -138,7 +138,7 @@ FORMULAS = {
 - New users can adapt `model.py` without breaking paper/proof links
 - Traceability aids understanding of what changed
 
-## ADR-003: Rationale
+## ADR-303: Rationale
 
 Mathematical papers must be reproducible and verifiable. Code-linked traceability:
 - Enables readers to inspect implementations
@@ -146,7 +146,7 @@ Mathematical papers must be reproducible and verifiable. Code-linked traceabilit
 - Prevents drift between paper and code
 - Supports formal verification workflows
 
-## ADR-003: Implementation
+## ADR-303: Implementation
 
 ### 1. Metadata in Source Code
 ```python
@@ -197,7 +197,7 @@ code_of_truth:
   formula: "rate = k * n_a * (n_a - 1) / 2"
 ```
 
-## ADR-003: Verification Workflow
+## ADR-303: Verification Workflow
 
 1. **Tests verify traceability**:
    ```python
@@ -216,13 +216,13 @@ code_of_truth:
    - Reviewer checks references point to correct lines
    - Verifies formula properties match paper claims
 
-## ADR-003: Negative consequences and mitigation
+## ADR-303: Negative consequences and mitigation
 
 - Line numbers break if code is refactored. Mitigation: use semantic versioning (formula name never changes,
   only implementation); write tests that verify traceability metadata; use git refs (commit hash) for
   permanent links; automate reference updates in CI/CD.
 
-## ADR-003: References
+## ADR-303: References
 
 - [Palomar Formalization Registry](https://palomar-registry.org)
 - [Literate Programming](https://en.wikipedia.org/wiki/Literate_programming)

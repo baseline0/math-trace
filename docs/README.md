@@ -8,9 +8,9 @@ This directory contains all documentation for math-trace, organized by purpose.
 Long-term design decisions that justify why the project is structured as it is.
 
 - **CONTEXT-architecture-overview.md** — System design overview
-- **ADR-001-typst-over-latex.md** — Why Typst instead of LaTeX
-- **ADR-002-python-first-formulas.md** — Why SymPy is source of truth
-- **ADR-003-code-linked-traceability.md** — How traceability works
+- **ADR-301-typst-over-latex.md** — Why Typst instead of LaTeX
+- **ADR-302-python-first-formulas.md** — Why SymPy is source of truth
+- **ADR-303-code-linked-traceability.md** — How traceability works
 
 Read these to understand *why* math-trace works the way it does.
 
