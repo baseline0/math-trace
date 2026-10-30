@@ -1,4 +1,4 @@
-# ADR-003: Code-Linked Traceability Between Paper, Code, and Formal Proofs
+# ADR-303: Code-Linked Traceability Between Paper, Code, and Formal Proofs
 
 ## Status
 Accepted

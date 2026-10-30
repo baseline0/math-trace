@@ -1,4 +1,4 @@
-"""Guard: math-trace publishes with Typst, not LaTeX (docs/adr/ADR-001-typst-over-latex.md).
+"""Guard: math-trace publishes with Typst, not LaTeX (docs/adr/ADR-301-typst-over-latex.md).
 
 Two checks, each run over every text file in the working tree:
 
@@ -22,12 +22,12 @@ from math_trace.constants import REPO_ROOT
 
 # Each entry is a repo-relative path that may contain LaTeX, with the reason it may.
 # An entry without a reason does not belong here; a stale entry fails the test below.
-# Remove the publishers.py and formula.py entries when LatexPublisher is removed (ADR-001 fallback).
+# Remove the publishers.py and formula.py entries when LatexPublisher is removed (ADR-301 fallback).
 LATEX_ALLOWLIST: frozenset[str] = frozenset(
     {
         # This guard names the compiler commands and the .tex suffix it detects.
         "tests/unit/test_latex_guard.py",
-        # LatexPublisher, the pdflatex fallback to Typst (ADR-001). Kept on purpose.
+        # LatexPublisher, the pdflatex fallback to Typst (ADR-301). Kept on purpose.
         "src/math_trace/publishers.py",
         # Comment at line 33 says a pdflatex fallback is available; prose, not a build call.
         "src/math_trace/formula.py",
@@ -66,7 +66,7 @@ def test_no_tex_files_outside_allowlist() -> None:
     offenders = sorted(
         _rel(p) for p in _working_tree_files() if p.suffix.lower() == ".tex" and _rel(p) not in LATEX_ALLOWLIST
     )
-    assert not offenders, f"LaTeX source files found (ADR-001 chose Typst): {offenders}"
+    assert not offenders, f"LaTeX source files found (ADR-301 chose Typst): {offenders}"
 
 
 def test_no_latex_build_commands_outside_allowlist() -> None:
@@ -83,7 +83,7 @@ def test_no_latex_build_commands_outside_allowlist() -> None:
             match = BUILD_TOOL.search(line)
             if match:
                 offenders.append(f"{rel}:{lineno} ({match.group(1)})")
-    assert not offenders, f"LaTeX build commands found (ADR-001 chose Typst): {offenders}"
+    assert not offenders, f"LaTeX build commands found (ADR-301 chose Typst): {offenders}"
 
 
 def test_allowlist_entries_exist_and_are_not_stale() -> None:

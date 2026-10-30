@@ -1,4 +1,4 @@
-# ADR-001: Choose Typst Over LaTeX for Paper Formatting
+# ADR-301: Choose Typst Over LaTeX for Paper Formatting
 
 ## Status
 Accepted

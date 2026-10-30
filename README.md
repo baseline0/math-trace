@@ -495,7 +495,7 @@ This repository is part of the mathematical research fleet.
 #### Typst
 - [Typst Documentation](https://typst.app/docs/)
 - [Typst Packages](https://typst.app/packages/)
-- [Why Typst](docs/adr/ADR-001-typst-over-latex.md)
+- [Why Typst](docs/adr/ADR-301-typst-over-latex.md)
 
 #### Lean & Formal Verification
 - [Lean 4 Manual](https://lean-lang.org/lean4/doc/)
@@ -503,7 +503,7 @@ This repository is part of the mathematical research fleet.
 
 #### Registry & Publication
 - [Palomar Formalization Registry](https://palomar-registry.org)
-- [Traceability Design](docs/adr/ADR-003-code-linked-traceability.md)
+- [Traceability Design](docs/adr/ADR-303-code-linked-traceability.md)
 
 ### Contributing
 
