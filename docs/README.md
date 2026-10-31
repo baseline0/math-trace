@@ -26,9 +26,6 @@ Read these when you need to *do* something.
 ### **research/** — Research & Market Analysis
 Strategic documents for positioning, planning, and future work.
 
-- **competitive-positioning.md** — Market positioning & competitors
-- **FORMULA_SLIDES_MARKET_ASSESSMENT.md** — Target market analysis
-- **arxiv-publication-plan.md** — arXiv publication roadmap
 - **equation-traceability-semantic-minimum.md** — Formal verification requirements
 
 Read these for context on business strategy and long-term planning.
