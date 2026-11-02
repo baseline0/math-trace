@@ -77,9 +77,13 @@ def _git_env() -> dict[str, str]:
 
 
 def _tracked_files(root: Path = REPO_ROOT) -> list[Path]:
-    """Every file git tracks under root, from the index. A tracked path that was deleted from disk is skipped."""
+    """Every file git tracks under root, plus every untracked file git does not ignore.
+
+    Ignored build trees (lean/.lake) are left out, as they are not source. Untracked, unignored files are included, so a
+    new file with a build command is caught before it is committed, as the walk of the working tree caught it.
+    """
     result = subprocess.run(
-        ["git", "-C", str(root), "ls-files", "--cached", "-z"],
+        ["git", "-C", str(root), "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
         capture_output=True,
         text=True,
         check=True,
@@ -134,13 +138,14 @@ def _git(root: Path, *args: str) -> None:
 
 
 def _repo_with_untracked_build_tree(tmp_path: Path) -> Path:
-    """A fresh repository whose Lake build tree (untracked, as .lake is ignored) names a build tool."""
+    """A fresh repository whose Lake build tree (ignored, as lean/.gitignore ignores .lake/) names a build tool."""
     _git(tmp_path, "init", "-q")
+    (tmp_path / ".gitignore").write_text(".lake/\n", encoding="utf-8")
     build_tree = tmp_path / ".lake" / "packages" / "mathlib" / ".docker"
     build_tree.mkdir(parents=True)
     (build_tree / "Dockerfile").write_text("RUN latexmk -pdf main.tex\n", encoding="utf-8")
     (tmp_path / "README.md").write_text("tracked\n", encoding="utf-8")
-    _git(tmp_path, "add", "README.md")
+    _git(tmp_path, "add", "README.md", ".gitignore")
     return tmp_path
 
 
@@ -239,3 +244,10 @@ def test_git_env_keeps_unrelated_git_settings(monkeypatch: pytest.MonkeyPatch) -
     assert "GIT_DIR" not in env
     assert env["GIT_SSH_COMMAND"] == "ssh -i /keys/ci"
     assert env["GIT_AUTHOR_NAME"] == "CI Bot"
+
+
+def test_guard_flags_an_untracked_unignored_build_command(tmp_path: Path) -> None:
+    """A new file not yet added is still checked, so the guard keeps the coverage of the old working-tree walk."""
+    root = _repo_with_untracked_build_tree(tmp_path)
+    (root / "notes.sh").write_text("latexmk -pdf main.tex\n", encoding="utf-8")
+    assert _build_command_offenders(_tracked_files(root), root) == ["notes.sh:1 (latexmk)"]
