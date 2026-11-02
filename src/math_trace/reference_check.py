@@ -223,13 +223,25 @@ def expected_payload(report: Report) -> dict[str, object]:
     }
 
 
+GIT_LOCATION_VARS = (
+    "GIT_DIR",
+    "GIT_WORK_TREE",
+    "GIT_INDEX_FILE",
+    "GIT_OBJECT_DIRECTORY",
+    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+    "GIT_COMMON_DIR",
+    "GIT_NAMESPACE",
+    "GIT_PREFIX",
+)
+
+
 def _clean_env() -> dict[str, str]:
-    """The environment for child processes, without the GIT_* variables a git hook exports.
+    """The environment for child processes, without the git location variables a git hook exports.
 
     Inherited GIT_DIR or GIT_INDEX_FILE would make `git -C <repo>` read the hook's repository, not <repo>, and would
-    leak into the contract tests the reviewer runs.
+    leak into the contract tests the reviewer runs. Other GIT_* settings (identity, SSH, config) are kept on purpose.
     """
-    return {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+    return {key: value for key, value in os.environ.items() if key not in GIT_LOCATION_VARS}
 
 
 def _git(repo: Path, *args: str) -> str:
