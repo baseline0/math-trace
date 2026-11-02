@@ -3,6 +3,7 @@ import GraphPolicy.Induced
 import GraphPolicy.Preservation
 import GraphPolicy.Guarded
 import GraphPolicy.Examples
+import GraphPolicy.Separation
 
 /-!
 Root module of the GraphPolicy package.
