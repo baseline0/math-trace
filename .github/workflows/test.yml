@@ -57,6 +57,10 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Type check with pyright ratchet (just check-types)
+        # The installed fleet CLI resolves FLEET_ROOT from its own install path, which is not a fleet checkout on CI.
+        # The runner's workspace holds the sibling checkouts, so it is the root.
+        env:
+          FLEET_ROOT: ${{ github.workspace }}
         run: just check-types
 
       - name: Run unit tests with pytest
