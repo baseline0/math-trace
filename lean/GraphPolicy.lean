@@ -1,4 +1,7 @@
 import GraphPolicy.Basic
+import GraphPolicy.Induced
+import GraphPolicy.Guarded
+import GraphPolicy.Examples
 
 /-!
 Root module of the GraphPolicy package.
