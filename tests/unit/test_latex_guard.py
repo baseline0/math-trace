@@ -156,3 +156,62 @@ def test_guard_is_not_fooled_by_the_hook_environment(tmp_path: Path, monkeypatch
     monkeypatch.setenv("GIT_DIR", str(other / ".git"))
     monkeypatch.setenv("GIT_INDEX_FILE", str(other / "index"))
     assert _build_command_offenders(_tracked_files(root), root) == ["docs/build.sh:1 (latexmk)"]
+
+
+def _staged_names(root: Path) -> str:
+    """The staged paths of root, read with the GIT_* variables scrubbed."""
+    result = subprocess.run(
+        ["git", "-C", str(root), "diff", "--cached", "--name-only"],
+        capture_output=True,
+        text=True,
+        check=True,
+        env=_git_env(),
+    )
+    return result.stdout
+
+
+def _calling_and_scratch(tmp_path: Path, script: str) -> tuple[Path, Path]:
+    """A `calling` repository with one staged file, and a `scratch` repository whose tracked build.sh holds script."""
+    calling = tmp_path / "calling"
+    scratch = tmp_path / "scratch"
+    for repo in (calling, scratch):
+        repo.mkdir()
+        _git(repo, "init", "-q")
+    (calling / "staged.txt").write_text("staged\n", encoding="utf-8")
+    _git(calling, "add", "staged.txt")
+    (scratch / "build.sh").write_text(script, encoding="utf-8")
+    _git(scratch, "add", "build.sh")
+    return calling, scratch
+
+
+def _point_git_env_at(monkeypatch: pytest.MonkeyPatch, repo: Path) -> None:
+    """Export GIT_DIR and GIT_INDEX_FILE for repo, as a pre-commit hook does."""
+    monkeypatch.setenv("GIT_DIR", str(repo / ".git"))
+    monkeypatch.setenv("GIT_INDEX_FILE", str(repo / ".git" / "index"))
+
+
+def test_guard_does_not_mutate_calling_repository_index(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Run as a hook does, with GIT_DIR and GIT_INDEX_FILE pointing at the calling repository. The guard must report
+    the scratch offender, and the calling repository's staged list must be unchanged afterwards."""
+    calling, scratch = _calling_and_scratch(tmp_path, "latexmk -pdf main.tex\n")
+    staged_before = _staged_names(calling)
+    assert staged_before == "staged.txt\n"
+    _point_git_env_at(monkeypatch, calling)
+
+    assert _build_command_offenders(_tracked_files(scratch), scratch) == ["build.sh:1 (latexmk)"]
+
+    assert _staged_names(calling) == staged_before
+
+
+def test_clean_scratch_repository_reports_nothing_and_leaves_calling_index_unchanged(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The mirror of the test above: a clean scratch repository reports nothing, and the calling index is untouched."""
+    calling, scratch = _calling_and_scratch(tmp_path, "echo hello\n")
+    staged_before = _staged_names(calling)
+    assert staged_before == "staged.txt\n"
+    _point_git_env_at(monkeypatch, calling)
+
+    assert _build_command_offenders(_tracked_files(scratch), scratch) == []
+
+    assert _staged_names(calling) == staged_before
