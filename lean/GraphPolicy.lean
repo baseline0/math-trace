@@ -1,5 +1,6 @@
 import GraphPolicy.Basic
 import GraphPolicy.Induced
+import GraphPolicy.Preservation
 import GraphPolicy.Guarded
 import GraphPolicy.Examples
 
