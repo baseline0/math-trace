@@ -154,7 +154,7 @@ argparse = {msg = "Use typer for CLIs: argparse is banned so every fleet CLI sha
 [tool.pyright]
 include = ["src", "tests"]
 # The membrane tests import the example's model and simulate modules by inserting this path into sys.path.
-extraPaths = ["examples/membrane-dynamics/src"]
+extraPaths = ["examples/membrane-dynamics/src", "scripts"]
 typeCheckingMode = "standard"
 pythonVersion = "3.13"
 pythonPlatform = "All"

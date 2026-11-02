@@ -17,9 +17,12 @@ names a compiler is flagged too; that is the coarse, intended behaviour.
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 from pathlib import Path
+
+import pytest
 
 from math_trace.constants import REPO_ROOT
 
@@ -51,10 +54,23 @@ SKIP_DIRS = {
 BUILD_TOOL = re.compile(r"\b(pdflatex|xelatex|lualatex|latexmk)\b")
 
 
+def _git_env() -> dict[str, str]:
+    """The environment for a git call, without the GIT_* variables a git hook exports.
+
+    git exports GIT_DIR and GIT_INDEX_FILE to pre-commit hooks. Inherited, they point `git -C <other repo>` at the
+    hook's own repository and index, so the guard and its temporary-repository tests read and write the wrong one.
+    """
+    return {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+
+
 def _tracked_files(root: Path = REPO_ROOT) -> list[Path]:
     """Every file git tracks under root, from the index. A tracked path that was deleted from disk is skipped."""
     result = subprocess.run(
-        ["git", "-C", str(root), "ls-files", "--cached", "-z"], capture_output=True, text=True, check=True
+        ["git", "-C", str(root), "ls-files", "--cached", "-z"],
+        capture_output=True,
+        text=True,
+        check=True,
+        env=_git_env(),
     )
     paths = [root / name for name in result.stdout.split("\0") if name]
     return [path for path in paths if path.is_file()]
@@ -101,7 +117,7 @@ def test_allowlist_entries_exist_and_are_not_stale() -> None:
 
 
 def _git(root: Path, *args: str) -> None:
-    subprocess.run(["git", "-C", str(root), *args], capture_output=True, check=True)
+    subprocess.run(["git", "-C", str(root), *args], capture_output=True, check=True, env=_git_env())
 
 
 def _repo_with_untracked_build_tree(tmp_path: Path) -> Path:
@@ -125,4 +141,18 @@ def test_guard_flags_a_tracked_latex_build_command(tmp_path: Path) -> None:
     (root / "docs").mkdir()
     (root / "docs" / "build.sh").write_text("latexmk -pdf main.tex\n", encoding="utf-8")
     _git(root, "add", "docs/build.sh")
+    assert _build_command_offenders(_tracked_files(root), root) == ["docs/build.sh:1 (latexmk)"]
+
+
+def test_guard_is_not_fooled_by_the_hook_environment(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Run as a pre-commit hook does: GIT_DIR and GIT_INDEX_FILE point at some other repository. The guard must still
+    read the temporary repository it was asked about."""
+    root = _repo_with_untracked_build_tree(tmp_path)
+    (root / "docs").mkdir()
+    (root / "docs" / "build.sh").write_text("latexmk -pdf main.tex\n", encoding="utf-8")
+    _git(root, "add", "docs/build.sh")
+    other = tmp_path / "elsewhere"
+    other.mkdir()
+    monkeypatch.setenv("GIT_DIR", str(other / ".git"))
+    monkeypatch.setenv("GIT_INDEX_FILE", str(other / "index"))
     assert _build_command_offenders(_tracked_files(root), root) == ["docs/build.sh:1 (latexmk)"]
