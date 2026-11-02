@@ -54,13 +54,26 @@ SKIP_DIRS = {
 BUILD_TOOL = re.compile(r"\b(pdflatex|xelatex|lualatex|latexmk)\b")
 
 
+GIT_LOCATION_VARS = (
+    "GIT_DIR",
+    "GIT_WORK_TREE",
+    "GIT_INDEX_FILE",
+    "GIT_OBJECT_DIRECTORY",
+    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+    "GIT_COMMON_DIR",
+    "GIT_NAMESPACE",
+    "GIT_PREFIX",
+)
+
+
 def _git_env() -> dict[str, str]:
-    """The environment for a git call, without the GIT_* variables a git hook exports.
+    """The environment for a git call, without the git location variables a git hook exports.
 
     git exports GIT_DIR and GIT_INDEX_FILE to pre-commit hooks. Inherited, they point `git -C <other repo>` at the
     hook's own repository and index, so the guard and its temporary-repository tests read and write the wrong one.
+    Other GIT_* settings are kept.
     """
-    return {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+    return {key: value for key, value in os.environ.items() if key not in GIT_LOCATION_VARS}
 
 
 def _tracked_files(root: Path = REPO_ROOT) -> list[Path]:
@@ -215,3 +228,14 @@ def test_clean_scratch_repository_reports_nothing_and_leaves_calling_index_uncha
     assert _build_command_offenders(_tracked_files(scratch), scratch) == []
 
     assert _staged_names(calling) == staged_before
+
+
+def test_git_env_keeps_unrelated_git_settings(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Only the location variables are removed; identity, SSH and config settings reach git unchanged."""
+    monkeypatch.setenv("GIT_DIR", "/elsewhere/.git")
+    monkeypatch.setenv("GIT_SSH_COMMAND", "ssh -i /keys/ci")
+    monkeypatch.setenv("GIT_AUTHOR_NAME", "CI Bot")
+    env = _git_env()
+    assert "GIT_DIR" not in env
+    assert env["GIT_SSH_COMMAND"] == "ssh -i /keys/ci"
+    assert env["GIT_AUTHOR_NAME"] == "CI Bot"
