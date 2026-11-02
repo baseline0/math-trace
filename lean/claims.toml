@@ -1,0 +1,24 @@
+# Trace records for formally checked claims. tests/unit/test_lean_claims.py checks each record against the repository:
+# the theorem file must exist, must match theorem_sha256 (the drift check), and the toolchain and mathlib pin must match.
+
+[[claim]]
+id = "C-guarded-policy-expressiveness"
+statement = "A policy built only from forbidden induced patterns cannot accept an approved graph that contains a forbidden copy; a guarded policy (reject iff forbidden and not approved) can."
+verification = "formally_verified"
+theorem_path = "lean/GraphPolicy/Separation.lean"
+theorem_name = "GraphPolicy.forbidden_induced_cannot_express_conditional_approval"
+theorem_sha256 = "8e5d37cdbcd040310e67863cbdecc513245115d2018c1f8366fc2425b2cfd565"
+lean_toolchain = "leanprover/lean4:v4.35.0"
+mathlib_revision = "56a005855ea17e0b0958f73ec801ae140b0a1679"
+# Informational only: the commit that introduced the theorem file. The hash above is what is checked.
+source_commit = "7f83732"
+verify_commands = [
+    "cd lean && lake build",
+    "cd lean && lake env leanchecker --fresh GraphPolicy.Separation",
+]
+caveats = [
+    "undirected SimpleGraph; the directed fleet policy needs a later model",
+    "a result about policy expressiveness, not a proof that the runtime gate enforces it",
+]
+forbidden_tokens_absent = true
+forbidden_tokens_note = "lean/GraphPolicy/Separation.lean was grep-checked for sorry, admit, axiom and native_decide: no matches."
