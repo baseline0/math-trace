@@ -21,6 +21,7 @@ from __future__ import annotations
 import glob
 import hashlib
 import json
+import os
 import platform
 import subprocess
 import time
@@ -222,8 +223,19 @@ def expected_payload(report: Report) -> dict[str, object]:
     }
 
 
+def _clean_env() -> dict[str, str]:
+    """The environment for child processes, without the GIT_* variables a git hook exports.
+
+    Inherited GIT_DIR or GIT_INDEX_FILE would make `git -C <repo>` read the hook's repository, not <repo>, and would
+    leak into the contract tests the reviewer runs.
+    """
+    return {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+
+
 def _git(repo: Path, *args: str) -> str:
-    done = subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True, check=False)
+    done = subprocess.run(
+        ["git", "-C", str(repo), *args], capture_output=True, text=True, check=False, env=_clean_env()
+    )
     return done.stdout.strip() if done.returncode == 0 else ""
 
 
@@ -237,7 +249,7 @@ def provenance(repo: Path) -> tuple[str, str | None, bool]:
 
 def run_step(argv: tuple[str, ...], cwd: Path) -> StepResult:
     started = time.monotonic()
-    done = subprocess.run(list(argv), cwd=cwd, capture_output=True, text=True, check=False)
+    done = subprocess.run(list(argv), cwd=cwd, capture_output=True, text=True, check=False, env=_clean_env())
     return StepResult(argv=argv, returncode=done.returncode, seconds=round(time.monotonic() - started, 1))
 
 
@@ -270,6 +282,7 @@ def check(name: str, repo: Path, *, use_expected: bool = True) -> Report:
             capture_output=True,
             text=True,
             check=False,
+            env=_clean_env(),
         )
         report.tests_returncode = tests.returncode
     report.failures = verdict(report)
