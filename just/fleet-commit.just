@@ -1,7 +1,10 @@
-# Vendored from fleet-base @ v0.7.0. Do not edit: the next install overwrites this file.
+# Vendored from fleet-base @ v0.8.0. Do not edit: the next install overwrites this file.
 # Update: uv run python -m fleet_base.vendor_just install <this repo> (run in fleet-base's checkout)
-# fleet-commit-sha256: d29f3a8fd3b2f6a6fa6c72f3d4cea54f8e64680decc4db3c1a4081c7a6e3b38d
+# fleet-commit-sha256: 7a7d2ec42f387baa1411c57f6f4396156682392bdaba91deeb2f666aaef1c821
 # fleet-commit-body
+unexport VIRTUAL_ENV
+# Why: a VIRTUAL_ENV exported by the parent shell names another project's venv. Recipes run with the repo's own
+# uv environment, so the hook "VIRTUAL_ENV must be this repo's .venv" passes for commits made through just.
 
 # COMMIT_MODEL: model used by commitmate (fast by default; mistral:7b for more detailed).
 # Not exported: it is passed to commitmate with --model, so it must not leak into other recipes.
