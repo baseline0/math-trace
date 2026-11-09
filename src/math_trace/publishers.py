@@ -47,6 +47,7 @@ See Also:
 from __future__ import annotations
 
 import subprocess
+import warnings
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -83,7 +84,18 @@ class TypstPublisher(Publisher):
 
     Typst provides excellent mathematical typesetting and is actively maintained.
     This is the preferred publisher for math-trace.
+
+    DEPRECATED: use tool-publish (`tool-publish render-typst`) as the renderer.
+    Constructing this class emits a DeprecationWarning. The class is kept so
+    existing imports keep working.
     """
+
+    def __init__(self) -> None:
+        warnings.warn(
+            "TypstPublisher is deprecated; use tool-publish (`tool-publish render-typst`) as the renderer.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
     def compile(self, source_file: Path) -> bytes:
         """Compile Typst document to PDF.
