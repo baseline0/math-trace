@@ -2,8 +2,7 @@
 
 Detail removed from docs/adr/ADR-302-python-first-formulas.md and docs/adr/ADR-303-code-linked-traceability.md.
 The decisions are in those ADRs; this file holds the rationale, examples, paths and commands.
-Line numbers from the original text are kept here as history, each tied to commit 925e5a4 (the commit that
-introduced the examples), so the references stay resolvable.
+Line numbers from the original text are kept here as history, kept here as history.
 
 ## ADR-302: Rationale
 
@@ -86,9 +85,9 @@ FORMULAS = {
 - [SymPy LaTeX Printing](https://docs.sympy.org/latest/modules/printing/latex.html)
 - [Code-as-Docs Philosophy](../../README.md#code-as-docs)
 
-## ADR-303: Example: The Rate Law (was model.py:25 at 925e5a4)
+## ADR-303: Example: The Rate Law
 
-1. **Source of truth** (model.py, 925e5a4):
+1. **Source of truth** (model.py):
    ```python
    rate_expr = k * sp.binomial(n_a, 2)  # Source: model.py:25
    ```
