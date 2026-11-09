@@ -9,18 +9,15 @@ Orchestrates the full publication workflow:
 5. Compile Typst document
 """
 
-import json
 import subprocess
 import sys
 from pathlib import Path
 
-from math_trace.generators import SymPyToTypst
+from math_trace.template_builder import FormulaPipeline
 
 
 def generate_formulas() -> bool:
     """Convert SymPy formulas to Typst via LaTeX."""
-    print("📐 Generating Typst formulas...")
-
     # 1. Run src/model.py to get JSON
     result = subprocess.run([sys.executable, "src/model.py"], capture_output=True, text=True)
     if result.returncode != 0:
@@ -31,25 +28,8 @@ def generate_formulas() -> bool:
         print("❌ model.py did not generate membrane_equations.json")
         return False
 
-    # 2. Convert LaTeX → Typst (simple regex-based approach)
-    with open("membrane_equations.json") as f:
-        data = json.load(f)
-
-    converter = SymPyToTypst()
-    typst_lines = []
-    for name, info in data.items():
-        latex_str = info["latex"]
-        typst_str = converter._latex_to_typst(latex_str)
-
-        comment = f"// {info['description']} (from model.py:{info['source_line']})"
-        definition = f"#let {name} = $ {typst_str} $"
-        typst_lines.append(f"{comment}\n{definition}")
-
-    output = Path("generated/formulas.typ")
-    output.parent.mkdir(exist_ok=True)
-    output.write_text("\n\n".join(typst_lines))
-    print(f"✅ Generated {output}")
-    return True
+    # 2. Convert LaTeX → Typst via the library pipeline
+    return FormulaPipeline("membrane_equations.json", output_dir="generated").generate_formulas()
 
 
 def generate_figures() -> bool:

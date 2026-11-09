@@ -50,7 +50,7 @@ class TestWorkflowEndToEnd:
     def test_formulas_convertible_to_latex(self) -> None:
         """Step 2: Formulas are convertible to LaTeX."""
         for _name, formula in FORMULAS.items():
-            latex = formula.to_latex()
+            latex = formula.latex
             assert latex is not None
             assert len(latex) > 0
             # Should contain math notation
@@ -84,7 +84,7 @@ class TestWorkflowEndToEnd:
 
     def test_rate_formula_matches_simulation(self) -> None:
         """Step 6: Rate formula in model.py matches simulation logic."""
-        # The rate from model.py:25 is r = k * n_a * (n_a - 1) / 2
+        # The rate from model.py:29 is r = k * n_a * (n_a - 1) / 2
         k_test = 0.01
         n_test = 50
 
@@ -104,7 +104,7 @@ class TestWorkflowEndToEnd:
         rate_formula = FORMULAS["rate"]
 
         # 2. Formula has metadata pointing to source
-        assert rate_formula.source_line == 25
+        assert rate_formula.source_line == 29
         assert "mass-action" in rate_formula.description
 
         # 3. Simulation is based on the same rate formula
@@ -173,7 +173,7 @@ class TestPaperConsistency:
         """
         # The rate formula should match Lean's definition
         rate_formula = FORMULAS["rate"]
-        latex = rate_formula.to_latex()
+        latex = rate_formula.latex
 
         # Should contain the structure k * n * (n-1) / 2
         # (exact representation varies by SymPy formatting)
