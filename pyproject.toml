@@ -27,6 +27,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
+    "fleet-base>=0.6.0",
     "sympy>=1.12",
     "numpy>=1.24",
     "matplotlib>=3.8",
@@ -162,6 +163,9 @@ exclude = ["**/__pycache__", ".git", ".ruff_cache", ".mypy_cache", ".pytest_cach
 
 [tool.uv]
 default-groups = ["dev"]
+
+[tool.uv.sources]
+fleet-base = { path = "../fleet-base", editable = true }
 
 [tool.importlinter]
 include_external_packages = true
