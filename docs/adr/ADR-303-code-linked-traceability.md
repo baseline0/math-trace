@@ -36,6 +36,6 @@ links back to its source with commit SHA references (see docs/adr-notes/ADR-002-
 `tests/unit/test_template_metadata.py` checks that recorded code references and lines match the
 code they name; `tests/unit/test_code_refs.py` checks that code_ref symbols resolve to their definition.
 
-## Review-by
+## Review
 
-2027-04-30
+No review trigger is recorded. The owner sets one.

@@ -39,6 +39,6 @@ All papers, simulations, and formalizations derive from this Python definition.
 `tests/unit/test_model_export.py` verifies that formulas generated from the Python model export
 correctly to the paper formats.
 
-## Review-by
+## Review
 
-2027-04-30
+No review trigger is recorded. The owner sets one.
