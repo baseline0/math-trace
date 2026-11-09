@@ -46,26 +46,14 @@ Use **Typst** as the primary formatting engine for all papers in math-trace.
 ## Alternatives Considered
 
 ### LaTeX
-```latex
-% Complex to generate programmatically
-\frac{k n_a (n_a - 1)}{2}
-\begin{theorem}[Monotonicity]
-  Let $k > 0$...
-\end{theorem}
-```
+Complex to generate programmatically, with environments and escaping that are hard to build from code.
 
 ### Typst
-```typst
-// Clean, code-friendly syntax
-$ (k n_a (n_a - 1)) / 2 $
-#theorem[Monotonicity][
-  Let $k > 0$...
-]
-```
+A code-friendly syntax for the same formulas and theorem blocks.
 
 ## Implementation
 
-1. Install Typst: `cargo install typst-cli`
+1. Install the Typst command-line tool.
 2. Use Typst for all `.typ` documents
 3. Generate formulas as Typst imports via `#include`
 4. Provide Justfile recipes for compilation
