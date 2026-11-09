@@ -4,16 +4,16 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8080:8080"
     volumes:
       - ./examples:/workspace/examples
-      - math-trace-cache:/root/.math-trace
+      - math-trace-cache:/data/.math-trace
     environment:
       - PYTHONUNBUFFERED=1
     networks:
       - math-trace-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
       interval: 30s
       timeout: 10s
       retries: 3

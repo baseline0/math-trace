@@ -8,6 +8,9 @@ import 'just/fleet-test.just'
 
 set default-list := true
 
+# Listen port for the local server; set FLEET_PORT to override (same variable the container reads).
+port := env("FLEET_PORT", "8080")
+
 # Lean/Mathlib health check for a project (default: the Palomar Sidorenko clone). Read-only: never downloads a toolchain. Exits 1 when a required check fails.
 [group("build")]
 lean-health project="~/.cache/math-trace/palomar-sidorenko" report="generated/lean-health.json":
@@ -70,12 +73,12 @@ paper:
 serve:
     @echo "🌐 Starting interactive slide editor..."
     @echo ""
-    @echo "Dashboard: http://localhost:8000"
-    @echo "API: http://localhost:8000/api/health"
+    @echo "Dashboard: http://localhost:{{port}}"
+    @echo "API: http://localhost:{{port}}/healthz"
     @echo ""
     @echo "Press Ctrl+C to stop"
     @echo ""
-    uv run uvicorn math_trace.server:app --reload --host 127.0.0.1 --port 8000
+    uv run uvicorn math_trace.server:app --reload --host 127.0.0.1 --port {{port}}
 
 [group("verify")]
 fmt:
@@ -185,7 +188,7 @@ setup:
 docker-up profile="" *args:
     @if [ -z "{{profile}}" ]; then \
         docker compose up -d {{args}}; \
-        echo "✅ Started math-trace on http://localhost:8000"; \
+        echo "✅ Started math-trace on http://localhost:${FLEET_PORT:-8080}"; \
     else \
         docker compose --profile {{profile}} up -d {{args}}; \
         echo "✅ Started with profile: {{profile}}"; \
@@ -392,7 +395,7 @@ help:
     @echo "🎓 math-trace: Formula-to-code traceability"
     @echo ""
     @echo "DOCKER (Quick Deploy):"
-    @echo "  just docker-up              — Start FastAPI + formula browser (http://localhost:8000)"
+    @echo "  just docker-up              — Start FastAPI + formula browser (http://localhost:8080)"
     @echo "  just docker-dev-up          — Start with Ollama for batch processing"
     @echo "  just docker-logs            — View live logs"
     @echo "  just docker-restart         — Full restart (down → rebuild → up)"
@@ -409,7 +412,7 @@ help:
     @echo "  just figures   — Generate matplotlib figures"
     @echo "  just pdf       — Compile Typst document to PDF"
     @echo "  just paper     — Full build (formulas + figures + pdf)"
-    @echo "  just serve     — Start interactive slide editor (http://localhost:8000)"
+    @echo "  just serve     — Start interactive slide editor (http://localhost:8080)"
     @echo ""
     @echo "VERIFY:"
     @echo "  just test              — Run unit tests (CI-safe)"

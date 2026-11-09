@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import html
 import json
+import os
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
@@ -38,9 +39,10 @@ app = FastAPI(
 # ============================================================================
 
 
+@app.get("/healthz")
 @app.get("/api/health")
 async def health():
-    """Health check endpoint."""
+    """Liveness check: cheap, no dependencies. /api/health is an alias."""
     return {"status": "ok", "version": "0.1.0"}
 
 
@@ -798,6 +800,6 @@ if __name__ == "__main__":
     uvicorn.run(
         app,
         host="127.0.0.1",
-        port=8000,
+        port=int(os.environ.get("FLEET_PORT", "8080")),
         reload=True,
     )
