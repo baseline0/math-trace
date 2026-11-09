@@ -10,23 +10,29 @@
   },
   "checks": {
     "build": {
-      "status": "passed",
+      "status": "upstream_recorded",
       "evidence": "LXD rebuild 2026-10-13, run 20261013T213113Z: lake build exit 0, 3,119 jobs",
-      "note": "38 linter warnings; 3 sorry warnings are the deliberate statement placeholders in Challenge.lean"
+      "note": "38 linter warnings; 3 sorry warnings are the deliberate statement placeholders in Challenge.lean",
+      "verified_here": false,
+      "status_note": "Recorded upstream (LXD run, see evidence). Not re-run in this repository; status is not a claim that this repository passed the check."
     },
     "axioms": {
-      "status": "passed",
-      "evidence": "run 20261013T213113Z: the three main theorems depend only on propext, Classical.choice, Quot.sound"
+      "status": "upstream_recorded",
+      "evidence": "run 20261013T213113Z: the three main theorems depend only on propext, Classical.choice, Quot.sound",
+      "verified_here": false,
+      "status_note": "Recorded upstream (LXD run, see evidence). Not re-run in this repository; status is not a claim that this repository passed the check."
     },
     "statement_match": {
-      "status": "passed",
+      "status": "upstream_recorded",
       "evidence": "run 20261015T204628Z: the repository's own Comparator judge (scripts/verify-comparator.sh, unmodified at ba6f109) printed 'Your solution is okay!'; con-ron, nanoda, and the Lean default kernel each accepted the solution",
       "container": {
         "nesting": true,
         "network": "provision-only",
         "image_fingerprint": "2781bbfeee5d7a2a52058d5c0f0ba7b6ef7105158d9ccdb787ecf37c439eff48"
       },
-      "note": "Ran with network access (--allow-network), so this is not Phase B evidence. It is the author's judge on the pinned commit, run in our container."
+      "note": "Ran with network access (--allow-network), so this is not Phase B evidence. It is the author's judge on the pinned commit, run in our container.",
+      "verified_here": false,
+      "status_note": "Recorded upstream (LXD run, see evidence). Not re-run in this repository; status is not a claim that this repository passed the check."
     }
   },
   "companion": {
