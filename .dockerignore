@@ -1,5 +1,4 @@
+.git
 **/.env
 **/.env.*
-.git
-**/.venv
-**/__pycache__
+.venv

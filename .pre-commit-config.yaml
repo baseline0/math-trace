@@ -217,3 +217,11 @@ repos:
         pass_filenames: false
         files: '(\.py|\.tex|\.sh|\.ya?ml|\.toml)$|^justfile$'
         stages: [pre-commit]
+  - repo: local
+    hooks:
+      - id: dockerfile-check
+        name: Dockerfile standard (fleet)
+        entry: python3 scripts/dockerfile_check.py
+        language: system
+        pass_filenames: false
+        files: (^|/)(Dockerfile[^/]*|\.dockerignore)$

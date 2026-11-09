@@ -2,11 +2,8 @@ FROM python:3.13-slim
 
 LABEL fleet.role="service"
 
-# FLEET_DATA_DIR is the mounted data root. HOME points under it so the server's
-# ~/.math-trace cache and logs land in the writable volume for the non-root user.
-ENV FLEET_DATA_DIR=/data \
-    FLEET_PORT=8080 \
-    HOME=/data
+ENV FLEET_DATA_DIR=/data
+ENV HOME=/home/app
 
 WORKDIR /workspace
 
@@ -27,18 +24,20 @@ COPY docs/ ./docs/
 # Install dependencies
 RUN pip install --no-cache-dir -e .
 
-# Create cache and data directory, owned by the non-root service user
-RUN mkdir -p /data/.math-trace/arxiv-cache \
-    && chown -R 10001:10001 /data
+# Non-root service user (uid 10001) with its cache and data directories
+RUN groupadd --system --gid 10001 app \
+    && useradd --system --uid 10001 --gid 10001 --home-dir /home/app --create-home app \
+    && mkdir -p /home/app/.math-trace/arxiv-cache /data \
+    && chown -R 10001:10001 /home/app /data
+
+USER 10001
 
 # Expose FastAPI port
 EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:${FLEET_PORT}/healthz || exit 1
+    CMD curl -f http://localhost:8080/healthz || exit 1
 
-USER 10001:10001
-
-# Default: run FastAPI server with uvicorn on FLEET_PORT
-CMD ["sh", "-c", "exec uvicorn math_trace.server:app --host 0.0.0.0 --port \"$FLEET_PORT\""]
+# Default: run FastAPI server with uvicorn
+CMD ["uvicorn", "math_trace.server:app", "--host", "0.0.0.0", "--port", "8080"]
