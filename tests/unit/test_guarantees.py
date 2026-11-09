@@ -35,7 +35,7 @@ class TestEquationExtraction:
     def test_equations_have_latex_representation(self):
         """Guarantee: SymPy equations convert to LaTeX."""
         rate_formula = FORMULAS["rate"]
-        latex = rate_formula.to_latex()
+        latex = rate_formula.latex
 
         # LaTeX should be a non-empty string
         assert isinstance(latex, str)
@@ -106,11 +106,10 @@ class TestMetadataSchemaAPI:
             assert len(formula.name) > 0
 
     def test_formula_provides_latex_method(self):
-        """Guarantee: Equations provide to_latex() method for publication."""
+        """Guarantee: Equations carry a LaTeX string for publication."""
         for _name, formula in FORMULAS.items():
-            assert hasattr(formula, "to_latex")
-            assert callable(formula.to_latex)
-            latex_str = formula.to_latex()
+            assert isinstance(formula.latex, str)
+            latex_str = formula.latex
             assert isinstance(latex_str, str)
 
 
@@ -120,9 +119,9 @@ class TestReproducibility:
     def test_same_model_generates_same_latex(self):
         """Guarantee: Same equation definition produces same LaTeX (deterministic)."""
         # Get LaTeX multiple times
-        latex1 = FORMULAS["rate"].to_latex()
-        latex2 = FORMULAS["rate"].to_latex()
-        latex3 = FORMULAS["rate"].to_latex()
+        latex1 = FORMULAS["rate"].latex
+        latex2 = FORMULAS["rate"].latex
+        latex3 = FORMULAS["rate"].latex
 
         # All should be identical
         assert latex1 == latex2 == latex3
@@ -189,7 +188,7 @@ class TestAPIStability:
         rate_formula = FORMULAS["rate"]
 
         # Should have consistent interface
-        assert callable(rate_formula.to_latex)
+        assert isinstance(rate_formula.latex, str)
 
         # Should be able to access key fields
         _ = rate_formula.name
@@ -212,7 +211,7 @@ class TestEndToEndGuarantees:
         assert rate.source_line > 0
 
         # 3. Convert to LaTeX ✓
-        latex = rate.to_latex()
+        latex = rate.latex
         assert latex
 
         # 4. Export to JSON ✓

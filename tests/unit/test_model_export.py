@@ -15,7 +15,7 @@ from math_trace.constants import REPO_ROOT
 
 sys.path.insert(0, str(REPO_ROOT / "examples" / "membrane-dynamics" / "src"))
 
-from model import FORMULAS
+from model import FORMULAS, export_json
 
 
 def test_formulas_defined():
@@ -27,7 +27,7 @@ def test_formulas_defined():
 def test_rate_formula_correct():
     """Verify the rate formula matches the expected form."""
     rate_formula = FORMULAS["rate"]
-    latex = rate_formula.to_latex()
+    latex = rate_formula.latex
 
     # LaTeX should contain k and n_a
     assert "k" in latex or "K" in latex
@@ -39,11 +39,7 @@ def test_export_json(tmp_path):
     # Export to temp file
     json_path = tmp_path / "equations.json"
 
-    data = {}
-    for name, formula in FORMULAS.items():
-        data[name] = formula.to_dict()
-
-    json_path.write_text(json.dumps(data, indent=2))
+    export_json(json_path)
 
     # Reload and verify
     loaded = json.loads(json_path.read_text())
@@ -56,6 +52,7 @@ def test_export_json(tmp_path):
     assert "sympy" in rate_data
     assert "description" in rate_data
     assert "source_line" in rate_data
+    assert rate_data["expr_hash"].startswith("sha256:")
 
     # Verify content
     assert len(rate_data["latex"]) > 0
@@ -75,7 +72,7 @@ def test_formula_metadata():
 def test_to_latex():
     """Verify LaTeX conversion works."""
     for _name, formula in FORMULAS.items():
-        latex = formula.to_latex()
+        latex = formula.latex
 
         assert isinstance(latex, str)
         assert len(latex) > 0
