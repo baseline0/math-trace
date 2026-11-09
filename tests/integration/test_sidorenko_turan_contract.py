@@ -9,6 +9,8 @@ Validates:
 
 import json
 import math
+import shutil
+import subprocess
 
 import pytest
 
@@ -44,6 +46,19 @@ class TestLeanTranscription:
         assert "(1 / (4 * (r : ℝ) ^ 2))" in text
         assert "Real.rpow (4 / (r : ℝ)) (1 / (r : ℝ))" in text
         assert "Real.rpow (1 - 1 / (r : ℝ)) (2 - 2 / (r : ℝ))" in text
+
+    def test_lean_statement_compiles(self):
+        """The statement file compiles under the pinned lake toolchain (lean/)."""
+        if shutil.which("lake") is None:
+            pytest.skip("lake binary not found on PATH; install elan to run the Lean compile check")
+        result = subprocess.run(
+            ["lake", "env", "lean", str(EXAMPLE / "lean_statement.lean")],
+            cwd=REPO_ROOT / "lean",
+            capture_output=True,
+            text=True,
+            timeout=1800,
+        )
+        assert result.returncode == 0, result.stdout + result.stderr
 
     def test_lean_evidence_names_the_pinned_commit(self):
         """The evidence record refers to the commit the statement was copied from."""

@@ -1,8 +1,13 @@
 {
   "source": "Palomar PALOMAR-2026-10-13-000012, xliu2022/improved-sidorenko-lean",
   "source_commit": "ba6f109bf01436ca15e55fdf5d35dbea85ffd9c9",
-  "toolchain": "leanprover/lean4:v4.35.0-rc2",
-  "mathlib": "065356127 (from the committed lake-manifest.json)",
+  "toolchain": "leanprover/lean4:v4.35.0",
+  "mathlib": "56a005855ea17e0b0958f73ec801ae140b0a1679 (from lean/lake-manifest.json; the toolchain the statement is checked against)",
+  "previous_toolchain_record": {
+    "toolchain": "leanprover/lean4:v4.35.0-rc2",
+    "mathlib": "065356127 (from the committed lake-manifest.json)",
+    "note": "Recorded at the upstream source. This was NOT the checked toolchain; it is kept only for history."
+  },
   "checks": {
     "build": {
       "status": "passed",
@@ -27,5 +32,8 @@
   "companion": {
     "script": "build_table.py",
     "checks": "arithmetic of the displayed constant and gap; not the statement match"
-  }
+  },
+  "statement_sha256": "37158e1fbaa9d3fc6dd59369a587ee4e121ec2da21c283fd0963dbf7a5fbbf06",
+  "upstream_source_verified": false,
+  "upstream_source_note": "Challenge.lean and scripts/verify-comparator.sh are not in this repository, and the upstream commit ba6f109 was not re-checked here. The build, axioms and statement_match entries above are upstream-recorded evidence, not re-verified in this repo; the Comparator result is not claimed as passed by this repo."
 }
