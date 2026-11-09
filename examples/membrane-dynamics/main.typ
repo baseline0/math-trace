@@ -26,7 +26,7 @@ reaction $2a → b$ is given by:
 
 #figure(
   align(center, text(size: 12pt, rate)),
-  caption: [Rate law for rule $2a → b$ derived from mass-action kinetics (see model.py:25)],
+  caption: [Rate law for rule $2a → b$ derived from mass-action kinetics (see model.py:48)],
 ) <eq-rate>
 
 This formula is computed symbolically from the Python model using SymPy and
@@ -70,7 +70,7 @@ trajectory for $k = 0.01$, $n_a(0) = 50$.
 Every formula, theorem statement, and simulation parameter is linked to its
 source in the codebase:
 
-- *model.py:25* — SymPy definition of the rate law (source of truth)
+- *model.py:48* — SymPy definition of the rate law (source of truth)
 - *simulate.py* — Stochastic realization using numpy
 - *build_paper.py* — Automated pipeline (formulas → figures → PDF)
 - *lean\/* — Formal development and Palomar registration

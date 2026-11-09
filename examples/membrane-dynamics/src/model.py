@@ -49,7 +49,7 @@ FORMULAS = {
         name="rate",
         expr=rate_simplified,
         description="Transition rate for rule 2a → b under mass-action kinetics",
-        source_line=25,
+        source_line=48,
     )
 }
 
