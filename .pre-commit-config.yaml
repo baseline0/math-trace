@@ -221,7 +221,7 @@ repos:
     hooks:
       - id: dockerfile-check
         name: Dockerfile standard (fleet)
-        entry: python3 scripts/dockerfile_check.py
+        entry: uv run python -m fleet_base.checks.dockerfile
         language: system
         pass_filenames: false
         files: (^|/)(Dockerfile[^/]*|\.dockerignore)$
