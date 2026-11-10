@@ -22,7 +22,7 @@ ideal_gas_temperature = thermo_model.ideal_gas_temperature
 ideal_gas_volume = thermo_model.ideal_gas_volume
 internal_energy = thermo_model.internal_energy
 
-pytestmark = pytest.mark.host  # reads repo templates; runs on the host, never in the image
+pytestmark = pytest.mark.unit  # pure file reads of repo templates; no host state
 
 
 class TestIdealGasLaw:

@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Sibling snapshot: fleet-base at the pinned commit in the label above, exported
-# by `git archive` into .sibling/ (ADR-021). Lands where ../fleet-base resolves from /workspace.
+# by `git archive` into .sibling/ (ADR-021, canonical in fleet-coordination docs/adr/ADR-021-SIBLING-PATH-SOURCES.md). Lands where ../fleet-base resolves from /workspace.
 COPY .sibling/fleet-base /fleet-base
 
 # Copy project files

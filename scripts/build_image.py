@@ -1,4 +1,4 @@
-"""Build the math-trace container image with a pinned fleet-base snapshot (ADR-021 sibling snapshot; SIB-5).
+"""Build the math-trace container image with a pinned fleet-base snapshot (ADR-021, canonical in fleet-coordination docs/adr/ADR-021-SIBLING-PATH-SOURCES.md; SIB-5).
 
 The snapshot is exported per build from one fleet-base commit and is never tracked (.sibling/ is ignored). The commit
 must be on origin/main, or the build refuses, so an image never records a commit nobody can fetch.
@@ -7,6 +7,7 @@ Environment:
     FLEET_BASE      the canonical fleet-base git checkout (default: ~/projects/fleet-base; the workspace sibling has no .git)
     FLEET_BASE_SHA  the fleet-base commit to pin (default: origin/main of FLEET_BASE)
     IMAGE           the image tag (default: math-trace:local)
+    NO_CACHE        set to 1 to pass --no-cache to docker build
 """
 
 from __future__ import annotations
@@ -44,7 +45,10 @@ def main() -> int:
     with tarfile.open(fileobj=io.BytesIO(archive.stdout)) as tar:
         tar.extractall(dest, filter="data")
 
-    subprocess.run(["docker", "build", "--build-arg", f"FLEET_BASE_SHA={sha}", "-t", image, str(REPO)], check=True)
+    no_cache = ["--no-cache"] if os.environ.get("NO_CACHE") == "1" else []
+    subprocess.run(
+        ["docker", "build", *no_cache, "--build-arg", f"FLEET_BASE_SHA={sha}", "-t", image, str(REPO)], check=True
+    )
     print(f"built {image} from fleet-base {sha}")
     return 0
 

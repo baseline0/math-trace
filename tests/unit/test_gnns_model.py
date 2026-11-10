@@ -22,7 +22,7 @@ graph_attention_layer = gnns_model.graph_attention_layer
 message_aggregate = gnns_model.message_aggregate
 node_update = gnns_model.node_update
 
-pytestmark = pytest.mark.host  # reads repo templates; runs on the host, never in the image
+pytestmark = pytest.mark.unit  # pure file reads of repo templates; no host state
 
 
 class TestMessageAggregation:

@@ -201,7 +201,7 @@ docker-down:
 
 [group("docker")]
 docker-rebuild:
-    docker compose build --no-cache
+    NO_CACHE=1 IMAGE=math-trace-math-trace uv run python scripts/build_image.py
     @echo "✅ Images rebuilt"
 
 [group("docker")]

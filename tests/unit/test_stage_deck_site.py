@@ -21,7 +21,7 @@ HTML = (
     "</body></html>"
 )
 
-pytestmark = pytest.mark.host  # reads repo templates; runs on the host, never in the image
+pytestmark = pytest.mark.unit  # pure file reads of repo templates; no host state
 
 
 @pytest.fixture

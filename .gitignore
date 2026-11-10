@@ -113,5 +113,5 @@ coverage.xml
 # The published deck folder, staged by scripts/stage_deck_site.py in the publish workflow: never committed
 /site/
 
-# Pinned fleet-base snapshot for container builds (generated per build; ADR-021)
+# Pinned fleet-base snapshot for container builds (generated per build; ADR-021, canonical in fleet-coordination docs/adr/ADR-021-SIBLING-PATH-SOURCES.md)
 .sibling/

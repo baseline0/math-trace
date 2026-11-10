@@ -209,7 +209,9 @@ docker compose down --rmi all
 ## Production Deployment
 
 For production use:
-1. Build image: `docker build -t math-trace:latest .`
+1. Build image: `IMAGE=math-trace:latest uv run python scripts/build_image.py` (or `just docker-rebuild`, which uses the same path).
+
+   A raw `docker build` is refused by policy (SIB-5). The Dockerfile copies a fleet-base snapshot from `.sibling/fleet-base`, and that snapshot is pinned to one fleet-base commit that must be on `origin/main`. Only `scripts/build_image.py` generates it, via `git archive` of that commit, and records the commit in the image's `fleet.sibling.fleet-base` label. A raw `docker build` has no pinned snapshot, so it either fails on the missing snapshot or reuses a stale one with no provenance. Use `FLEET_BASE_SHA=<commit>` to pin a specific commit.
 2. Push to registry: `docker push myregistry/math-trace:latest`
 3. Use in kubernetes/swarm/cloud run with appropriate resource limits
 4. Mount persistent volume for `math-trace-cache` across instances
