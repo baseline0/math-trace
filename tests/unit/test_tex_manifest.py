@@ -14,6 +14,8 @@ from math_trace.tex_manifest import TexManifestError, load_tex_sources
 FIXTURE_MANIFEST = REPO_ROOT / "tests" / "fixtures" / "tex_manifest" / "2610.22341v1" / "manifest.json"
 CC_BY_NC_LICENCE = "https://creativecommons.org/licenses/by-nc/4.0/"
 
+pytestmark = pytest.mark.host  # reads repo templates; runs on the host, never in the image
+
 
 def _stage_bundle(tmp_path: Path, edits: dict[str, Any] | None = None) -> Path:
     """Copy the fixture manifest into tmp_path, apply field edits, and create every listed file under src/."""

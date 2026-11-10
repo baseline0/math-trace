@@ -6,6 +6,7 @@ Happy path tests for message passing, node updates, and graph operations.
 import importlib.util
 
 import numpy as np
+import pytest
 
 from math_trace.constants import REPO_ROOT
 
@@ -20,6 +21,8 @@ attention_weights = gnns_model.attention_weights
 graph_attention_layer = gnns_model.graph_attention_layer
 message_aggregate = gnns_model.message_aggregate
 node_update = gnns_model.node_update
+
+pytestmark = pytest.mark.host  # reads repo templates; runs on the host, never in the image
 
 
 class TestMessageAggregation:

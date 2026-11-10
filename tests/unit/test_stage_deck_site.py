@@ -21,6 +21,8 @@ HTML = (
     "</body></html>"
 )
 
+pytestmark = pytest.mark.host  # reads repo templates; runs on the host, never in the image
+
 
 @pytest.fixture
 def repo(tmp_path: Path) -> Path:
