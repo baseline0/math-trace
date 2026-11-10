@@ -16,6 +16,8 @@ import pytest
 from math_trace.constants import REPO_ROOT
 
 TEMPLATE_DIR = REPO_ROOT / "templates"
+
+pytestmark = pytest.mark.host  # reads repo templates; runs on the host, never in the image
 TEMPLATES = [
     "simple-physics",
     "biochemistry",
