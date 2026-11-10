@@ -24,7 +24,7 @@ import subprocess
 import tarfile
 from pathlib import Path
 
-import httpx
+import httpx2
 import typer
 
 app = typer.Typer(help="Install the latest elan release, after verifying its SHA-256.", add_completion=False)
@@ -101,13 +101,13 @@ def extract_safely(archive: Path, destination: Path) -> None:
         tar.extractall(destination, filter="data")
 
 
-def fetch_latest_release(client: httpx.Client) -> dict:
+def fetch_latest_release(client: httpx2.Client) -> dict:
     response = client.get(RELEASE_API, timeout=30.0)
     response.raise_for_status()
     return dict(response.json())
 
 
-def download(client: httpx.Client, url: str, target: Path) -> None:
+def download(client: httpx2.Client, url: str, target: Path) -> None:
     with client.stream("GET", url, timeout=120.0, follow_redirects=True) as response:
         response.raise_for_status()
         with target.open("wb") as handle:
@@ -126,7 +126,7 @@ def main(
         install_dir = install_dir.expanduser().resolve()
         system, machine = platform.system(), platform.machine()
         asset = asset_name_for(system, machine)
-        with httpx.Client(headers={"User-Agent": "math-trace-install-elan"}) as client:
+        with httpx2.Client(headers={"User-Agent": "math-trace-install-elan"}) as client:
             release = fetch_latest_release(client)
             tag = str(release.get("tag_name", "unknown"))
             expected = published_digest(release, asset)
@@ -158,7 +158,7 @@ def main(
     except InstallError as exc:
         typer.echo(f"ERROR {exc}", err=True)
         raise typer.Exit(1) from None
-    except httpx.HTTPError as exc:
+    except httpx2.HTTPError as exc:
         typer.echo(f"ERROR network: {exc}", err=True)
         raise typer.Exit(1) from None
     typer.echo(f"elan {tag} installed in {install_dir}")

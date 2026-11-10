@@ -25,7 +25,7 @@ import subprocess
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-import httpx
+import httpx2
 import typer
 
 app = typer.Typer(help="Check that this machine can build and verify a Lean/Mathlib project.", add_completion=False)
@@ -125,11 +125,11 @@ def check_sandbox() -> Check:
     return Check("sandbox", True, True, "bwrap starts a sandbox with its own /proc")
 
 
-def check_cache(client: httpx.Client) -> Check:
+def check_cache(client: httpx2.Client) -> Check:
     """Informational: the Mathlib cache is reachable. An offline run does not need it, so this never fails a run."""
     try:
         response = client.get(MATHLIB_CACHE, timeout=15.0)
-    except httpx.HTTPError as error:
+    except httpx2.HTTPError as error:
         return Check(
             "cache", False, False, f"not reachable ({type(error).__name__}); fetch during provisioning instead"
         )
@@ -151,7 +151,7 @@ def gather(project: Path, which: str | None, with_cache: bool) -> list[Check]:
     checks.append(check_manifest(project))
     checks.append(check_sandbox())
     if with_cache:
-        with httpx.Client(headers={"User-Agent": "math-trace-lean-health"}) as client:
+        with httpx2.Client(headers={"User-Agent": "math-trace-lean-health"}) as client:
             checks.append(check_cache(client))
     return checks
 
