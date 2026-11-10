@@ -58,6 +58,28 @@ def test_each_failed_check_is_named_in_the_report(overrides: dict[str, object], 
     assert report.result == "fail"
 
 
+def test_python_version_mismatch_is_reported_with_reason() -> None:
+    """When expected Python version differs, verdict names the version delta clearly."""
+    expected = rc.ExpectedHashes(
+        python="3.13.15",
+        uv_lock_sha256="abc123def456",
+        outputs={"out.json": "h1"},
+    )
+    report = _passing_report(
+        python="3.13.1",
+        uv_lock_sha256="abc123def456",  # Keep lock the same to isolate version mismatch
+        expected=expected,
+    )
+
+    reasons = rc.expected_reasons(report, expected)
+
+    assert len(reasons) == 1
+    assert "python version changed" in reasons[0]
+    assert "3.13.15" in reasons[0]
+    assert "3.13.1" in reasons[0]
+    assert "re-record" in reasons[0]
+
+
 def test_missing_required_lists_only_the_absent_files(tmp_path: Path) -> None:
     (tmp_path / "ex").mkdir()
     (tmp_path / "ex" / "present.py").write_text("x = 1\n")
