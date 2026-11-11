@@ -208,7 +208,7 @@ class TestEndToEndGuarantees:
         rate = FORMULAS["rate"]
         assert rate.name
         assert rate.description
-        assert rate.source_line > 0
+        assert rate.source_line is not None and rate.source_line > 0
 
         # 3. Convert to LaTeX ✓
         latex = rate.latex

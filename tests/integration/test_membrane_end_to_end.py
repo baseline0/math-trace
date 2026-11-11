@@ -162,7 +162,7 @@ class TestPaperConsistency:
         assert "mass-action" in rate_formula.description
 
         # Source line should be documented
-        assert rate_formula.source_line > 0
+        assert rate_formula.source_line is not None and rate_formula.source_line > 0
 
     def test_lean_challenge_parameters(self) -> None:
         """

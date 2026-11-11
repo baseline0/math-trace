@@ -145,17 +145,13 @@ class EquationVerification:
         )
     """
 
-    verifications: dict[VerificationStatus, VerificationRecord | None] = field(default_factory=dict)
+    verifications: dict[VerificationStatus, VerificationRecord] = field(default_factory=dict)
     """Mapping of VerificationStatus → VerificationRecord. Omitted keys mean "not yet verified"."""
 
     def __post_init__(self) -> None:
         """Validate that at least one verification status is present."""
         if not self.verifications:
             raise ValueError("EquationVerification must have at least one verification status")
-
-        # Ensure at least one record is non-None
-        if all(v is None for v in self.verifications.values()):
-            raise ValueError("EquationVerification must have at least one non-None verification record")
 
     def is_verified(self, status: VerificationStatus) -> bool:
         """Check if a specific status has been verified.
@@ -164,9 +160,9 @@ class EquationVerification:
             status: The VerificationStatus to check.
 
         Returns:
-            True if the status has a VerificationRecord, False otherwise (including if omitted).
+            True if the status is in the verifications dict, False otherwise (if omitted).
         """
-        return self.verifications.get(status) is not None
+        return status in self.verifications
 
     def all_statuses(self) -> list[VerificationStatus]:
         """Return list of all verified statuses (excluding None values).

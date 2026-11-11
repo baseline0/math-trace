@@ -65,7 +65,7 @@ def test_formula_metadata():
 
     assert rate.description is not None
     assert len(rate.description) > 0
-    assert rate.source_line > 0
+    assert rate.source_line is not None and rate.source_line > 0
     assert "mass-action" in rate.description.lower()
 
 

@@ -188,16 +188,6 @@ class TestEquationVerification:
         with pytest.raises(ValueError, match="at least one verification status"):
             EquationVerification(verifications={})
 
-    def test_rejects_all_none_verifications(self):
-        """Test that dict with only None values is rejected."""
-        with pytest.raises(ValueError, match="at least one non-None"):
-            EquationVerification(
-                verifications={
-                    VerificationStatus.SOURCE_VERIFIED: None,
-                    VerificationStatus.FORMALLY_VERIFIED: None,
-                }
-            )
-
     def test_is_verified_checks_specific_status(self):
         """Test is_verified() method for specific status checks."""
         record = VerificationRecord(by="test_sir.py")
