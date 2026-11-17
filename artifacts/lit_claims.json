@@ -1,0 +1,27 @@
+[
+  {
+    "paperId": "quant-ph-9605043",
+    "claimId": "C-steane-1996-code",
+    "title": "Error Correcting Codes in Quantum Theory (Steane)",
+    "codeN": 7,
+    "codeK": 1,
+    "codeDistance": 3,
+    "thresholdPpm": 10000,
+    "assumptions": [
+      "depolarizing_channel",
+      "css_structure"
+    ]
+  },
+  {
+    "paperId": "quant-ph-9508027",
+    "claimId": "C-shor-1995-code",
+    "title": "Scheme for reducing decoherence in quantum computer memory (Shor)",
+    "codeN": 9,
+    "codeK": 1,
+    "codeDistance": 3,
+    "thresholdPpm": 11000,
+    "assumptions": [
+      "single_qubit_arbitrary_error"
+    ]
+  }
+]

@@ -1,0 +1,55 @@
+# Hermes Prompt Contract for tool-lit-review
+
+**Goal**: Instruct the `hermes-fleet` model (using the `tool-lit-review` MCP server) to retrieve the two quantum error‑correcting code claims and produce a JSON file `artifacts/lit_claims.json` that conforms *exactly* to the `LitClaim` Pydantic schema used by `scripts/render_literature_lean.py`.
+
+**Prompt**:
+```
+You are the `tool-lit-review` service. Fetch the metadata for the following arXiv papers and extract the quantum error‑correcting code claim information.
+
+Papers to retrieve:
+- arXiv ID: quant-ph/9605043 (Steane 1996)
+- arXiv ID: quant-ph/9508027 (Shor 1995)
+
+For each paper, locate the claim about a quantum error‑correcting code and extract the following fields **exactly** as defined:
+
+- `paperId` (string) – the arXiv identifier (e.g., "quant-ph-9605043")
+- `claimId` (string) – a unique identifier you choose, prefixed with `C-`
+- `title` (string) – the paper title
+- `codeN` (int) – the block length `N`
+- `codeK` (int) – the dimension `K`
+- `codeDistance` (int) – the minimum distance `d`
+- `thresholdPpm` (int) – an integer representing the error‑threshold in parts‑per‑million (if not explicitly given, use the nearest published estimate; if unavailable, set to `0`)
+- `assumptions` (list of strings) – any assumptions mentioned (e.g., "depolarizing_channel", "css_structure", "single_qubit_arbitrary_error")
+
+**Output** must be a **single JSON array** printed to STDOUT. The array must contain *exactly* the two claim objects, with **no extra fields** or surrounding commentary. The JSON must be pretty‑printed with an indentation of two spaces.
+
+**Example (do NOT include this in the output):**
+```json
+[
+  {
+    "paperId": "quant-ph-9605043",
+    "claimId": "C-steane-1996-code",
+    "title": "Error Correcting Codes in Quantum Theory (Steane)",
+    "codeN": 7,
+    "codeK": 1,
+    "codeDistance": 3,
+    "thresholdPpm": 10000,
+    "assumptions": ["depolarizing_channel", "css_structure"]
+  },
+  {
+    "paperId": "quant-ph-9508027",
+    "claimId": "C-shor-1995-code",
+    "title": "Scheme for reducing decoherence in quantum computer memory (Shor)",
+    "codeN": 9,
+    "codeK": 1,
+    "codeDistance": 3,
+    "thresholdPpm": 11000,
+    "assumptions": ["single_qubit_arbitrary_error"]
+  }
+]
+```
+
+When you have produced the JSON, write it to the file `artifacts/lit_claims.json` in the repository root (creating the `artifacts` directory if necessary). Do **not** modify any other files.
+
+If any required field cannot be determined, abort with a clear error message indicating which field is missing.
+```

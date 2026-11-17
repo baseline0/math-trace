@@ -12,7 +12,14 @@ from .constants import LOG_FORMAT, LOG_LEVEL
 
 # Cache directory for logs
 LOG_DIR: Path = Path.home() / ".math-trace" / "logs"
-LOG_DIR.mkdir(parents=True, exist_ok=True)
+try:
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+except OSError:
+    LOG_DIR = Path("/tmp/.math-trace/logs")
+    try:
+        LOG_DIR.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
 
 
 def get_logger(name: str) -> logging.Logger:
@@ -37,9 +44,12 @@ def get_logger(name: str) -> logging.Logger:
         logger.addHandler(console_handler)
 
         # File handler (optional, for debugging)
-        file_handler = logging.FileHandler(LOG_DIR / f"{name.replace('.', '_')}.log")
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(logging.Formatter(LOG_FORMAT))
-        logger.addHandler(file_handler)
+        try:
+            file_handler = logging.FileHandler(LOG_DIR / f"{name.replace('.', '_')}.log")
+            file_handler.setLevel(logging.DEBUG)
+            file_handler.setFormatter(logging.Formatter(LOG_FORMAT))
+            logger.addHandler(file_handler)
+        except OSError:
+            pass
 
     return logger

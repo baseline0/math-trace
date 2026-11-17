@@ -4,6 +4,9 @@ import GraphPolicy.Preservation
 import GraphPolicy.Guarded
 import GraphPolicy.Examples
 import GraphPolicy.Separation
+import GraphPolicy.Validation
+import GraphPolicy.Literature
+import GraphPolicy.Hypothesis
 
 /-!
 Root module of the GraphPolicy package.

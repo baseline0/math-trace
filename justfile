@@ -21,6 +21,42 @@ lean-health project="~/.cache/math-trace/palomar-sidorenko" report="generated/le
 install-elan:
     uv run python scripts/install_elan.py --install-dir ~/.elan
 
+# Fetch precompiled Mathlib olean cache to keep builds fast (<30s).
+[group("setup")]
+lean-setup:
+    export PATH="${ELAN_HOME:-$HOME/.elan}/bin:$PATH"; cd lean && lake exe cache get
+
+# Export benchmark metrics to JSON for compile-time Lean validation (Tier 2/3).
+[group("build")]
+export-benchmarks mode="fixture":
+    uv run python scripts/export_benchmarks.py --output artifacts/benchmarks.json {{ if mode == "live" { "--live" } else { "--fixture" } }}
+    rm -f lean/.lake/build/lib/lean/GraphPolicy/Validation.*
+
+# Build Lean proofs and verify compile-time empirical JSON bounds.
+[group("verify")]
+lean-verify:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    export PATH="${ELAN_HOME:-$HOME/.elan}/bin:$PATH"
+    if [ artifacts/benchmarks.json -nt lean/.lake/build/lib/lean/GraphPolicy/Validation.olean 2>/dev/null ]; then
+        rm -f lean/.lake/build/lib/lean/GraphPolicy/Validation.*
+    fi
+    cd lean && lake build
+
+# Audit axioms (no sorryAx) and enforce live benchmark provenance before publication.
+[group("verify")]
+lean-audit:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    export PATH="${ELAN_HOME:-$HOME/.elan}/bin:$PATH"
+    cd lean
+    out=$(lake env lean GraphPolicy/Audit.lean)
+    echo "$out"
+    if echo "$out" | grep -q "sorryAx"; then
+        echo "ERROR: Unproven sorryAx detected in audit target." >&2
+        exit 1
+    fi
+
 # Reviewer path: rebuild a registered reference twice, check it, and write its JSON report. Exits 1 on any failure.
 [group("build")]
 reference-check reference="sidorenko-turan":
