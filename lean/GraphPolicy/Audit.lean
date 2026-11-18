@@ -14,5 +14,6 @@ theorem empirical_data_is_live : checkAllLive = true := by
 -- Print dependencies to audit for sorryAx / unproven axioms before publication.
 #print axioms GraphPolicy.Validation.empirical_data_valid
 #print axioms GraphPolicy.forbidden_induced_cannot_express_conditional_approval
+#print axioms GraphPolicy.Lifecycle.unmediated_cannot_reach_closed
 
 end GraphPolicy.Audit

@@ -7,6 +7,7 @@ import GraphPolicy.Separation
 import GraphPolicy.Validation
 import GraphPolicy.Literature
 import GraphPolicy.Hypothesis
+import GraphPolicy.Lifecycle
 
 /-!
 Root module of the GraphPolicy package.
