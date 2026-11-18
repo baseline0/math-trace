@@ -1,3 +1,4 @@
+import GraphPolicy.Lifecycle
 import GraphPolicy.Validation
 import GraphPolicy.Separation
 

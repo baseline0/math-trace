@@ -45,12 +45,15 @@ lean-verify:
 
 # Audit axioms (no sorryAx) and enforce live benchmark provenance before publication.
 [group("verify")]
-lean-audit:
+lean-audit: lean-verify
     #!/usr/bin/env bash
     set -euo pipefail
     export PATH="${ELAN_HOME:-$HOME/.elan}/bin:$PATH"
     cd lean
-    out=$(lake env lean GraphPolicy/Audit.lean)
+    if ! out=$(lake env lean GraphPolicy/Audit.lean 2>&1); then
+        echo "$out" >&2
+        exit 1
+    fi
     echo "$out"
     if echo "$out" | grep -q "sorryAx"; then
         echo "ERROR: Unproven sorryAx detected in audit target." >&2
