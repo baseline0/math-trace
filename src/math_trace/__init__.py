@@ -29,6 +29,20 @@ __version__ = "0.1.0"
 __author__ = "Mark Alexiuk"
 __license__ = "MIT"
 
+from .equation_identity import EquationId, canonical_srepr, expr_hash
+from .formula_records import (
+    FormulaRecord,
+    FormulaSource,
+    build_formula_record,
+    build_records_from_tex,
+    extract_display_formulas,
+    infer_concept_tags,
+    normalize_latex,
+    read_records_jsonl,
+    records_to_jsonl,
+    stable_record_id,
+    write_records_jsonl,
+)
 from .generators import SymPyToTypst, TypstEnvironmentBuilder
 from .services import (
     ExtractedEquation,
@@ -42,11 +56,25 @@ from .services import (
 Formula = ExtractedEquation
 
 __all__ = [
+    "EquationId",
     "Formula",
     "FormulaExtractor",
+    "FormulaRecord",
+    "FormulaSource",
     "PaperDownloader",
     "PaperMetadata",
     "PresentationBuilder",
     "SymPyToTypst",
     "TypstEnvironmentBuilder",
+    "build_formula_record",
+    "build_records_from_tex",
+    "canonical_srepr",
+    "expr_hash",
+    "extract_display_formulas",
+    "infer_concept_tags",
+    "normalize_latex",
+    "read_records_jsonl",
+    "records_to_jsonl",
+    "stable_record_id",
+    "write_records_jsonl",
 ]
