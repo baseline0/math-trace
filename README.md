@@ -96,6 +96,10 @@ The registry is code, so a new reference is a reviewed change, not a configurati
 checkout. It reads `reports/summary.json` and `reports/attempts/*.jsonl` without
 modifying them. Set `LEAN_HARDNESS_PROBE_ROOT` to point at another checkout.
 
+The read-only JSON endpoints follow the same static-site pattern as the Stacks
+Project browser: `/api/hardness/summary`, `/api/hardness/cases/{case_id}`,
+`/api/hardness/attempts`, and `/api/hardness/attempts/{case_id}`.
+
 ## For contributors
 
 The sections below cover the architecture, the membrane-dynamics example, and the developer workflow. They are kept for contributors and are not part of the reviewer path.
