@@ -9,6 +9,7 @@ Provides web UI for:
 
 from __future__ import annotations
 
+import dataclasses
 import html
 import json
 import os
@@ -21,6 +22,11 @@ from .arxiv_extractor import (
     extract_arxiv_id,
     load_extracted_paper,
     save_extracted_paper,
+)
+from .hardness_reports import (
+    HardnessReport,
+    load_hardness,
+    resolve_probe_root,
 )
 from .logging import get_logger
 from .responses import ApiResponse
@@ -792,6 +798,195 @@ async def get_local_model_formulas(path: str):
     except Exception as e:
         logger.error(f"Error loading formulas from {path}: {e}")
         return HTMLResponse('<p style="color: #d32f2f;">Unable to load formulas from this file.</p>')
+
+
+# ============================================================================
+# Lean hardness probe validation dashboard
+# ============================================================================
+
+
+def _hardness_report_or_404(root: str | None = None) -> HardnessReport:
+    resolved = resolve_probe_root(root)
+    try:
+        return load_hardness(resolved)
+    except (FileNotFoundError, ValueError, OSError) as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.get("/api/hardness/summary")
+async def hardness_summary(root: str | None = None):
+    """Read-only summary of lean-hardness-probe telemetry."""
+
+    report = _hardness_report_or_404(root)
+    return {
+        "status": "success",
+        **report.to_dict(),
+    }
+
+
+@app.get("/api/hardness/cases/{case_id}")
+async def hardness_case(case_id: str, root: str | None = None):
+    """Read one case and its attempt records."""
+
+    report = _hardness_report_or_404(root)
+    for case in report.cases:
+        if case.case_id == case_id:
+            return {"status": "success", "case": dataclasses.asdict(case)}
+    raise HTTPException(status_code=404, detail=f"unknown hardness case: {case_id}")
+
+
+@app.get("/api/hardness/attempts")
+async def hardness_attempts(root: str | None = None):
+    """Read all attempt records, optionally filtered by case."""
+
+    report = _hardness_report_or_404(root)
+    attempts = [dataclasses.asdict(attempt) for case in report.cases for attempt in case.attempt_records]
+    return {"status": "success", "attempts": attempts}
+
+
+@app.get("/api/hardness/attempts/{case_id}")
+async def hardness_case_attempts(case_id: str, root: str | None = None):
+    """Read attempt records for one case."""
+
+    report = _hardness_report_or_404(root)
+    for case in report.cases:
+        if case.case_id == case_id:
+            return {
+                "status": "success",
+                "caseId": case_id,
+                "attempts": [dataclasses.asdict(attempt) for attempt in case.attempt_records],
+            }
+    raise HTTPException(status_code=404, detail=f"unknown hardness case: {case_id}")
+
+
+HARDNESS_HTML = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>math-trace: Lean hardness probe</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; background: #f5f5f5; color: #222; }
+        header { background: #1e1e1e; color: white; padding: 20px; }
+        header h1 { margin: 0 0 6px; font-size: 24px; }
+        header p { margin: 0; color: #bbb; font-size: 13px; }
+        main { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .card { background: white; border-radius: 6px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+        .card .value { font-size: 28px; font-weight: 700; }
+        .card .label { color: #666; font-size: 12px; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+        th, td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; text-align: left; vertical-align: top; }
+        th { background: #fafafa; }
+        .error { color: #c62828; }
+        .status-ok { color: #2e7d32; }
+        .status-error { color: #c62828; }
+        .muted { color: #666; font-size: 12px; }
+        .bar { height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; }
+        .bar > span { display: block; height: 100%; background: #2196f3; }
+        pre { white-space: pre-wrap; word-break: break-word; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Lean hardness probe dashboard</h1>
+        <p>Read-only validation view over <code>reports/summary.json</code> and <code>reports/attempts/*.jsonl</code>.</p>
+    </header>
+    <main>
+        <div id="status" class="muted">Loading…</div>
+        <div class="cards" id="cards"></div>
+        <h2>Cases</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Case</th>
+                    <th>Stubs</th>
+                    <th>Telemetry</th>
+                    <th>Max backtracks</th>
+                    <th>Mean steps</th>
+                    <th>Frictions</th>
+                </tr>
+            </thead>
+            <tbody id="cases"></tbody>
+        </table>
+        <h2>Attempts</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Case</th>
+                    <th>Target</th>
+                    <th>Status</th>
+                    <th>Friction</th>
+                    <th>Steps</th>
+                    <th>Backtracks</th>
+                    <th>Error</th>
+                </tr>
+            </thead>
+            <tbody id="attempts"></tbody>
+        </table>
+    </main>
+    <script>
+        function esc(value) {
+            return String(value ?? "").replace(/[&<>"']/g, ch => ({
+                "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+            }[ch]));
+        }
+        async function load() {
+            const response = await fetch("/api/hardness/summary");
+            if (!response.ok) {
+                document.getElementById("status").textContent = "Could not load hardness report.";
+                return;
+            }
+            const data = await response.json();
+            document.getElementById("status").textContent =
+                `Probe root: ${data.probeRoot} | ${data.totalStubs} stubs | ${data.totalTelemetryRecords} telemetry records`;
+            const cards = document.getElementById("cards");
+            cards.innerHTML = `
+                <div class="card"><div class="value">${data.totalStubs}</div><div class="label">Stubs</div></div>
+                <div class="card"><div class="value">${data.totalTelemetryRecords}</div><div class="label">Telemetry records</div></div>
+                <div class="card"><div class="value">${data.cases.length}</div><div class="label">Cases</div></div>
+            `;
+            const cases = document.getElementById("cases");
+            cases.innerHTML = data.cases.map(item => `
+                <tr>
+                    <td><strong>${esc(item.case_id)}</strong><div class="muted">${esc(item.targets.join(", "))}</div></td>
+                    <td>${item.stubs}</td>
+                    <td>${item.attempt_records.length}</td>
+                    <td>${item.max_backtracks}</td>
+                    <td>${Number(item.mean_proof_steps).toFixed(2)}</td>
+                    <td>${esc(item.friction_mix || "-")}</td>
+                </tr>
+            `).join("");
+            const attempts = document.getElementById("attempts");
+            const rows = data.cases.flatMap(item => item.attempt_records.map(attempt => `
+                <tr>
+                    <td>${esc(attempt.case_id)}</td>
+                    <td>${esc(attempt.target_name)}</td>
+                    <td class="${attempt.status === "ok" ? "status-ok" : "status-error"}">${esc(attempt.status)}</td>
+                    <td>${esc(attempt.friction)}</td>
+                    <td>${attempt.proof_steps ?? "-"}</td>
+                    <td>${attempt.backtracks ?? "-"}</td>
+                    <td><pre>${esc((attempt.error_message || "").slice(0, 180))}</pre></td>
+                </tr>
+            `));
+            attempts.innerHTML = rows.join("");
+        }
+        load().catch(error => {
+            document.getElementById("status").textContent = `Failed to load report: ${error}`;
+        });
+    </script>
+</body>
+</html>
+"""
+
+
+@app.get("/hardness", response_class=HTMLResponse)
+async def hardness_dashboard(root: str | None = None):
+    """Serve the read-only lean-hardness-probe validation dashboard."""
+
+    _hardness_report_or_404(root)
+    return HARDNESS_HTML
 
 
 if __name__ == "__main__":

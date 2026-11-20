@@ -90,6 +90,12 @@ The registry is code, so a new reference is a reviewed change, not a configurati
 
 ---
 
+## Lean hardness probe validation
+
+`just serve` exposes `/hardness`, a read-only dashboard for a `lean-hardness-probe`
+checkout. It reads `reports/summary.json` and `reports/attempts/*.jsonl` without
+modifying them. Set `LEAN_HARDNESS_PROBE_ROOT` to point at another checkout.
+
 ## For contributors
 
 The sections below cover the architecture, the membrane-dynamics example, and the developer workflow. They are kept for contributors and are not part of the reviewer path.
