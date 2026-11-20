@@ -29,8 +29,8 @@ set -euo pipefail
 # ============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-SIBLINGS_DIR="${GITHUB_WORKSPACE:-$(dirname "$PROJECT_ROOT")}"
+PROJECT_ROOT="${PROJECT_ROOT:-$(dirname "$SCRIPT_DIR")}"
+SIBLINGS_DIR="${SIBLINGS_DIR:-$(dirname "$PROJECT_ROOT")}"
 
 # Defaults (can be overridden by arguments)
 ORG="${ORG:-baseline0}"
@@ -39,6 +39,10 @@ TOKEN="${GITHUB_TOKEN:-}"
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --project-root)
+      PROJECT_ROOT="$2"
+      shift 2
+      ;;
     --org)
       ORG="$2"
       shift 2
@@ -68,7 +72,7 @@ extract_dependencies() {
   local pyproject="$1"
 
   if [[ ! -f "$pyproject" ]]; then
-    echo "::error::pyproject.toml not found at $pyproject"
+    echo "::error::pyproject.toml not found at $pyproject" >&2
     return 1
   fi
 
@@ -151,7 +155,7 @@ checkout_sibling() {
   echo -n "  ⋯ $dep_name... "
 
   # Clone the repository
-  if ! git clone "${clone_opts[@]}" "$clone_url" "$sibling_path" 2>&1 | grep -v "Cloning"; then
+  if ! git clone "${clone_opts[@]}" "$clone_url" "$sibling_path"; then
     echo ""
     echo "::error::Failed to clone $dep_name from $clone_url"
     echo "::error::  Check that:"
