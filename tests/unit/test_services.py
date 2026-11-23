@@ -197,3 +197,21 @@ class TestEndToEnd:
 
             saved_formulas = json.loads(formulas_path.read_text())
             assert len(saved_formulas) == 2
+
+
+def test_services_package_exports_preserved():
+    import math_trace.services as services
+
+    for name in [
+        "ExtractedEquation",
+        "FormulaExtractor",
+        "PaperDownloader",
+        "PaperMetadata",
+        "PresentationBuilder",
+    ]:
+        assert hasattr(services, name), name
+    assert services.ExtractedEquation is ExtractedEquation
+    assert services.FormulaExtractor is FormulaExtractor
+    assert services.PaperDownloader is PaperDownloader
+    assert services.PaperMetadata is PaperMetadata
+    assert services.PresentationBuilder is PresentationBuilder

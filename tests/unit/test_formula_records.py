@@ -75,3 +75,52 @@ def test_infer_concept_tags():
     tags = set(infer_concept_tags(r"D(p\|q) \ge 0", "KL divergence Pinsker"))
     assert "kl_divergence" in tags
     assert "pinsker" in tags
+
+
+def test_normalize_empty_and_unparsed():
+    ok, cs, h, s, err = normalize_latex(r"   \[ \]  ")
+    assert (ok, cs, h, s) == (False, None, None, None)
+    assert err == "empty"
+
+    ok, _cs, _h, _s, err = normalize_latex(r"\newcommand{\x}{1}")
+    assert ok is False
+    assert isinstance(err, str) and err
+
+
+def test_read_records_jsonl_ignores_blank_lines(tmp_path):
+    from math_trace.formula_records import FormulaRecord, FormulaSource
+
+    rec = FormulaRecord(
+        record_id="sha256:abc",
+        latex="x=y",
+        canonical_srepr=None,
+        expr_hash=None,
+        sympy_str=None,
+        concept_tags=(),
+        source=FormulaSource(paper_id="p", file="f.tex", line=1),
+    )
+    path = tmp_path / "records.jsonl"
+    path.write_text("\n" + __import__("json").dumps(rec.to_dict()) + "\n\n", encoding="utf-8")
+    loaded = read_records_jsonl(path)
+    assert len(loaded) == 1
+    assert loaded[0].record_id == "sha256:abc"
+
+
+def test_formula_records_package_exports():
+    import math_trace.formula_records as fr
+
+    for name in [
+        "FormulaRecord",
+        "FormulaSource",
+        "build_formula_record",
+        "build_records_from_tex",
+        "extract_display_formulas",
+        "infer_concept_tags",
+        "normalize_latex",
+        "read_records_jsonl",
+        "records_to_jsonl",
+        "stable_record_id",
+        "write_records_jsonl",
+    ]:
+        assert hasattr(fr, name), name
+    assert fr.normalize_latex is normalize_latex
