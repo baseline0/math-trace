@@ -1,9 +1,13 @@
 """Stable equation ids and provenance: catalog-compatible, additive, and drift-checked."""
 
 import json
+import runpy
+import subprocess
 
 import sympy as sp
 
+import math_trace.constants as constants
+import math_trace.equation_provenance as provenance
 from math_trace.equation_provenance import (
     PROVENANCE_PATH,
     _verification_for,
@@ -100,3 +104,53 @@ def test_committed_artifact_matches_the_emitter():
     artifact = json.loads(PROVENANCE_PATH.read_text(encoding="utf-8"))
     expected = export_equation_provenance(commit=artifact["source_commit"])
     assert artifact == expected
+
+
+def test_git_commit_returns_none_when_git_cannot_run(monkeypatch):
+    def fail(*_args, **_kwargs):
+        raise OSError("git missing")
+
+    monkeypatch.setattr(provenance.subprocess, "run", fail)
+
+    assert provenance.git_commit() is None
+
+
+def test_git_commit_returns_none_for_empty_output(monkeypatch):
+    monkeypatch.setattr(
+        provenance.subprocess,
+        "run",
+        lambda *_args, **_kwargs: subprocess.CompletedProcess(args=[], returncode=0, stdout="\n", stderr=""),
+    )
+
+    assert provenance.git_commit() is None
+
+
+def test_git_commit_returns_the_short_sha(monkeypatch):
+    monkeypatch.setattr(
+        provenance.subprocess,
+        "run",
+        lambda *_args, **_kwargs: subprocess.CompletedProcess(args=[], returncode=0, stdout="abc1234\n", stderr=""),
+    )
+
+    assert provenance.git_commit() == "abc1234"
+
+
+def test_main_writes_the_artifact_and_reports_the_count(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(provenance, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(provenance, "PROVENANCE_PATH", tmp_path / "artifacts" / "equation_provenance.json")
+    monkeypatch.setattr(provenance, "git_commit", lambda: "abc123")
+
+    provenance.main()
+
+    payload = json.loads(provenance.PROVENANCE_PATH.read_text(encoding="utf-8"))
+    assert payload["source_commit"] == "abc123"
+    assert len(payload["equations"]) == len(FORMULAS)
+    assert "Exported provenance" in capsys.readouterr().out
+
+
+def test_module_entrypoint_writes_the_artifact(tmp_path, monkeypatch):
+    monkeypatch.setattr(constants, "REPO_ROOT", tmp_path)
+
+    runpy.run_module("math_trace.equation_provenance", run_name="__main__")
+
+    assert (tmp_path / "artifacts" / "equation_provenance.json").is_file()

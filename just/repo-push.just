@@ -1,9 +1,10 @@
 # Vendored from fleet-base @ v0.8.0. Do not edit: the next install overwrites this file.
 # Update: uv run python -m fleet_base.vendor_just install <this repo> (run in fleet-base's checkout)
-# repo-push-sha256: e09d45a43fa1b3722bce0e5a90596c5a9cb06f287880c06d409da1c3b72628c4
+# repo-push-sha256: 496b0b6fd0579a690f34e2bb8f475275c4ba11c5372b7eaf8f60275d4d51c34f
 # repo-push-body
 
 # Push main to origin. Refuses a branch other than main, and a dirty tree.
+[group("dev")]
 push:
     #!/bin/bash
     set -euo pipefail
@@ -13,8 +14,11 @@ push:
         echo "[!] refuse: push runs from main (trunk-based development); this checkout is on '$branch'" >&2
         exit 1
     fi
-    if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
-        echo "[!] refuse: uncommitted changes. Commit them first (just commit), then push." >&2
+    dirty="$(git status --porcelain --untracked-files=no)"
+    if [ -n "$dirty" ]; then
+        echo "[!] refuse: uncommitted changes in tracked files:" >&2
+        echo "$dirty" | sed 's/^/    /' >&2
+        echo "Commit them first (just commit), then push." >&2
         exit 1
     fi
 
@@ -26,11 +30,19 @@ push:
     fi
 
     # The commits about to go out carry no Co-Authored-By trailer, unless the push names the override.
-    uv run python -m fleet_base.commit_trailers --repo . --range "origin/main..HEAD"
+    if uv run python -c "import fleet_base" 2>/dev/null; then
+        uv run python -m fleet_base.commit_trailers --repo . --range "origin/main..HEAD"
+    elif [ -d "../fleet-base" ]; then
+        uv run --project ../fleet-base python -m fleet_base.commit_trailers --repo . --range "origin/main..HEAD"
+    else
+        echo "[!] cannot find fleet_base to check commit trailers" >&2
+        exit 1
+    fi
 
     git push origin main
 
 # Verify the vendored copy at just/repo-push.just is the one fleet-base ships (header hash over the body).
+[group("dev")]
 check-repo-push:
     #!/bin/bash
     set -euo pipefail

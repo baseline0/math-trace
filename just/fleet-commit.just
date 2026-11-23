@@ -1,6 +1,6 @@
 # Vendored from fleet-base @ v0.8.0. Do not edit: the next install overwrites this file.
 # Update: uv run python -m fleet_base.vendor_just install <this repo> (run in fleet-base's checkout)
-# fleet-commit-sha256: 7a7d2ec42f387baa1411c57f6f4396156682392bdaba91deeb2f666aaef1c821
+# fleet-commit-sha256: eebf30a38605cf3f44d32ba287f142f47db5e50d2df0627434ef94ac4f027a86
 # fleet-commit-body
 unexport VIRTUAL_ENV
 # Why: a VIRTUAL_ENV exported by the parent shell names another project's venv. Recipes run with the repo's own
@@ -13,6 +13,7 @@ COMMIT_MODEL := env("COMMIT_MODEL", "qwen2.5-coder:1.5b")
 # Generate and commit staged changes with LLM or custom message
 # Uses commitmate with COMMIT_MODEL (default: qwen2.5-coder:1.5b, ~1.5B params, fast)
 # Falls back to manual commit if Ollama unavailable or commitmate fails
+[group("dev")]
 commit:
     #!/bin/bash
     set -e
@@ -143,6 +144,7 @@ commit:
     exit 1
 
 # Verify this copy is unedited: the hash in its header must match the body below the marker.
+[group("dev")]
 check-fleet-commit:
     #!/usr/bin/env bash
     set -euo pipefail
