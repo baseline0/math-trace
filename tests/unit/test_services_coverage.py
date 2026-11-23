@@ -50,6 +50,20 @@ class TestPaperDownloaderErrorHandling:
         assert result.read_bytes() == b"%PDF-1.4 cached"
         mock_urlopen.assert_not_called()
 
+    def test_download_default_cache_dir_is_used(self, tmp_path, monkeypatch):
+        """Default cache dir is created under tempdir when not provided."""
+        monkeypatch.setattr("math_trace.services.downloader.tempfile.gettempdir", lambda: str(tmp_path))
+        response = MagicMock()
+        response.read.return_value = b"%PDF-default"
+        response.__enter__.return_value = response
+        response.__exit__.return_value = False
+
+        with patch("math_trace.services.downloader.urlopen", return_value=response):
+            result = PaperDownloader.download("https://example.com/paper.pdf")
+
+        assert result == tmp_path / "math-trace-papers" / "paper.pdf"
+        assert result.read_bytes() == b"%PDF-default"
+
     def test_download_arxiv_abs_fetches_pdf(self, tmp_path):
         """arXiv abs URLs are converted to PDF URLs and cached."""
         pdf_bytes = b"%PDF-1.4 test"

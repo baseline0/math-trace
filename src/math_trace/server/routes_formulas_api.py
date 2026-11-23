@@ -46,6 +46,8 @@ async def get_formulas(paper_id: str):
             "status": "success",
             "formulas": formulas,
         }
+    except HTTPException:
+        raise
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=f"Formulas not found for {paper_id}") from e
     except Exception as e:

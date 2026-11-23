@@ -42,11 +42,8 @@ def test_get_formulas_missing_paper_raises_404(monkeypatch):
     with pytest.raises(HTTPException) as exc:
         asyncio.run(routes_formulas_api.get_formulas("missing"))
 
-    # Characterization: current handler catches HTTPException in broad except
-    # and remaps to a 500 with the original detail string.
-    assert exc.value.status_code == 500
-    assert "404" in str(exc.value.detail)
-    assert "No formulas found for missing" in str(exc.value.detail)
+    assert exc.value.status_code == 404
+    assert exc.value.detail == "No formulas found for missing"
 
 
 def test_get_formulas_file_not_found_maps_to_404(monkeypatch):
@@ -179,3 +176,81 @@ def test_get_local_model_formulas_renders_formulas(monkeypatch):
     body = bytes(resp.body).decode()
     assert "f1" in body
     assert "E=mc^2" in body
+
+
+def test_get_formulas_unexpected_error_maps_to_500(monkeypatch):
+    def _boom(_paper_id):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(routes_formulas_api, "_load_extracted_paper", _boom)
+
+    with pytest.raises(HTTPException) as exc:
+        asyncio.run(routes_formulas_api.get_formulas("x"))
+
+    assert exc.value.status_code == 500
+    assert exc.value.detail == "boom"
+
+
+def test_get_preview_unexpected_error_maps_to_500(monkeypatch):
+    def _boom(_paper_id):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(routes_formulas_api, "_load_extracted_paper", _boom)
+
+    with pytest.raises(HTTPException) as exc:
+        asyncio.run(routes_formulas_api.get_preview("x", "eq0"))
+
+    assert exc.value.status_code == 500
+    assert exc.value.detail == "boom"
+
+
+def test_browse_arxiv_papers_error_renders_fragment(monkeypatch):
+    def _boom(limit=20):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr("math_trace.formula_browser.arxiv_papers", _boom)
+
+    resp = asyncio.run(routes_formulas_browser.browse_arxiv_papers())
+
+    assert "Unable to load papers. Please try again." in bytes(resp.body).decode()
+
+
+def test_browse_local_models_empty_renders_message(monkeypatch):
+    monkeypatch.setattr("math_trace.formula_browser.local_models", lambda pattern="*/src/model.py", root=".": [])
+
+    resp = asyncio.run(routes_formulas_browser.browse_local_models())
+
+    assert "No model.py files found matching pattern." in bytes(resp.body).decode()
+
+
+def test_browse_local_models_error_renders_fragment(monkeypatch):
+    def _boom(pattern="*/src/model.py", root="."):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr("math_trace.formula_browser.local_models", _boom)
+
+    resp = asyncio.run(routes_formulas_browser.browse_local_models())
+
+    assert "Unable to load models. Please try again." in bytes(resp.body).decode()
+
+
+def test_get_arxiv_equations_error_renders_fragment(monkeypatch):
+    def _boom(paper_id):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr("math_trace.formula_browser.arxiv_equations", _boom)
+
+    resp = asyncio.run(routes_formulas_browser.get_arxiv_equations("x"))
+
+    assert "Unable to load equations. Please try again." in bytes(resp.body).decode()
+
+
+def test_get_local_model_formulas_exception_renders_fragment(monkeypatch):
+    def _boom(path):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr("math_trace.formula_browser.local_model_formulas", _boom)
+
+    resp = asyncio.run(routes_formulas_browser.get_local_model_formulas("bad.py"))
+
+    assert "Unable to load formulas from this file." in bytes(resp.body).decode()
