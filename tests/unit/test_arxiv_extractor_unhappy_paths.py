@@ -71,3 +71,41 @@ def test_empty_archive_raises_filenotfounderror() -> None:
 
             with pytest.raises(FileNotFoundError, match=r"No \.tex files"):
                 download_and_extract_equations("2610.23820")
+
+
+def test_path_traversal_member_raises_valueerror() -> None:
+    """Archive member escaping tmpdir is refused (path traversal hardening)."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tar_path = Path(tmpdir) / "traversal.tar.gz"
+        with tarfile.open(tar_path, "w:gz") as tar:
+            content = rb"\documentclass{article}"
+            info = tarfile.TarInfo(name="../evil.tex")
+            info.size = len(content)
+            tar.addfile(info, fileobj=mock.Mock(read=lambda *args: content))
+
+        with mock.patch("math_trace.arxiv_extractor.requests.get") as mock_get:
+            mock_response = mock.Mock()
+            mock_response.content = tar_path.read_bytes()
+            mock_get.return_value = mock_response
+
+            with pytest.raises(ValueError, match=r"unsafe|escapes|refused"):
+                download_and_extract_equations("2610.23820")
+
+
+def test_symlink_member_raises_valueerror() -> None:
+    """Archive symlink is refused (untrusted archive hardening)."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tar_path = Path(tmpdir) / "symlink.tar.gz"
+        with tarfile.open(tar_path, "w:gz") as tar:
+            info = tarfile.TarInfo(name="main.tex")
+            info.type = tarfile.SYMTYPE
+            info.linkname = "/etc/passwd"
+            tar.addfile(info)
+
+        with mock.patch("math_trace.arxiv_extractor.requests.get") as mock_get:
+            mock_response = mock.Mock()
+            mock_response.content = tar_path.read_bytes()
+            mock_get.return_value = mock_response
+
+            with pytest.raises(ValueError, match=r"link|refused"):
+                download_and_extract_equations("2610.23820")

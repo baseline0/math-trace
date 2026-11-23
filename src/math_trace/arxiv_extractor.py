@@ -10,6 +10,7 @@ Workflow:
 from __future__ import annotations
 
 import json
+import os
 import re
 import tarfile
 import tempfile
@@ -97,6 +98,35 @@ def fetch_paper_metadata(paper_id: str) -> dict:
     }
 
 
+def _safe_extract_tar(tar: tarfile.TarFile, destination: Path) -> None:
+    """Extract a tar archive, refusing members that escape destination or are unsafe.
+
+    arXiv source archives are untrusted input. Refuse absolute paths, traversal,
+    symlinks/hardlinks/devices/FIFOs, and use stdlib data filter when available.
+    """
+    destination = destination.resolve()
+    safe_members: list[tarfile.TarInfo] = []
+    for member in tar.getmembers():
+        name = member.name
+        if not name or name.startswith("/") or name.startswith("\\"):
+            raise ValueError(f"unsafe archive member path: {name!r}")
+        target = (destination / name).resolve()
+        if not str(target).startswith(str(destination) + os.sep) and target != destination:
+            raise ValueError(f"archive member escapes extraction directory: {name!r}")
+        if member.issym() or member.islnk():
+            raise ValueError(f"archive contains link, refused: {name!r}")
+        if member.ischr() or member.isblk() or member.isfifo():
+            raise ValueError(f"archive contains special file, refused: {name!r}")
+        safe_members.append(member)
+
+    # Python 3.12+ supports extraction filter; "data" blocks dangerous metadata/links.
+    try:
+        tar.extractall(destination, members=safe_members, filter="data")
+    except TypeError:
+        # Fallback for runtimes without filter support; members were pre-validated.
+        tar.extractall(destination, members=safe_members)
+
+
 def download_and_extract_equations(paper_id: str, max_equations: int = 50) -> tuple[str, list[Equation]]:
     """Download arXiv source and extract equations.
 
@@ -115,7 +145,7 @@ def download_and_extract_equations(paper_id: str, max_equations: int = 50) -> tu
         tar_path.write_bytes(response.content)
 
         with tarfile.open(tar_path) as tar:
-            tar.extractall(tmpdir)
+            _safe_extract_tar(tar, Path(tmpdir))
 
         # Find main .tex file
         tex_files = list(Path(tmpdir).glob("*.tex"))
