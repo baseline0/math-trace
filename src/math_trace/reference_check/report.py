@@ -1,20 +1,4 @@
-"""Reviewer path: rebuild one reference from its checkout, check it, and write a report that says what was checked.
-
-A reference is registered explicitly in REFERENCES: where it lives, the commands that build it, the files it must
-contain, and the tests that hold its contract. The check:
-1. confirms the required files exist;
-2. runs the build twice, and hashes every output after each run;
-3. runs the contract tests;
-4. records provenance: the source revision, whether it is a tag, whether the tree is dirty, and the Python version;
-5. when the reference registers an expected-hashes file, compares the outputs, the uv.lock hash, and the Python version
-   with it. A Python change is named as a version change, not reported as output drift.
-
-It passes only when all four hold. The report is JSON, and the exit status is 0 on a pass and 1 on a fail, so a
-failure is readable in the report, not an opaque traceback.
-
-Usage:
-    uv run python -m math_trace.reference_check --reference epidemiology-sir --repo . --report report.json
-"""
+"""Report model, hashing, provenance, and verdict logic for reference checks."""
 
 from __future__ import annotations
 
@@ -25,66 +9,10 @@ import os
 import platform
 import subprocess
 import time
-from dataclasses import asdict, dataclass, field
-from enum import StrEnum
+from dataclasses import dataclass, field
 from pathlib import Path
 
-import typer
-
-app = typer.Typer(help="Rebuild a reference from its checkout and report what was checked.", add_completion=False)
-
-
-@dataclass(frozen=True)
-class Reference:
-    """One registered reference. Paths are relative to the repo root; build commands run in `directory`."""
-
-    directory: str
-    build: tuple[tuple[str, ...], ...]
-    required: tuple[str, ...]
-    outputs: tuple[str, ...]  # glob patterns, relative to `directory`
-    contract_tests: tuple[str, ...]  # relative to the repo root
-    expected: str | None = None  # expected-hashes file, relative to `directory`; None means no recorded hashes
-
-
-REFERENCES: dict[str, Reference] = {
-    "epidemiology-sir": Reference(
-        directory="examples/epidemiology-sir",
-        build=(
-            ("uv", "run", "python", "build_paper.py"),
-            ("uv", "run", "python", "build_presentation.py", "--output", "generated/presentation.html"),
-        ),
-        required=(
-            "build_paper.py",
-            "build_presentation.py",
-            "presentation_config.yaml",
-            "src/model.py",
-            "src/simulate.py",
-        ),
-        outputs=(
-            "generated/sir_equations.json",
-            "generated/covid_scenario.json",
-            "generated/figures/*.png",
-            "generated/presentation.html",
-        ),
-        contract_tests=(
-            "tests/integration/test_epidemiology_sir_contract.py",
-            "tests/unit/test_build_presentation.py",
-            "tests/unit/test_sir_presentation_config.py",
-        ),
-    ),
-    "sidorenko-turan": Reference(
-        directory="examples/sidorenko-turan",
-        build=(("uv", "run", "python", "build_table.py"),),
-        required=(
-            "build_table.py",
-            "lean_statement.lean",
-            "formalization.json",
-        ),
-        outputs=("generated/gap_table.json",),
-        contract_tests=("tests/integration/test_sidorenko_turan_contract.py",),
-        expected="expected-hashes.json",
-    ),
-}
+from .registry import Reference
 
 
 @dataclass(frozen=True)
@@ -203,7 +131,7 @@ def load_expected(path: Path) -> ExpectedHashes:
     )
 
 
-def _read_expected(path: Path, reference: Reference) -> tuple[ExpectedHashes | None, str | None]:
+def read_expected(path: Path, reference: Reference) -> tuple[ExpectedHashes | None, str | None]:
     """The recorded hashes, or the named reason they cannot be read. A registered file must exist."""
     shown = f"{reference.directory}/{reference.expected}"
     if not path.is_file():
@@ -236,11 +164,7 @@ GIT_LOCATION_VARS = (
 
 
 def _clean_env() -> dict[str, str]:
-    """The environment for child processes, without the git location variables a git hook exports.
-
-    Inherited GIT_DIR or GIT_INDEX_FILE would make `git -C <repo>` read the hook's repository, not <repo>, and would
-    leak into the contract tests the reviewer runs. Other GIT_* settings (identity, SSH, config) are kept on purpose.
-    """
+    """The environment for child processes, without the git location variables a git hook exports."""
     return {key: value for key, value in os.environ.items() if key not in GIT_LOCATION_VARS}
 
 
@@ -265,9 +189,9 @@ def run_step(argv: tuple[str, ...], cwd: Path) -> StepResult:
     return StepResult(argv=argv, returncode=done.returncode, seconds=round(time.monotonic() - started, 1))
 
 
-def check(name: str, repo: Path, *, use_expected: bool = True) -> Report:
+def check(name: str, repo: Path, references: dict[str, Reference], *, use_expected: bool = True) -> Report:
     """Run the full reviewer path for one registered reference. `use_expected=False` skips the recorded-hash comparison."""
-    reference = REFERENCES[name]
+    reference = references[name]
     revision, tag, dirty = provenance(repo)
     report = Report(
         reference=name,
@@ -280,7 +204,7 @@ def check(name: str, repo: Path, *, use_expected: bool = True) -> Report:
     report.missing_required = missing_required(reference, repo)
     base = repo / reference.directory
     if use_expected and reference.expected is not None:
-        report.expected, report.expected_problem = _read_expected(base / reference.expected, reference)
+        report.expected, report.expected_problem = read_expected(base / reference.expected, reference)
     report.inputs = {name_: file_sha256(base / name_) for name_ in reference.required if (base / name_).is_file()}
     if not report.missing_required:
         report.steps = [run_step(argv, base) for argv in reference.build]
@@ -299,51 +223,3 @@ def check(name: str, repo: Path, *, use_expected: bool = True) -> Report:
         report.tests_returncode = tests.returncode
     report.failures = verdict(report)
     return report
-
-
-class Toggle(StrEnum):
-    """Explicit boolean value for a command option: `--name true` or `--name false`."""
-
-    TRUE = "true"
-    FALSE = "false"
-
-
-@app.command()
-def run(
-    reference: str = typer.Option(..., "--reference", help="A registered reference name."),
-    repo: Path = typer.Option(..., "--repo", help="The repository root."),
-    report: Path = typer.Option(..., "--report", help="Where to write the JSON report."),
-    record_expected: Toggle = typer.Option(
-        ...,
-        "--record-expected",
-        help=(
-            "true: after a passing build, write the reference's expected-hashes file and skip the "
-            "recorded-hash comparison; false: compare against the recorded hashes."
-        ),
-    ),
-) -> None:
-    """Rebuild a registered reference twice, check it, write the report, and exit 1 on any failure."""
-    if reference not in REFERENCES:
-        typer.echo(f"unknown reference {reference!r}; known: {', '.join(sorted(REFERENCES))}", err=True)
-        raise typer.Exit(2)
-    record = record_expected is Toggle.TRUE
-    if record and REFERENCES[reference].expected is None:
-        typer.echo(f"{reference} has no expected-hashes file to record", err=True)
-        raise typer.Exit(2)
-    result = check(reference, repo, use_expected=not record)
-    payload = asdict(result) | {"result": result.result}
-    report.parent.mkdir(parents=True, exist_ok=True)
-    report.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    typer.echo(f"{reference}: {result.result} (report: {report})")
-    for reason in result.failures:
-        typer.echo(f"  - {reason}")
-    if result.failures:
-        raise typer.Exit(1)
-    if record:
-        target = repo / REFERENCES[reference].directory / str(REFERENCES[reference].expected)
-        target.write_text(json.dumps(expected_payload(result), indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        typer.echo(f"recorded expected hashes: {target}")
-
-
-if __name__ == "__main__":
-    app()

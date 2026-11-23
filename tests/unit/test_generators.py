@@ -397,7 +397,7 @@ class TestLatexToTypstMacros:
 
 
 class TestTypstFunctionRendering:
-    """Typst must read these as functions, not as literal text or braces (TODO tech debt, 2026-10-13)."""
+    """Regression: Typst must read these as functions, not as literal text or braces."""
 
     @pytest.mark.parametrize(
         ("latex", "typst"),
@@ -414,7 +414,7 @@ class TestTypstFunctionRendering:
 
 
 class TestTypstScriptRendering:
-    """Typst shows braces after ^ and _ literally, so script groups are unwrapped (TODO tech debt, 2026-10-13)."""
+    """Regression: Typst script braces must be unwrapped so they do not render literally."""
 
     @pytest.mark.parametrize(
         ("latex", "typst"),
@@ -439,7 +439,7 @@ class TestTypstGroupingRendering:
 
 
 class TestTypstBareGroupRendering:
-    """Bare LaTeX grouping braces are dropped, so Typst does not print them (TODO tech debt, 2026-10-13)."""
+    """Regression: bare LaTeX grouping braces must not leak into Typst output."""
 
     @pytest.mark.parametrize(
         ("latex", "typst"),
@@ -455,7 +455,7 @@ class TestTypstBareGroupRendering:
 
 
 class TestTypstOperatorRendering:
-    """Operator names and roots render as Typst functions, not stray macros (TODO tech debt, 2026-10-13)."""
+    """Regression: operator names and roots render as Typst functions, not stray macros."""
 
     @pytest.mark.parametrize(
         ("latex", "typst"),
