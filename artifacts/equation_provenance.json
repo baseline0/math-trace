@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_commit": "d4f951b",
+  "source_commit": "fccaadb",
   "source_repo": "math-trace",
   "equations": {
     "state_normalisation": {
@@ -11,7 +11,20 @@
       "function": null,
       "latex": "|\\alpha|^2 + |\\beta|^2 = 1 \\text{ for } \\alpha|0\\rangle + \\beta|1\\rangle",
       "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 2 (postulate 1)",
-      "holds": true
+      "holds": true,
+      "verification": {
+        "statuses": [
+          "symbolic_verified"
+        ],
+        "records": [
+          {
+            "status": "symbolic_verified",
+            "by": "sympy residual check",
+            "note": "residual for state_normalisation simplifies to zero",
+            "test_file": "tests/unit/test_quantum_formulas.py"
+          }
+        ]
+      }
     },
     "bloch_vector_x": {
       "id": "math-trace/bloch_vector_x",
@@ -21,7 +34,20 @@
       "function": null,
       "latex": "\\langle\\psi|X|\\psi\\rangle = \\sin\\theta\\cos\\phi",
       "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 2 (Bloch sphere)",
-      "holds": true
+      "holds": true,
+      "verification": {
+        "statuses": [
+          "symbolic_verified"
+        ],
+        "records": [
+          {
+            "status": "symbolic_verified",
+            "by": "sympy residual check",
+            "note": "residual for bloch_vector_x simplifies to zero",
+            "test_file": "tests/unit/test_quantum_formulas.py"
+          }
+        ]
+      }
     },
     "bloch_vector_y": {
       "id": "math-trace/bloch_vector_y",
@@ -31,7 +57,20 @@
       "function": null,
       "latex": "\\langle\\psi|Y|\\psi\\rangle = \\sin\\theta\\sin\\phi",
       "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 2 (Bloch sphere)",
-      "holds": true
+      "holds": true,
+      "verification": {
+        "statuses": [
+          "symbolic_verified"
+        ],
+        "records": [
+          {
+            "status": "symbolic_verified",
+            "by": "sympy residual check",
+            "note": "residual for bloch_vector_y simplifies to zero",
+            "test_file": "tests/unit/test_quantum_formulas.py"
+          }
+        ]
+      }
     },
     "bloch_vector_z": {
       "id": "math-trace/bloch_vector_z",
@@ -41,7 +80,20 @@
       "function": null,
       "latex": "\\langle\\psi|Z|\\psi\\rangle = \\cos\\theta",
       "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 2 (Bloch sphere)",
-      "holds": true
+      "holds": true,
+      "verification": {
+        "statuses": [
+          "symbolic_verified"
+        ],
+        "records": [
+          {
+            "status": "symbolic_verified",
+            "by": "sympy residual check",
+            "note": "residual for bloch_vector_z simplifies to zero",
+            "test_file": "tests/unit/test_quantum_formulas.py"
+          }
+        ]
+      }
     },
     "born_rule_hadamard_plus": {
       "id": "math-trace/born_rule_hadamard_plus",
@@ -51,7 +103,20 @@
       "function": null,
       "latex": "p(0) = |\\langle 0|H|0\\rangle|^2 = \\tfrac12",
       "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 2 (postulate 3, measurement)",
-      "holds": true
+      "holds": true,
+      "verification": {
+        "statuses": [
+          "symbolic_verified"
+        ],
+        "records": [
+          {
+            "status": "symbolic_verified",
+            "by": "sympy residual check",
+            "note": "residual for born_rule_hadamard_plus simplifies to zero",
+            "test_file": "tests/unit/test_quantum_formulas.py"
+          }
+        ]
+      }
     },
     "hadamard_unitary": {
       "id": "math-trace/hadamard_unitary",
@@ -61,7 +126,20 @@
       "function": null,
       "latex": "H^\\dagger H = I",
       "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 4 (single-qubit gates)",
-      "holds": true
+      "holds": true,
+      "verification": {
+        "statuses": [
+          "symbolic_verified"
+        ],
+        "records": [
+          {
+            "status": "symbolic_verified",
+            "by": "sympy residual check",
+            "note": "residual for hadamard_unitary simplifies to zero",
+            "test_file": "tests/unit/test_quantum_formulas.py"
+          }
+        ]
+      }
     },
     "pauli_squares": {
       "id": "math-trace/pauli_squares",
@@ -71,7 +149,20 @@
       "function": null,
       "latex": "X^2 = Y^2 = Z^2 = I",
       "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 2 (Pauli operators)",
-      "holds": true
+      "holds": true,
+      "verification": {
+        "statuses": [
+          "symbolic_verified"
+        ],
+        "records": [
+          {
+            "status": "symbolic_verified",
+            "by": "sympy residual check",
+            "note": "residual for pauli_squares simplifies to zero",
+            "test_file": "tests/unit/test_quantum_formulas.py"
+          }
+        ]
+      }
     },
     "pauli_product": {
       "id": "math-trace/pauli_product",
@@ -81,7 +172,20 @@
       "function": null,
       "latex": "XY = iZ",
       "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 2 (Pauli operators)",
-      "holds": true
+      "holds": true,
+      "verification": {
+        "statuses": [
+          "symbolic_verified"
+        ],
+        "records": [
+          {
+            "status": "symbolic_verified",
+            "by": "sympy residual check",
+            "note": "residual for pauli_product simplifies to zero",
+            "test_file": "tests/unit/test_quantum_formulas.py"
+          }
+        ]
+      }
     },
     "rotation_z_unitary": {
       "id": "math-trace/rotation_z_unitary",
@@ -91,7 +195,20 @@
       "function": null,
       "latex": "R_z(\\theta)^\\dagger R_z(\\theta) = I",
       "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 4 (single-qubit gates)",
-      "holds": true
+      "holds": true,
+      "verification": {
+        "statuses": [
+          "symbolic_verified"
+        ],
+        "records": [
+          {
+            "status": "symbolic_verified",
+            "by": "sympy residual check",
+            "note": "residual for rotation_z_unitary simplifies to zero",
+            "test_file": "tests/unit/test_quantum_formulas.py"
+          }
+        ]
+      }
     },
     "bell_state_from_hadamard_and_cnot": {
       "id": "math-trace/bell_state_from_hadamard_and_cnot",
@@ -101,7 +218,20 @@
       "function": null,
       "latex": "\\mathrm{CNOT}(H\\otimes I)|00\\rangle = \\tfrac{1}{\\sqrt2}(|00\\rangle + |11\\rangle)",
       "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 4 (controlled-NOT, Bell states)",
-      "holds": true
+      "holds": true,
+      "verification": {
+        "statuses": [
+          "symbolic_verified"
+        ],
+        "records": [
+          {
+            "status": "symbolic_verified",
+            "by": "sympy residual check",
+            "note": "residual for bell_state_from_hadamard_and_cnot simplifies to zero",
+            "test_file": "tests/unit/test_quantum_formulas.py"
+          }
+        ]
+      }
     },
     "grover_two_qubits_one_iteration": {
       "id": "math-trace/grover_two_qubits_one_iteration",
@@ -111,7 +241,20 @@
       "function": null,
       "latex": "\\sin^2\\big((2k+1)\\theta\\big) = 1 \\text{ with } \\sin\\theta = 1/\\sqrt{N},\\ N=4,\\ k=1",
       "source": "Grover (1996), A fast quantum mechanical algorithm for database search, STOC; Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 6",
-      "holds": true
+      "holds": true,
+      "verification": {
+        "statuses": [
+          "symbolic_verified"
+        ],
+        "records": [
+          {
+            "status": "symbolic_verified",
+            "by": "sympy residual check",
+            "note": "residual for grover_two_qubits_one_iteration simplifies to zero",
+            "test_file": "tests/unit/test_quantum_formulas.py"
+          }
+        ]
+      }
     },
     "shor_factor_from_order": {
       "id": "math-trace/shor_factor_from_order",
@@ -121,7 +264,20 @@
       "function": null,
       "latex": "\\gcd(a^{r/2}-1, N)\\cdot\\gcd(a^{r/2}+1, N) = N \\text{ for } N=15,\\ a=2,\\ r=4",
       "source": "Shor (1997), Polynomial-time algorithms for prime factorization and discrete logarithms, SIAM J. Comput.; Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 5",
-      "holds": true
+      "holds": true,
+      "verification": {
+        "statuses": [
+          "symbolic_verified"
+        ],
+        "records": [
+          {
+            "status": "symbolic_verified",
+            "by": "sympy residual check",
+            "note": "residual for shor_factor_from_order simplifies to zero",
+            "test_file": "tests/unit/test_quantum_formulas.py"
+          }
+        ]
+      }
     },
     "qft_unitary_n4": {
       "id": "math-trace/qft_unitary_n4",
@@ -131,7 +287,20 @@
       "function": null,
       "latex": "F_N^\\dagger F_N = I,\\quad F_N = \\tfrac{1}{\\sqrt N}\\,[\\omega^{jk}],\\ \\omega = e^{2\\pi i/N},\\ N=4",
       "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 5 (quantum Fourier transform)",
-      "holds": true
+      "holds": true,
+      "verification": {
+        "statuses": [
+          "symbolic_verified"
+        ],
+        "records": [
+          {
+            "status": "symbolic_verified",
+            "by": "sympy residual check",
+            "note": "residual for qft_unitary_n4 simplifies to zero",
+            "test_file": "tests/unit/test_quantum_formulas.py"
+          }
+        ]
+      }
     }
   },
   "formal_claims": [

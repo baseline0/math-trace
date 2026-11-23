@@ -70,6 +70,11 @@ model:
     @echo "📐 Exporting formulas from Python model..."
     cd examples/membrane-dynamics && uv run python src/model.py
 
+# Regenerate the additive equation provenance artifact consumed by equations-history and tool-rag.
+[group("build")]
+export-provenance:
+    uv run python -m math_trace.equation_provenance
+
 [group("build")]
 formulas: model
     @echo "🔄 Converting LaTeX formulas to Typst..."

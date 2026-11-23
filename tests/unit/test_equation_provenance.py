@@ -6,10 +6,12 @@ import sympy as sp
 
 from math_trace.equation_provenance import (
     PROVENANCE_PATH,
+    _verification_for,
     export_equation_provenance,
     formula_expr_hash,
 )
 from math_trace.quantum_formulas import FORMULAS, QuantumFormula, theta
+from math_trace.verification import VerificationStatus
 
 
 def test_export_is_deterministic_for_a_fixed_commit():
@@ -28,6 +30,45 @@ def test_every_formula_has_a_stable_id_and_relative_source():
         assert record["source_file"].startswith("src/")
         assert record["line"] > 0
         assert record["holds"] is True
+        assert record["verification"]["statuses"] == [VerificationStatus.SYMBOLIC_VERIFIED.value]
+        assert record["verification"]["records"][0]["by"] == "sympy residual check"
+
+
+def test_verification_is_narrow_and_omits_unverified_statuses():
+    payload = export_equation_provenance(commit="abc123")
+
+    for record in payload["equations"].values():
+        statuses = set(record["verification"]["statuses"])
+        assert statuses == {VerificationStatus.SYMBOLIC_VERIFIED.value}
+        assert VerificationStatus.SOURCE_VERIFIED.value not in statuses
+        assert VerificationStatus.FORMALLY_VERIFIED.value not in statuses
+
+
+def test_an_unverified_formula_gets_no_status():
+    formula = QuantumFormula(
+        name="x",
+        latex="a",
+        source="one",
+        residual=lambda: sp.Integer(1),
+        source_line=1,
+    )
+
+    assert _verification_for(formula, holds=False) == {"statuses": [], "records": []}
+
+
+def test_unset_verification_metadata_is_omitted():
+    formula = QuantumFormula(
+        name="x",
+        latex="a",
+        source="one",
+        residual=lambda: sp.Integer(0),
+        source_line=1,
+    )
+
+    record = _verification_for(formula, holds=True)["records"][0]
+
+    assert "date" not in record
+    assert "tolerance" not in record
 
 
 def test_hash_tracks_mathematics_not_source_text():

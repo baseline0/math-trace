@@ -13,6 +13,8 @@ import json
 import subprocess
 import tomllib
 from collections.abc import Sequence
+from dataclasses import asdict
+from datetime import date
 from typing import Any
 
 import sympy as sp
@@ -20,6 +22,7 @@ import sympy as sp
 from math_trace.constants import REPO_ROOT
 from math_trace.equation_identity import canonical_srepr
 from math_trace.quantum_formulas import FORMULAS, QuantumFormula
+from math_trace.verification import VerificationRecord, VerificationStatus
 
 PROVENANCE_PATH = REPO_ROOT / "artifacts" / "equation_provenance.json"
 CLAIMS_TOML_PATH = REPO_ROOT / "lean" / "claims.toml"
@@ -49,6 +52,34 @@ def formula_expr_hash(formula: QuantumFormula) -> str:
     return "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def _verification_for(formula: QuantumFormula, *, holds: bool) -> dict[str, Any]:
+    """Publish the verification statuses this repository can actually substantiate.
+
+    A SymPy residual check is symbolic verification, not source, transcription, numeric, formal or historical
+    verification. Absent statuses are omitted rather than marked false: a consumer must not read a missing
+    status as a failed check.
+    """
+    records: list[dict[str, Any]] = []
+    if holds:
+        record = VerificationRecord(
+            by="sympy residual check",
+            test_file="tests/unit/test_quantum_formulas.py",
+            note=f"residual for {formula.name} simplifies to zero",
+        )
+        payload = asdict(record)
+        records.append(
+            {
+                "status": VerificationStatus.SYMBOLIC_VERIFIED.value,
+                **{
+                    key: value.isoformat() if isinstance(value, date) else value
+                    for key, value in payload.items()
+                    if value is not None
+                },
+            }
+        )
+    return {"statuses": [record["status"] for record in records], "records": records}
+
+
 def _formal_claims() -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
     if CLAIMS_TOML_PATH.is_file():
@@ -76,6 +107,7 @@ def export_equation_provenance(
     """Build the provenance artifact for the given formulas."""
     equations: dict[str, Any] = {}
     for formula in formulas:
+        holds = formula.holds()
         equations[formula.name] = {
             "id": f"math-trace/{formula.name}",
             "expr_hash": formula_expr_hash(formula),
@@ -84,7 +116,8 @@ def export_equation_provenance(
             "function": None,
             "latex": formula.latex,
             "source": formula.source,
-            "holds": formula.holds(),
+            "holds": holds,
+            "verification": _verification_for(formula, holds=holds),
         }
     literature: list[dict[str, Any]] = []
     if LIT_CLAIMS_PATH.is_file():
