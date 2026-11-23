@@ -5,12 +5,16 @@ from __future__ import annotations
 import re
 import tempfile
 from pathlib import Path
+from typing import ClassVar
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
 
 class PaperDownloader:
     """Download papers from various sources."""
+
+    _DOWNLOAD_TIMEOUT_SECONDS = 30
+    _ALLOWED_SCHEMES: ClassVar[set[str]] = {"http", "https"}
 
     @staticmethod
     def _parse_arxiv_url(url: str) -> str | None:
@@ -66,8 +70,12 @@ class PaperDownloader:
                 raise ValueError(f"Cannot parse arXiv URL: {url}")
             pdf_url = parsed_url
 
+        parsed_pdf_url = urlparse(pdf_url)
+        if parsed_pdf_url.scheme not in PaperDownloader._ALLOWED_SCHEMES:
+            raise ValueError(f"Unsupported URL scheme: {parsed_pdf_url.scheme or '<missing>'}")
+
         # Generate cache filename from URL
-        cache_name = urlparse(pdf_url).path.split("/")[-1]
+        cache_name = parsed_pdf_url.path.split("/")[-1]
         if not cache_name.endswith(".pdf"):
             cache_name = cache_name.replace("abs", "pdf") + ".pdf"
         cache_path = cache_dir / cache_name
@@ -77,7 +85,7 @@ class PaperDownloader:
             return cache_path
 
         # Download
-        with urlopen(pdf_url) as response:
+        with urlopen(pdf_url, timeout=PaperDownloader._DOWNLOAD_TIMEOUT_SECONDS) as response:
             cache_path.write_bytes(response.read())
 
         return cache_path

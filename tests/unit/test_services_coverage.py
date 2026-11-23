@@ -77,7 +77,7 @@ class TestPaperDownloaderErrorHandling:
 
         assert result == tmp_path / "2609.21904.pdf"
         assert result.read_bytes() == pdf_bytes
-        mock_urlopen.assert_called_once_with("https://arxiv.org/pdf/2609.21904.pdf")
+        mock_urlopen.assert_called_once_with("https://arxiv.org/pdf/2609.21904.pdf", timeout=30)
 
     def test_download_direct_pdf_uses_urlopen(self, tmp_path):
         """Direct PDF URLs download to cache dir."""
@@ -91,7 +91,7 @@ class TestPaperDownloaderErrorHandling:
 
         assert result == tmp_path / "paper.pdf"
         assert result.read_bytes() == b"%PDF-direct"
-        mock_urlopen.assert_called_once_with("https://example.com/paper.pdf")
+        mock_urlopen.assert_called_once_with("https://example.com/paper.pdf", timeout=30)
 
     def test_download_invalid_arxiv_url_raises(self, tmp_path):
         """Unparseable arXiv URLs raise ValueError."""
@@ -201,3 +201,26 @@ class TestFormulaExtractorCharacterization:
             formulas = FormulaExtractor.extract(pdf_path)
 
         assert [f.latex for f in formulas] == ["E = mc^{2}"]
+
+    def test_download_rejects_unsupported_scheme(self, tmp_path):
+        """Non-http(s) schemes are rejected before network access."""
+        with (
+            patch("math_trace.services.downloader.urlopen") as mock_urlopen,
+            pytest.raises(ValueError, match="Unsupported URL scheme: file"),
+        ):
+            PaperDownloader.download("file:///etc/passwd", cache_dir=tmp_path)
+
+        mock_urlopen.assert_not_called()
+
+    def test_download_uses_timeout(self, tmp_path):
+        """Downloads pass an explicit timeout to urlopen."""
+        response = MagicMock()
+        response.read.return_value = b"%PDF-timeout"
+        response.__enter__.return_value = response
+        response.__exit__.return_value = False
+
+        with patch("math_trace.services.downloader.urlopen", return_value=response) as mock_urlopen:
+            result = PaperDownloader.download("https://example.com/paper.pdf", cache_dir=tmp_path)
+
+        assert result.read_bytes() == b"%PDF-timeout"
+        mock_urlopen.assert_called_once_with("https://example.com/paper.pdf", timeout=30)
