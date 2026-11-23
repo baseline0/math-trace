@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "source_commit": "d4f951b",
+  "source_repo": "math-trace",
+  "equations": {
+    "state_normalisation": {
+      "id": "math-trace/state_normalisation",
+      "expr_hash": "sha256:56a13b15a8faea54c82078d46a0f0c09d6a6fab72986a6171d36025d9af9bdeb",
+      "source_file": "src/math_trace/quantum_formulas.py",
+      "line": 94,
+      "function": null,
+      "latex": "|\\alpha|^2 + |\\beta|^2 = 1 \\text{ for } \\alpha|0\\rangle + \\beta|1\\rangle",
+      "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 2 (postulate 1)",
+      "holds": true
+    },
+    "bloch_vector_x": {
+      "id": "math-trace/bloch_vector_x",
+      "expr_hash": "sha256:c2380f845d3ae18ee52b9b913df086a95264def624e513f47ca9351efdb7ab37",
+      "source_file": "src/math_trace/quantum_formulas.py",
+      "line": 102,
+      "function": null,
+      "latex": "\\langle\\psi|X|\\psi\\rangle = \\sin\\theta\\cos\\phi",
+      "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 2 (Bloch sphere)",
+      "holds": true
+    },
+    "bloch_vector_y": {
+      "id": "math-trace/bloch_vector_y",
+      "expr_hash": "sha256:bf9e624877b79dc21827453df92980d69069b3acd29999391445691ddfead033",
+      "source_file": "src/math_trace/quantum_formulas.py",
+      "line": 110,
+      "function": null,
+      "latex": "\\langle\\psi|Y|\\psi\\rangle = \\sin\\theta\\sin\\phi",
+      "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 2 (Bloch sphere)",
+      "holds": true
+    },
+    "bloch_vector_z": {
+      "id": "math-trace/bloch_vector_z",
+      "expr_hash": "sha256:f016bab1146a33283e3b91eaa476a5efd333f7aedb9a26eeaa2c3929c53ea7f2",
+      "source_file": "src/math_trace/quantum_formulas.py",
+      "line": 118,
+      "function": null,
+      "latex": "\\langle\\psi|Z|\\psi\\rangle = \\cos\\theta",
+      "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 2 (Bloch sphere)",
+      "holds": true
+    },
+    "born_rule_hadamard_plus": {
+      "id": "math-trace/born_rule_hadamard_plus",
+      "expr_hash": "sha256:9937a9eb6b34cd5953bb3d90a0353df5266b6568f4040558fb75e05b051f598c",
+      "source_file": "src/math_trace/quantum_formulas.py",
+      "line": 126,
+      "function": null,
+      "latex": "p(0) = |\\langle 0|H|0\\rangle|^2 = \\tfrac12",
+      "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 2 (postulate 3, measurement)",
+      "holds": true
+    },
+    "hadamard_unitary": {
+      "id": "math-trace/hadamard_unitary",
+      "expr_hash": "sha256:ddd34d8e88533ce863bae33ed5b43eb1db74f35ebec3a10a98eb3ebfa11f1165",
+      "source_file": "src/math_trace/quantum_formulas.py",
+      "line": 134,
+      "function": null,
+      "latex": "H^\\dagger H = I",
+      "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 4 (single-qubit gates)",
+      "holds": true
+    },
+    "pauli_squares": {
+      "id": "math-trace/pauli_squares",
+      "expr_hash": "sha256:147154bb3ddf4110cc4326ea909a388b849f97178cecb468705aea278ebc0c84",
+      "source_file": "src/math_trace/quantum_formulas.py",
+      "line": 141,
+      "function": null,
+      "latex": "X^2 = Y^2 = Z^2 = I",
+      "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 2 (Pauli operators)",
+      "holds": true
+    },
+    "pauli_product": {
+      "id": "math-trace/pauli_product",
+      "expr_hash": "sha256:ddd34d8e88533ce863bae33ed5b43eb1db74f35ebec3a10a98eb3ebfa11f1165",
+      "source_file": "src/math_trace/quantum_formulas.py",
+      "line": 148,
+      "function": null,
+      "latex": "XY = iZ",
+      "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 2 (Pauli operators)",
+      "holds": true
+    },
+    "rotation_z_unitary": {
+      "id": "math-trace/rotation_z_unitary",
+      "expr_hash": "sha256:ddd34d8e88533ce863bae33ed5b43eb1db74f35ebec3a10a98eb3ebfa11f1165",
+      "source_file": "src/math_trace/quantum_formulas.py",
+      "line": 155,
+      "function": null,
+      "latex": "R_z(\\theta)^\\dagger R_z(\\theta) = I",
+      "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 4 (single-qubit gates)",
+      "holds": true
+    },
+    "bell_state_from_hadamard_and_cnot": {
+      "id": "math-trace/bell_state_from_hadamard_and_cnot",
+      "expr_hash": "sha256:3b624b7f6d00afbaac0f090052edf74a12da0fe7a19d3712da885b56def1af2c",
+      "source_file": "src/math_trace/quantum_formulas.py",
+      "line": 162,
+      "function": null,
+      "latex": "\\mathrm{CNOT}(H\\otimes I)|00\\rangle = \\tfrac{1}{\\sqrt2}(|00\\rangle + |11\\rangle)",
+      "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 4 (controlled-NOT, Bell states)",
+      "holds": true
+    },
+    "grover_two_qubits_one_iteration": {
+      "id": "math-trace/grover_two_qubits_one_iteration",
+      "expr_hash": "sha256:9937a9eb6b34cd5953bb3d90a0353df5266b6568f4040558fb75e05b051f598c",
+      "source_file": "src/math_trace/quantum_formulas.py",
+      "line": 172,
+      "function": null,
+      "latex": "\\sin^2\\big((2k+1)\\theta\\big) = 1 \\text{ with } \\sin\\theta = 1/\\sqrt{N},\\ N=4,\\ k=1",
+      "source": "Grover (1996), A fast quantum mechanical algorithm for database search, STOC; Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 6",
+      "holds": true
+    },
+    "shor_factor_from_order": {
+      "id": "math-trace/shor_factor_from_order",
+      "expr_hash": "sha256:9937a9eb6b34cd5953bb3d90a0353df5266b6568f4040558fb75e05b051f598c",
+      "source_file": "src/math_trace/quantum_formulas.py",
+      "line": 181,
+      "function": null,
+      "latex": "\\gcd(a^{r/2}-1, N)\\cdot\\gcd(a^{r/2}+1, N) = N \\text{ for } N=15,\\ a=2,\\ r=4",
+      "source": "Shor (1997), Polynomial-time algorithms for prime factorization and discrete logarithms, SIAM J. Comput.; Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 5",
+      "holds": true
+    },
+    "qft_unitary_n4": {
+      "id": "math-trace/qft_unitary_n4",
+      "expr_hash": "sha256:350876aeaa8d2443253b0841adc268b5ec9a134884014fbe55070f64ce7cc9bd",
+      "source_file": "src/math_trace/quantum_formulas.py",
+      "line": 189,
+      "function": null,
+      "latex": "F_N^\\dagger F_N = I,\\quad F_N = \\tfrac{1}{\\sqrt N}\\,[\\omega^{jk}],\\ \\omega = e^{2\\pi i/N},\\ N=4",
+      "source": "Nielsen & Chuang (2010), Quantum Computation and Quantum Information, 10th anniversary ed., ch. 5 (quantum Fourier transform)",
+      "holds": true
+    }
+  },
+  "formal_claims": [
+    {
+      "claim_id": "C-guarded-policy-expressiveness",
+      "verification": "formally_verified",
+      "theorem_path": "lean/GraphPolicy/Separation.lean",
+      "theorem_name": "GraphPolicy.forbidden_induced_cannot_express_conditional_approval",
+      "theorem_sha256": "8e5d37cdbcd040310e67863cbdecc513245115d2018c1f8366fc2425b2cfd565",
+      "source_commit": "7f83732"
+    },
+    {
+      "claim_id": "C-steane-1996-code",
+      "verification": "formally_verified",
+      "theorem_path": "lean/GraphPolicy/Literature.lean",
+      "theorem_name": "GraphPolicy.Literature.C_steane_1996_code_theorem",
+      "theorem_sha256": "e24c0db862bfbd14792cacb7f9975dc723c755c84e3049d2851074798423294a",
+      "source_commit": "7f83732"
+    },
+    {
+      "claim_id": "C-shor-1995-code",
+      "verification": "formally_verified",
+      "theorem_path": "lean/GraphPolicy/Literature.lean",
+      "theorem_name": "GraphPolicy.Literature.C_shor_1995_code_theorem",
+      "theorem_sha256": "e24c0db862bfbd14792cacb7f9975dc723c755c84e3049d2851074798423294a",
+      "source_commit": "7f83732"
+    }
+  ],
+  "literature_claims": [
+    {
+      "paperId": "quant-ph-9605043",
+      "claimId": "C-steane-1996-code",
+      "title": "Error Correcting Codes in Quantum Theory (Steane)",
+      "codeN": 7,
+      "codeK": 1,
+      "codeDistance": 3,
+      "thresholdPpm": 10000,
+      "assumptions": [
+        "depolarizing_channel",
+        "css_structure"
+      ]
+    },
+    {
+      "paperId": "quant-ph-9508027",
+      "claimId": "C-shor-1995-code",
+      "title": "Scheme for reducing decoherence in quantum computer memory (Shor)",
+      "codeN": 9,
+      "codeK": 1,
+      "codeDistance": 3,
+      "thresholdPpm": 11000,
+      "assumptions": [
+        "single_qubit_arbitrary_error"
+      ]
+    }
+  ]
+}
