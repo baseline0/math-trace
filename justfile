@@ -1,10 +1,5 @@
 # Shared commit recipe from fleet-base. Literal path: just does not interpolate variables into import paths.
-import 'just/repo-push.just'
-
-import 'just/fleet-clean.just'
-import 'just/fleet-checks.just'
-import 'just/fleet-commit.just'
-import 'just/fleet-test.just'
+import 'just/fleet-recipes.just'
 
 set default-list := true
 
@@ -187,7 +182,7 @@ typecheck:
     @echo "🔎 Type checking (mypy, advisory; not a gate: use just check-types)..."
     uv run mypy src/ tests/ --ignore-missing-imports
 
-# Renamed from `clean`: removes generated example outputs (PDF, JSON, generated slides), which are not caches. The shared clean (fleet-clean.just) removes caches only.
+# Renamed from `clean`: removes generated example outputs (PDF, JSON, generated slides), which are not caches. The shared clean recipe wrapper removes caches only.
 [group("clean")]
 clean-generated:
     @echo "🗑️  Cleaning generated files..."

@@ -156,57 +156,12 @@ repos:
         stages: [pre-commit]
   - repo: local
     hooks:
-      - id: vendored-fleet-clean
-        name: "[P1] just/fleet-clean.just matches fleet-base (hand edits fail)"
-        entry: just check-fleet-clean
+      - id: recipe-wrappers
+        name: "[P1] just/fleet-recipes.just matches fleet-base"
+        entry: just check-fleet-recipes
         language: system
         pass_filenames: false
-        files: '^(just/fleet-clean\.just|justfile)$'
-        stages: [pre-commit]
-  - repo: local
-    hooks:
-      - id: vendored-fleet-commit
-        name: "[P1] just/fleet-commit.just matches fleet-base (hand edits fail)"
-        entry: just check-fleet-commit
-        language: system
-        pass_filenames: false
-        files: '^(just/fleet-commit\.just|justfile)$'
-        stages: [pre-commit]
-  - repo: local
-    hooks:
-      - id: vendored-repo-push
-        name: "[P1] just/repo-push.just matches fleet-base (hand edits fail)"
-        entry: just check-repo-push
-        language: system
-        pass_filenames: false
-        files: '^(just/repo-push\.just|justfile)$'
-        stages: [pre-commit]
-  - repo: local
-    hooks:
-      - id: vendored-fleet-checks
-        name: "[P1] just/fleet-checks.just matches fleet-base (hand edits fail)"
-        entry: just check-fleet-checks
-        language: system
-        pass_filenames: false
-        files: '^(just/fleet-checks\.just|justfile)$'
-        stages: [pre-commit]
-  - repo: local
-    hooks:
-      - id: vendored-fleet-test
-        name: "[P1] just/fleet-test.just matches fleet-base (hand edits fail)"
-        entry: just check-fleet-test
-        language: system
-        pass_filenames: false
-        files: '^(just/fleet-test\.just|justfile)$'
-        stages: [pre-commit]
-  - repo: local
-    hooks:
-      - id: vendored-revision
-        name: "[P1] vendored just copies name one fleet-base revision (commit)"
-        entry: bash -c 'h=$(grep -h "Vendored from fleet-base @" just/fleet-clean.just just/fleet-commit.just just/repo-push.just just/fleet-checks.just just/fleet-test.just 2>/dev/null); total=$(printf "%s\n" "$h" | grep -c .); distinct=$(printf "%s\n" "$h" | sort -u | grep -c .); [ "$total" -eq 5 ] && [ "$distinct" -eq 1 ] || { echo "vendored just copies must be five and name one fleet-base revision (found $total, $distinct revisions); reinstall them from one release" >&2; exit 1; }'
-        language: system
-        pass_filenames: false
-        files: '^(just/(fleet-clean|fleet-commit|repo-push|fleet-checks|fleet-test)\.just|justfile)$'
+        files: '^(just/fleet-recipes\.just|justfile)$'
         stages: [pre-commit]
   - repo: local
     hooks:
