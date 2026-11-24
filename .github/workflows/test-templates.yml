@@ -17,6 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Checkout sibling dependencies
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLEET_READ_TOKEN }}
+        run: bash scripts/checkout-sibling-deps.sh
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
