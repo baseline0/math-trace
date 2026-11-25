@@ -55,6 +55,22 @@ lean-audit: lean-verify
         exit 1
     fi
 
+# Lean gauntlet: full compile (lean-audit) plus a forbidden-token scan (sorry/admit)
+# over the GraphPolicy Lean sources. (native_decide and the word sorryAx in comments are
+# excluded: math-trace uses native_decide deliberately in GraphPolicy/Audit.lean.)
+[group("verify")]
+lean-gauntlet: lean-audit
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd lean
+    out=$(grep -rEn "\b(sorry|admit)\b" --include="*.lean" GraphPolicy GraphPolicy.lean 2>/dev/null || true)
+    if [ -n "$out" ]; then
+        echo "ERROR: forbidden proof tokens found in Lean sources:" >&2
+        echo "$out" >&2
+        exit 1
+    fi
+    echo "✅ Lean gauntlet: lake build clean + no sorry/admit tokens in $(find GraphPolicy -name '*.lean' | wc -l) Lean files"
+
 # Reviewer path: rebuild a registered reference twice, check it, and write its JSON report. Exits 1 on any failure.
 [group("build")]
 reference-check reference="sidorenko-turan":
