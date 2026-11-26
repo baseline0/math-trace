@@ -30,6 +30,10 @@ fleet-check:
 fleet-test *ARGS:
     @fleet recipe --name fleet-test {{ARGS}}
 
+# preflight-script runs the installed fleet-base recipe in this repository.
+preflight-script path:
+    @fleet recipe --name preflight-script {{path}}
+
 # Verify that this generated file is still the one fleet-base produces.
 check-fleet-recipes:
     @fleet recipe-wrappers check --repo .
