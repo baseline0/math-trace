@@ -1,4 +1,14 @@
-"""Record construction from LaTeX/TeX sources."""
+"""Record construction from LaTeX/TeX sources.
+
+## Specification Map
+
+| Rule or Invariant | Authority | Enforcement |
+|---|---|---|
+| `build_formula_record` preserves raw LaTeX and source metadata; normalizes best-effort | builder contract | `build_formula_record`; `tests/unit/test_formula_records.py::test_build_record_preserves_raw_and_tags` |
+| Concept tags are inferred when not supplied; explicit tags are accepted as provided (sorted unique) | tagging contract | `build_formula_record`, `tags.infer_concept_tags`; `tests/unit/test_formula_records.py::test_build_record_preserves_raw_and_tags`, `test_infer_concept_tags` |
+| `record_id` defaults to deterministic `stable_record_id`; explicit record_id overrides | record identity contract | `build_formula_record`; `tests/unit/test_formula_records.py::test_stable_record_id_deterministic`, `test_build_formula_record_respects_explicit_record_id` |
+| `build_records_from_tex` extracts display formulas and builds records with surrounding context | extraction+builder contract | `build_records_from_tex`; `tests/unit/test_formula_records.py::test_build_records_from_tex_and_roundtrip` |
+"""
 
 from __future__ import annotations
 

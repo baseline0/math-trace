@@ -1,4 +1,13 @@
-"""JSONL IO for formula records."""
+"""JSONL IO for formula records.
+
+## Specification Map
+
+| Rule or Invariant | Authority | Enforcement |
+|---|---|---|
+| JSONL output is deterministic: one sorted-key JSON object per line, UTF-8, trailing newline | IO contract | `records_to_jsonl`, `write_records_jsonl`; `tests/unit/test_formula_records.py::test_build_records_from_tex_and_roundtrip` |
+| `write_records_jsonl` creates parent directories | IO contract | `write_records_jsonl`; `tests/unit/test_formula_records.py::test_build_records_from_tex_and_roundtrip` |
+| `read_records_jsonl` ignores blank lines and parses each line via `FormulaRecord.from_dict` | IO contract | `read_records_jsonl`; `tests/unit/test_formula_records.py::test_read_records_jsonl_ignores_blank_lines` |
+"""
 
 from __future__ import annotations
 

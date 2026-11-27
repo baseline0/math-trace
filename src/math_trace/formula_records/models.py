@@ -1,4 +1,13 @@
-"""Datamodels for formula records."""
+"""Datamodels for formula records.
+
+## Specification Map
+
+| Rule or Invariant | Authority | Enforcement |
+|---|---|---|
+| `FormulaSource` and `FormulaRecord` are frozen dataclasses | data contract | dataclass declarations; `tests/unit/test_formula_records.py::test_build_record_preserves_raw_and_tags` |
+| `to_dict` serializes `concept_tags` as a list; `from_dict` restores tuple and defaults | serialization contract | `FormulaRecord.to_dict/from_dict`; `tests/unit/test_formula_records.py::test_build_records_from_tex_and_roundtrip`, `test_formula_record_from_dict_ignores_unknown_source_keys_and_defaults` |
+| `from_dict` accepts only known `FormulaSource` keys (unknown keys ignored) | forward-compat contract | `FormulaRecord.from_dict`; `tests/unit/test_formula_records.py::test_formula_record_from_dict_ignores_unknown_source_keys_and_defaults` |
+"""
 
 from __future__ import annotations
 

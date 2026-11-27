@@ -124,3 +124,30 @@ def test_formula_records_package_exports():
     ]:
         assert hasattr(fr, name), name
     assert fr.normalize_latex is normalize_latex
+
+
+def test_formula_record_from_dict_ignores_unknown_source_keys_and_defaults():
+    rec = __import__("math_trace.formula_records", fromlist=["FormulaRecord"]).FormulaRecord.from_dict(
+        {
+            "record_id": "r1",
+            "latex": "x=y",
+            "source": {"paper_id": "p1", "unknown_future_key": "ignored", "line": 7},
+            "concept_tags": ["entropy"],
+        }
+    )
+
+    assert rec.record_id == "r1"
+    assert rec.latex == "x=y"
+    assert rec.source.paper_id == "p1"
+    assert rec.source.line == 7
+    assert not hasattr(rec.source, "unknown_future_key")
+    assert rec.context == ""
+    assert rec.concept_tags == ("entropy",)
+    assert rec.normalized is False
+    assert rec.schema_version == 1
+
+
+def test_build_formula_record_respects_explicit_record_id():
+    rec = build_formula_record("x=y", paper_id="p1", record_id="custom-id")
+
+    assert rec.record_id == "custom-id"

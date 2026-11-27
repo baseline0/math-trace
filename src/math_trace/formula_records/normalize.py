@@ -1,4 +1,14 @@
-"""Normalization and display-formula extraction helpers."""
+"""Normalization and display-formula extraction helpers.
+
+## Specification Map
+
+| Rule or Invariant | Authority | Enforcement |
+|---|---|---|
+| `normalize_latex` is best-effort and never raises; empty body returns `(False,None,None,None,"empty")` | normalization contract | `normalize_latex`; `tests/unit/test_formula_records.py::test_normalize_best_effort`, `test_normalize_empty_and_unparsed` |
+| Successful normalization returns canonical srepr and `sha256:` expr hash | identity contract | `normalize_latex`, `math_trace.equation_identity`; `tests/unit/test_formula_records.py::test_normalize_best_effort` |
+| `stable_record_id` is deterministic `sha256:` + 16 hex chars from identifying parts | record identity contract | `stable_record_id`; `tests/unit/test_formula_records.py::test_stable_record_id_deterministic` |
+| `extract_display_formulas` returns `(line, env, latex, start, end)` for display blocks | extraction contract | `extract_display_formulas`; `tests/unit/test_formula_records.py::test_extract_display_formulas` |
+"""
 
 from __future__ import annotations
 

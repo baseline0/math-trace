@@ -1,4 +1,11 @@
-"""Heuristic concept tagging for formula records."""
+"""Heuristic concept tagging for formula records.
+
+## Specification Map
+
+| Rule or Invariant | Authority | Enforcement |
+|---|---|---|
+| Tagging is heuristic/best-effort and returns sorted unique tags from known info-theory patterns | tagging contract | `infer_concept_tags`; `tests/unit/test_formula_records.py::test_infer_concept_tags` |
+"""
 
 from __future__ import annotations
 
