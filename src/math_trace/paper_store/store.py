@@ -1,4 +1,15 @@
-"""Read-only paper store implementation."""
+"""Read-only paper store implementation.
+
+## Specification Map
+
+| Rule or Invariant | Authority | Enforcement |
+|---|---|---|
+| Store root must be a directory; reads are read-only | paper-store FORMAT contract | `PaperStore.__init__`; `tests/unit/test_paper_store.py::test_store_root_must_be_a_directory` |
+| `get_blob` verifies bytes hash to requested sha256; missing/corrupt blobs are broken | paper-store FORMAT contract | `PaperStore.get_blob`; `tests/unit/test_paper_store.py::test_blob_whose_bytes_do_not_match_its_name_is_reported_broken`, `test_manifest_with_missing_blob_is_reported_broken` |
+| `read_manifest` resolves `latest` pointer, validates manifest name/file, parses and validates fields | paper-store FORMAT contract | `PaperStore.read_manifest`; `tests/unit/test_paper_store.py::test_reads_manifest_and_tex_blob`, `test_missing_latest_pointer_is_not_found`, `test_manifest_version_must_match_file_name`, `test_latest_pointer_with_bad_name_is_broken`, `test_latest_pointer_naming_missing_manifest_is_broken` |
+| `read_paper` checks licence before blob access, requires named blobs present, returns verified TeX bytes | paper-store FORMAT contract | `PaperStore.read_paper`; `tests/unit/test_paper_store.py::test_non_allowed_licence_is_refused`, `test_restricted_paper_is_refused_before_its_blob_is_read`, `test_manifest_with_missing_blob_is_reported_broken` |
+| Missing membership file means no topics; membership lines validated; listed paper dir must exist | paper-store FORMAT contract | `PaperStore.read_memberships`, `PaperStore.list_papers`; `tests/unit/test_paper_store.py::test_missing_membership_file_means_no_topics`, `test_topic_lists_its_papers`, `test_paper_in_two_topics_appears_under_both`, `test_membership_line_for_missing_paper_is_broken` |
+"""
 
 from __future__ import annotations
 

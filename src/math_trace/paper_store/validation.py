@@ -1,4 +1,13 @@
-"""Validation and parsing for paper store manifests and membership lines."""
+"""Validation and parsing for paper store manifests and membership lines.
+
+## Specification Map
+
+| Rule or Invariant | Authority | Enforcement |
+|---|---|---|
+| `sha256` and `arxiv_id` inputs are validated before path use | path-safety contract | `check_sha256`, `check_arxiv_id`; `tests/unit/test_paper_store.py::test_arxiv_id_that_is_not_a_plain_id_is_rejected`, `test_invalid_sha256_is_rejected_before_path_use` |
+| Manifest must be object with schema_version==1, matching arxiv_id/version/file name, required field types, valid sha256/status/fetched_at | paper-store FORMAT contract | `parse_manifest`, `_text`, `_text_or_null`; `tests/unit/test_paper_store.py::test_reads_manifest_and_tex_blob`, `test_manifest_field_with_wrong_type_is_broken`, `test_manifest_version_must_match_file_name` |
+| Membership lines must be JSON objects with non-empty topic/arxiv_id/query/added_at and valid arXiv IDs | paper-store FORMAT contract | `parse_membership`; `tests/unit/test_paper_store.py::test_topic_lists_its_papers`, `test_membership_line_for_missing_paper_is_broken`, `test_invalid_membership_json_line_is_broken` |
+"""
 
 from __future__ import annotations
 

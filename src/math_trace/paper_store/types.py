@@ -1,4 +1,13 @@
-"""Types, constants, and errors for the paper store contract."""
+"""Types, constants, and errors for the paper store contract.
+
+## Specification Map
+
+| Rule or Invariant | Authority | Enforcement |
+|---|---|---|
+| Schema version is 1; manifest/status/allowed-licence sets are fixed by contract | paper-store FORMAT contract | `SCHEMA_VERSION`, `PaperStatus`, `ALLOWED_LICENCES`; `tests/unit/test_paper_store.py::test_reads_manifest_and_tex_blob`, `test_non_allowed_licence_is_refused` |
+| Only exact canonical open licences are allowed; anything else is restricted | paper-store FORMAT contract | `ALLOWED_LICENCES`; `tests/unit/test_paper_store.py::test_non_allowed_licence_is_refused`, `test_restricted_paper_is_refused_before_its_blob_is_read` |
+| Error types distinguish not-found, restricted, and broken store states | paper-store FORMAT contract | `PaperStoreError`, `PaperNotFoundError`, `PaperRestrictedError`, `PaperBrokenError`; `tests/unit/test_paper_store.py::test_missing_latest_pointer_is_not_found`, `test_non_allowed_licence_is_refused`, `test_manifest_with_missing_blob_is_reported_broken` |
+"""
 
 from __future__ import annotations
 

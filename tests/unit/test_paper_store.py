@@ -199,3 +199,40 @@ def test_missing_membership_file_means_no_topics(tmp_path: Path) -> None:
 def test_store_root_must_be_a_directory(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="not a directory"):
         PaperStore(tmp_path / "absent")
+
+
+def test_invalid_sha256_is_rejected_before_path_use(tmp_path: Path) -> None:
+    store = PaperStore(tmp_path)
+
+    with pytest.raises(ValueError, match="not a sha256 hex digest"):
+        store.get_blob("../escape")
+
+    with pytest.raises(ValueError, match="not a sha256 hex digest"):
+        store.has_blob("ABC123")
+
+
+def test_latest_pointer_with_bad_name_is_broken(tmp_path: Path) -> None:
+    paper_dir = tmp_path / "papers" / PAPER
+    paper_dir.mkdir(parents=True)
+    (paper_dir / "latest").write_text("not-a-manifest.txt\n", encoding="utf-8")
+
+    with pytest.raises(PaperBrokenError, match="not a manifest file name"):
+        PaperStore(tmp_path).read_manifest(PAPER)
+
+
+def test_latest_pointer_naming_missing_manifest_is_broken(tmp_path: Path) -> None:
+    paper_dir = tmp_path / "papers" / PAPER
+    paper_dir.mkdir(parents=True)
+    (paper_dir / "latest").write_text("v1.json\n", encoding="utf-8")
+
+    with pytest.raises(PaperBrokenError, match="manifest that is missing"):
+        PaperStore(tmp_path).read_manifest(PAPER)
+
+
+def test_invalid_membership_json_line_is_broken(tmp_path: Path) -> None:
+    catalog = tmp_path / "catalog"
+    catalog.mkdir()
+    (catalog / "membership.jsonl").write_text("{not json}\n", encoding="utf-8")
+
+    with pytest.raises(PaperBrokenError, match="line is not JSON"):
+        PaperStore(tmp_path).read_memberships()
