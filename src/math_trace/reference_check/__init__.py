@@ -5,6 +5,15 @@ Public API is preserved for tests and downstream imports:
 - `check`, `verdict`, `expected_reasons`, `missing_required`, `hash_files`, `file_sha256`
 - `provenance`, `lock_sha256`, `load_expected`, `expected_payload`
 - Typer `app` and `run`
+
+## Specification Map
+
+| Rule or Invariant | Authority | Enforcement |
+|---|---|---|
+| Registered reference names are the only accepted CLI targets; unknown name exits 2 and names known refs | reviewer-path CLI contract | `run`; `tests/unit/test_reference_check.py::test_an_unknown_reference_is_refused_with_the_known_names` |
+| `--record-expected true` requires reference to declare an expected-hashes file; otherwise exit 2 | reviewer-path CLI contract | `run`; `tests/unit/test_reference_check.py::test_record_expected_true_without_expected_file_is_refused` |
+| CLI writes report JSON, prints result, exits 1 on any failure; on record-success writes expected-hashes payload | reviewer-path CLI contract | `run`; `tests/unit/test_reference_check.py::test_cli_writes_report_and_exits_1_on_failure`, `test_cli_records_expected_hashes_on_passing_run` |
+| `check` orchestrates provenance, required-file check, build twice, determinism, contract tests, expected-hash comparison | reviewer-path contract | `report.check`; `tests/unit/test_reference_check.py` verdict/expected-reasons cases |
 """
 
 from __future__ import annotations
@@ -28,6 +37,7 @@ from .report import (
     lock_sha256,
     missing_required,
     provenance,
+    read_expected,
     verdict,
 )
 from .report import (
@@ -108,6 +118,7 @@ __all__ = [
     "lock_sha256",
     "missing_required",
     "provenance",
+    "read_expected",
     "run",
     "verdict",
 ]

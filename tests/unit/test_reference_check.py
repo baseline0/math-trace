@@ -6,6 +6,7 @@ The full build is not run here (it takes seconds and writes into the example). T
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -197,3 +198,150 @@ def test_epidemiology_sir_without_an_expected_file_is_unchanged() -> None:
     report = _passing_report(uv_lock_sha256="anything")
 
     assert rc.verdict(report) == []
+
+
+def test_dirty_report_does_not_fail_verdict() -> None:
+    report = _passing_report(dirty=True)
+
+    assert rc.verdict(report) == []
+    assert report.result == "pass"
+
+
+def test_python_and_uv_lock_changes_are_both_reported() -> None:
+    expected = _expected(python="3.13.15", uv_lock_sha256="old-lock")
+    report = _passing_report(
+        python="3.13.1",
+        uv_lock_sha256="new-lock",
+        outputs_run_1={"out.json": "changed"},
+        outputs_run_2={"out.json": "changed"},
+        expected=expected,
+    )
+
+    reasons = rc.expected_reasons(report, expected)
+
+    assert any("python version changed" in r for r in reasons)
+    assert any(r.startswith("uv.lock changed: recorded sha256 old-lock, now new-lock") for r in reasons)
+    assert not any("output differs from the recorded hash" in r for r in reasons)
+
+
+def test_expected_problem_is_reported_as_failure() -> None:
+    report = _passing_report(expected_problem="expected hashes file missing: examples/x/expected-hashes.json")
+
+    reasons = rc.verdict(report)
+
+    assert reasons == ["expected hashes file missing: examples/x/expected-hashes.json"]
+    report.failures = reasons
+    assert report.result == "fail"
+
+
+def test_read_expected_reports_missing_and_unreadable(tmp_path: Path) -> None:
+    ref = rc.Reference(
+        directory="ex", build=(), required=(), outputs=(), contract_tests=(), expected="expected-hashes.json"
+    )
+    missing = tmp_path / "missing.json"
+    expected, problem = rc.read_expected(missing, ref)
+    assert expected is None
+    assert problem == "expected hashes file missing: ex/expected-hashes.json"
+
+    bad = tmp_path / "bad.json"
+    bad.write_text("{not json", encoding="utf-8")
+    expected, problem = rc.read_expected(bad, ref)
+    assert expected is None
+    assert problem is not None
+    assert problem.startswith("expected hashes file unreadable: ex/expected-hashes.json (")
+
+
+def test_expected_payload_records_first_run_outputs() -> None:
+    report = _passing_report(python="3.13.2", uv_lock_sha256="locksha", outputs_run_1={"b.json": "2", "a.json": "1"})
+
+    assert rc.expected_payload(report) == {
+        "python": "3.13.2",
+        "uv_lock_sha256": "locksha",
+        "outputs": {"b.json": "2", "a.json": "1"},
+    }
+
+
+def test_record_expected_true_without_expected_file_is_refused(tmp_path: Path) -> None:
+    result = CliRunner().invoke(
+        rc.app,
+        [
+            "--reference",
+            "epidemiology-sir",
+            "--repo",
+            str(tmp_path),
+            "--report",
+            str(tmp_path / "r.json"),
+            "--record-expected",
+            "true",
+        ],
+    )
+
+    assert result.exit_code == 2
+    assert "has no expected-hashes file to record" in result.output
+    assert not (tmp_path / "r.json").exists()
+
+
+def test_cli_writes_report_and_exits_1_on_failure(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    failing = _passing_report(missing_required=["src/model.py"])
+    failing.failures = rc.verdict(failing)
+
+    monkeypatch.setattr(rc, "check", lambda *args, **kwargs: failing)
+    report_path = tmp_path / "r.json"
+    result = CliRunner().invoke(
+        rc.app,
+        [
+            "--reference",
+            "epidemiology-sir",
+            "--repo",
+            str(tmp_path),
+            "--report",
+            str(report_path),
+            "--record-expected",
+            "false",
+        ],
+    )
+
+    assert result.exit_code == 1
+    assert report_path.is_file()
+    payload = json.loads(report_path.read_text(encoding="utf-8"))
+    assert payload["result"] == "fail"
+    assert "required files missing: src/model.py" in payload["failures"]
+
+
+def test_cli_records_expected_hashes_on_passing_run(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    passing = _passing_report(
+        reference="sidorenko-turan",
+        python="3.13.2",
+        uv_lock_sha256="locksha",
+        outputs_run_1={"generated/gap_table.json": "abc"},
+        outputs_run_2={"generated/gap_table.json": "abc"},
+    )
+    passing.failures = []
+
+    monkeypatch.setattr(rc, "check", lambda *args, **kwargs: passing)
+    repo = tmp_path
+    (repo / "examples" / "sidorenko-turan").mkdir(parents=True)
+    report_path = repo / "r.json"
+    result = CliRunner().invoke(
+        rc.app,
+        [
+            "--reference",
+            "sidorenko-turan",
+            "--repo",
+            str(repo),
+            "--report",
+            str(report_path),
+            "--record-expected",
+            "true",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    expected_path = repo / "examples" / "sidorenko-turan" / "expected-hashes.json"
+    assert expected_path.is_file()
+    payload = json.loads(expected_path.read_text(encoding="utf-8"))
+    assert payload == {
+        "outputs": {"generated/gap_table.json": "abc"},
+        "python": "3.13.2",
+        "uv_lock_sha256": "locksha",
+    }

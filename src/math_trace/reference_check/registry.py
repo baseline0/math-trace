@@ -1,4 +1,12 @@
-"""Registered reference definitions for the reviewer path."""
+"""Registered reference definitions for the reviewer path.
+
+## Specification Map
+
+| Rule or Invariant | Authority | Enforcement |
+|---|---|---|
+| Each reference declares directory, build commands, required files, output globs, contract tests, optional expected-hashes file | reviewer-path registry contract | `Reference`, `REFERENCES`; `tests/unit/test_reference_check.py::test_the_epidemiology_reference_is_registered_with_its_contract_tests`, `test_the_sidorenko_turan_reference_is_registered_with_its_contract_tests` |
+| `epidemiology-sir` has no recorded expected-hashes file; `sidorenko-turan` records `expected-hashes.json` | reviewer-path registry contract | `REFERENCES`; `tests/unit/test_reference_check.py::test_epidemiology_sir_without_an_expected_file_is_unchanged`, `test_the_sidorenko_turan_reference_is_registered_with_its_contract_tests` |
+"""
 
 from __future__ import annotations
 

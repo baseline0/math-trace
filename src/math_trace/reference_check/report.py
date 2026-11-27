@@ -1,4 +1,18 @@
-"""Report model, hashing, provenance, and verdict logic for reference checks."""
+"""Report model, hashing, provenance, and verdict logic for reference checks.
+
+## Specification Map
+
+| Rule or Invariant | Authority | Enforcement |
+|---|---|---|
+| Verdict fails loudly: missing required files, nonzero build step, nonzero contract tests, no outputs, nondeterministic outputs, expected-file problem, expected-hash mismatch are each named | reviewer-path contract | `verdict`; `tests/unit/test_reference_check.py::test_a_report_where_every_check_holds_passes`, `test_each_failed_check_is_named_in_the_report`, `test_a_changed_output_is_named_in_the_reason`, `test_a_changed_uv_lock_hash_is_named_in_the_reason`, `test_expected_problem_is_reported_as_failure` |
+| Python version change is named alone (no output-drift noise); uv.lock change is named; both can be reported together | reviewer-path expected-hashes contract | `expected_reasons`; `tests/unit/test_reference_check.py::test_python_version_mismatch_is_reported_with_reason`, `test_a_python_change_is_named_and_not_reported_as_output_drift`, `test_python_and_uv_lock_changes_are_both_reported` |
+| Dirty tree is recorded in provenance/report but is not a verdict failure | reviewer-path contract | `provenance`, `Report.dirty`, `verdict`; `tests/unit/test_reference_check.py::test_dirty_report_does_not_fail_verdict` |
+| Required files are checked relative to reference directory; only absent files are listed | reviewer-path contract | `missing_required`; `tests/unit/test_reference_check.py::test_missing_required_lists_only_the_absent_files` |
+| Output hashes are sha256 over files matching output globs, keyed by posix-relative path, sorted | reviewer-path determinism contract | `hash_files`, `file_sha256`; `tests/unit/test_reference_check.py::test_hashes_are_sorted_and_change_when_content_changes` |
+| Expected-hashes file must exist/read as JSON with python/uv_lock_sha256/outputs; missing/unreadable is reported | reviewer-path expected-hashes contract | `read_expected`, `load_expected`; `tests/unit/test_reference_check.py::test_expected_problem_is_reported_as_failure`, `test_read_expected_reports_missing_and_unreadable` |
+| `expected_payload` records python, uv_lock_sha256, and first-run outputs for a passing run | reviewer-path record contract | `expected_payload`; `tests/unit/test_reference_check.py::test_expected_payload_records_first_run_outputs` |
+| Provenance outside git repo is explicitly unknown/clean; git location vars are stripped from child env | reviewer-path provenance contract | `provenance`, `_clean_env`; `tests/unit/test_reference_check.py::test_provenance_outside_a_git_repository_is_explicitly_unknown` |
+"""
 
 from __future__ import annotations
 
