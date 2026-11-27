@@ -254,3 +254,52 @@ def test_get_local_model_formulas_exception_renders_fragment(monkeypatch):
     resp = asyncio.run(routes_formulas_browser.get_local_model_formulas("bad.py"))
 
     assert "Unable to load formulas from this file." in bytes(resp.body).decode()
+
+
+def test_get_formulas_http_exception_from_loader_propagates(monkeypatch):
+    def _raise_http(_paper_id):
+        raise HTTPException(status_code=418, detail="teapot")
+
+    monkeypatch.setattr(routes_formulas_api, "_load_extracted_paper", _raise_http)
+
+    with pytest.raises(HTTPException) as exc:
+        asyncio.run(routes_formulas_api.get_formulas("x"))
+
+    assert exc.value.status_code == 418
+    assert exc.value.detail == "teapot"
+
+
+def test_get_preview_missing_paper_raises_404(monkeypatch):
+    monkeypatch.setattr(routes_formulas_api, "_load_extracted_paper", lambda paper_id: None)
+
+    with pytest.raises(HTTPException) as exc:
+        asyncio.run(routes_formulas_api.get_preview("missing", "eq0"))
+
+    assert exc.value.status_code == 404
+    assert exc.value.detail == "Paper missing not found"
+
+
+def test_get_preview_file_not_found_maps_to_404(monkeypatch):
+    def _missing(_paper_id):
+        raise FileNotFoundError("missing")
+
+    monkeypatch.setattr(routes_formulas_api, "_load_extracted_paper", _missing)
+
+    with pytest.raises(HTTPException) as exc:
+        asyncio.run(routes_formulas_api.get_preview("missing", "eq0"))
+
+    assert exc.value.status_code == 404
+    assert exc.value.detail == "Paper missing not found"
+
+
+def test_get_preview_http_exception_from_loader_propagates(monkeypatch):
+    def _raise_http(_paper_id):
+        raise HTTPException(status_code=418, detail="teapot")
+
+    monkeypatch.setattr(routes_formulas_api, "_load_extracted_paper", _raise_http)
+
+    with pytest.raises(HTTPException) as exc:
+        asyncio.run(routes_formulas_api.get_preview("x", "eq0"))
+
+    assert exc.value.status_code == 418
+    assert exc.value.detail == "teapot"

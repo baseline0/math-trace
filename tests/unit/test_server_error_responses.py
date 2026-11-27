@@ -8,6 +8,7 @@ accept. These tests run the real handlers and assert the response body.
 import asyncio
 
 import pytest
+from fastapi import HTTPException
 
 from math_trace import server
 
@@ -53,3 +54,48 @@ def test_arxiv_get_paper_unexpected_failure_returns_error_body(monkeypatch: pyte
         "error": "Error loading paper",
         "message": "corrupt cache file",
     }
+
+
+def test_arxiv_extract_http_exception_propagates(monkeypatch: pytest.MonkeyPatch) -> None:
+    """HTTPException raised inside arxiv_extract should not be remapped to 500 body."""
+
+    def _raise_http(paper_url_or_id: str):
+        raise HTTPException(status_code=418, detail="teapot")
+
+    monkeypatch.setattr("math_trace.server.routes_arxiv.extract_arxiv_id", _raise_http)
+
+    with pytest.raises(HTTPException) as exc:
+        asyncio.run(server.arxiv_extract("2301.13848"))
+
+    assert exc.value.status_code == 418
+    assert exc.value.detail == "teapot"
+
+
+def test_arxiv_get_paper_http_exception_propagates(monkeypatch: pytest.MonkeyPatch) -> None:
+    """HTTPException raised inside arxiv_get_paper should not be remapped to 500 body."""
+
+    def _raise_http(paper_id: str, cache_dir=None) -> dict:
+        raise HTTPException(status_code=418, detail="teapot")
+
+    monkeypatch.setattr(server, "load_extracted_paper", _raise_http)
+
+    with pytest.raises(HTTPException) as exc:
+        asyncio.run(server.arxiv_get_paper("2301.13848"))
+
+    assert exc.value.status_code == 418
+    assert exc.value.detail == "teapot"
+
+
+def test_fetch_paper_http_exception_propagates(monkeypatch: pytest.MonkeyPatch) -> None:
+    """HTTPException raised inside fetch_paper should preserve original status."""
+
+    def _raise_http(paper_url_or_id: str):
+        raise HTTPException(status_code=418, detail="teapot")
+
+    monkeypatch.setattr("math_trace.server.routes_arxiv.extract_arxiv_id", _raise_http)
+
+    with pytest.raises(HTTPException) as exc:
+        asyncio.run(server.fetch_paper("2301.13848"))
+
+    assert exc.value.status_code == 418
+    assert exc.value.detail == "teapot"

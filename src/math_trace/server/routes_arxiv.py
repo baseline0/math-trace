@@ -42,6 +42,8 @@ async def fetch_paper(url: str):
             "paper_id": paper_id,
             "count": len(equations),
         }
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error fetching paper: {e}")
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -88,6 +90,8 @@ async def arxiv_extract(paper_url_or_id: str):
             message=str(e),
             code=404,
         ).to_dict()
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Extraction failed: {e}")
         return ApiResponse.error(
@@ -125,6 +129,8 @@ async def arxiv_get_paper(paper_id: str):
             code=404,
         ).to_dict()
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error loading paper {paper_id}: {e}")
         return ApiResponse.error(
