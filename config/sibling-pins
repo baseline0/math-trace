@@ -1,0 +1,3 @@
+# Sibling commits the LXC push gate exports. One line per sibling: name and full 40-character SHA.
+# scripts/lxc-pytest-runner.sh reads this file from HEAD. It never reads origin/main or any other local ref.
+fleet-base d68e6f1707686951932c29e0de16923600b6c77b
